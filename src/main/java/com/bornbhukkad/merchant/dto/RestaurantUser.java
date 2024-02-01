@@ -10,8 +10,8 @@ import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 
-@Document(collection = "users")
-public class User {
+@Document(collection = "restaurant_users")
+public class RestaurantUser {
 
     @Id
     private String id;
@@ -19,7 +19,14 @@ public class User {
     private String email;
     private Integer phone;
     private String password;
-    private String username;
+    public String getMerchantType() {
+		return merchantType;
+	}
+	public void setMerchantType(String merchantType) {
+		this.merchantType = merchantType;
+	}
+	private String username;
+    private String merchantType;
     private boolean enabled;
     @DBRef
     private Set<Role> roles;

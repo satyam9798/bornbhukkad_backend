@@ -2,10 +2,10 @@ package com.bornbhukkad.merchant.Repository;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
 
-import com.bornbhukkad.merchant.dto.User;
+import com.bornbhukkad.merchant.dto.RestaurantUser;
 
-public interface IUserRepository  extends MongoRepository <User, String>{
+public interface IUserRepository  extends MongoRepository <RestaurantUser, String>{
 	
-	User findByEmail(String email);
+	RestaurantUser findByEmail(String email);
 
 }

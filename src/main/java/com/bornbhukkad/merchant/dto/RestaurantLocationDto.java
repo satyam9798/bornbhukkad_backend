@@ -1,11 +1,12 @@
 package com.bornbhukkad.merchant.dto;
+
 import java.time.Instant;
 import java.util.List;
 
 import org.springframework.data.mongodb.core.mapping.Document;
 
-@Document (collection = "bb_admin_panel_vendors_locations")
-public class LocationDto {
+@Document (collection = "restaurant_locations")
+public class RestaurantLocationDto {
     private String locationId;
     private LocationTime time;
     private String gps;

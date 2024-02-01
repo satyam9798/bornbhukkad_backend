@@ -12,8 +12,6 @@ import org.springframework.data.mongodb.core.query.Criteria;
 //import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Service;
 
-import com.bornbhukkad.merchant.dto.User;
-
 import java.util.Collections;
 import java.util.List;
 

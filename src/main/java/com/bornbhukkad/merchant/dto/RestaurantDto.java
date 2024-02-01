@@ -2,25 +2,20 @@ package com.bornbhukkad.merchant.dto;
 
 
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.annotation.Id;
+
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
-import com.bornbhukkad.merchant.dto.MerchantDto.Descriptor;
-import com.bornbhukkad.merchant.dto.MerchantDto.Time;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 
 
 
 
-@Document (collection = "Vendor")
-public class MerchantDto{
+@Document (collection = "restaurant")
+public class RestaurantDto{
 
 	
 	
