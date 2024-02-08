@@ -41,8 +41,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 		http.httpBasic().disable().csrf().disable().sessionManagement()
         .sessionCreationPolicy(SessionCreationPolicy.STATELESS).and().authorizeRequests()
         .antMatchers("/api/auth/login").permitAll().antMatchers("/api/auth/register").permitAll()
-        .antMatchers("/api/auth/registerKirana").permitAll().antMatchers("/api/auth/registerRestaurant").permitAll()
-        .antMatchers("/merchant/**").hasAuthority("ADMIN").anyRequest().authenticated().and().csrf()
+        .antMatchers("/api/auth/registerKirana").permitAll().antMatchers("/api/auth/registerRestaurant").permitAll().antMatchers("/merchants/restaurant").permitAll()
+        .antMatchers("/merchants/restaurantLocation").permitAll()
+        .antMatchers("/merchants/**").hasAuthority("ADMIN").anyRequest().authenticated().and().csrf()
         .disable().exceptionHandling().authenticationEntryPoint(unauthorizedEntryPoint()).and()
         .apply(new JwtConfigurer(jwtTokenProvider));
 
