@@ -57,6 +57,9 @@ public class MyController {
     public KiranaDto addKirana(@RequestBody KiranaDto merchant) {
     	kiranaService.addKirana(merchant);
         return merchant;
+    }
+    
+    
 //        	if(merchant.getVendorId() != null) {
 //		}
 //    	else {
@@ -64,13 +67,25 @@ public class MyController {
 //			model.put("error", "Name already exist");
 //			throw new UsernameNotFoundException("Same vendor details already present.");
 //			return;
-//		} 			
-    }
+//		} 
+    
+    
+//    @CrossOrigin(origins = "http://localhost:4200", allowedHeaders = {"Authorization", "Content-Type"})
+//    @PostMapping(path="/restaurant")
+//    public RestaurantDto addRestaurant(@RequestBody RestaurantDto merchant) {
+//    	restaurantService.addRestaurant(merchant);
+//        return merchant;			
+//    }
     @CrossOrigin(origins = "http://localhost:4200", allowedHeaders = {"Authorization", "Content-Type"})
-    @PostMapping(path="/restaurant")
-    public RestaurantDto addRestaurant(@RequestBody RestaurantDto merchant) {
-    	restaurantService.addRestaurant(merchant);
-        return merchant;			
+    @PostMapping(path = "/restaurant")
+    public ResponseEntity<Object> addRestaurant(@RequestBody RestaurantDto merchant) {
+        if (merchant == null || merchant.getDescriptor()==null) {
+            // Customize the response for an empty merchant
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Merchant is empty");
+        }
+
+        restaurantService.addRestaurant(merchant);
+        return ResponseEntity.status(HttpStatus.CREATED).body(merchant);
     }
 
     @CrossOrigin(origins = "http://localhost:4200", allowedHeaders = {"Authorization", "Content-Type"})
