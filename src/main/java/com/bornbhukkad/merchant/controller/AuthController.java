@@ -62,9 +62,6 @@ public class AuthController {
     
     @Autowired
     IKiranaUserRepository kiranaUsers;
-    
-//    @Autowired
-//    IRestaurantUserRepository restaurantUsers;
 
     @Autowired
     private CustomUserDetailsService userService;
@@ -129,6 +126,8 @@ public class AuthController {
     @SuppressWarnings("rawtypes")
     @PostMapping("/registerKirana")
     public ResponseEntity register(@RequestBody KiranaUser user) {
+    	try {
+			
     		KiranaUser userExists = userService.findKiranaUserByEmail(user.getEmail());
     		if (userExists != null) {
 //            throw new BadCredentialsException("User with username: " + user.getEmail() + " already exists");
@@ -137,9 +136,15 @@ public class AuthController {
     			return ResponseEntity.status(HttpStatus.OK).body(model);
     		}
     		userService.saveKiranaUser(user);
-        Map<Object, Object> model = new HashMap<>();
-        model.put("message", "User registered successfully");
-        return ok(model);
+    		Map<Object, Object> model = new HashMap<>();
+    		model.put("message", "User registered successfully");
+    		return ok(model);
+		} catch (Exception e) {
+			// TODO: handle exception
+			Map<String,String> model = new HashMap<>();
+        	model.put("error", "Error occured");
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(model);
+		}
     }
     
     
@@ -147,7 +152,9 @@ public class AuthController {
     @SuppressWarnings("rawtypes")
     @PostMapping("/registerRestaurant")
     public ResponseEntity registerRestaurant(@RequestBody RestaurantUser user) {
-    	RestaurantUser userExists = userService.findRestaurantUserByEmail(user.getEmail());
+    	try {
+			
+    		RestaurantUser userExists = userService.findRestaurantUserByEmail(user.getEmail());
     		if (userExists != null) {
 //            throw new BadCredentialsException("User with username: " + user.getEmail() + " already exists");
     			Map<String,String> model = new HashMap<>();
@@ -155,8 +162,14 @@ public class AuthController {
     			return ResponseEntity.status(HttpStatus.OK).body(model);
     		}
     		userService.saveRestaurantUser(user);
-        Map<Object, Object> model = new HashMap<>();
-        model.put("message", "User registered successfully");
-        return ok(model);
+    		Map<Object, Object> model = new HashMap<>();
+    		model.put("message", "User registered successfully");
+    		return ok(model);
+		} catch (Exception e) {
+			// TODO: handle exception
+			Map<String,String> model = new HashMap<>();
+        	model.put("error", "Invalid Credentials");
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(model);
+		}
     }
 }

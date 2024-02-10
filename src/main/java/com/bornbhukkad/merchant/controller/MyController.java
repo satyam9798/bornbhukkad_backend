@@ -29,8 +29,10 @@ import com.bornbhukkad.merchant.Service.KiranaServiceImpl;
 import com.bornbhukkad.merchant.Service.RestaurantServiceImpl;
 import com.bornbhukkad.merchant.dto.KiranaDto;
 import com.bornbhukkad.merchant.dto.KiranaLocationDto;
+import com.bornbhukkad.merchant.dto.RestaurantCategoriesDto;
 import com.bornbhukkad.merchant.dto.RestaurantDto;
 import com.bornbhukkad.merchant.dto.RestaurantLocationDto;
+import com.bornbhukkad.merchant.dto.RestaurantProductDto;
 
 
 
@@ -54,50 +56,97 @@ public class MyController {
 
     @CrossOrigin(origins = "http://localhost:4200", allowedHeaders = {"Authorization", "Content-Type"})
     @PostMapping(path="/kirana")
-    public KiranaDto addKirana(@RequestBody KiranaDto merchant) {
-    	kiranaService.addKirana(merchant);
-        return merchant;
+    public ResponseEntity<Object> addKirana(@RequestBody KiranaDto merchant) {
+    	try {
+    		
+    		if (merchant == null || merchant.getDescriptor()==null) {
+    			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Merchant is empty");
+    		}
+    		
+    		kiranaService.addKirana(merchant);
+    		return ResponseEntity.status(HttpStatus.CREATED).body(merchant);
+			
+		} catch (Exception e) {
+			
+			Map<String,String> model = new HashMap<>();
+        	model.put("error", "Unable to save details");
+        	return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(model);
+		}
     }
     
     
-//        	if(merchant.getVendorId() != null) {
-//		}
-//    	else {
-//			Map<Object, Object> model = new HashMap<>();
-//			model.put("error", "Name already exist");
-//			throw new UsernameNotFoundException("Same vendor details already present.");
-//			return;
-//		} 
-    
-    
-//    @CrossOrigin(origins = "http://localhost:4200", allowedHeaders = {"Authorization", "Content-Type"})
-//    @PostMapping(path="/restaurant")
-//    public RestaurantDto addRestaurant(@RequestBody RestaurantDto merchant) {
-//    	restaurantService.addRestaurant(merchant);
-//        return merchant;			
-//    }
     @CrossOrigin(origins = "http://localhost:4200", allowedHeaders = {"Authorization", "Content-Type"})
     @PostMapping(path = "/restaurant")
     public ResponseEntity<Object> addRestaurant(@RequestBody RestaurantDto merchant) {
-        if (merchant == null || merchant.getDescriptor()==null) {
-            // Customize the response for an empty merchant
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Merchant is empty");
-        }
-
-        restaurantService.addRestaurant(merchant);
-        return ResponseEntity.status(HttpStatus.CREATED).body(merchant);
+    	try {
+    		if (merchant == null || merchant.getDescriptor()==null) {
+    			// Customize the response for an empty merchant
+    			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Merchant is empty");
+    		}
+    		
+    		restaurantService.addRestaurant(merchant);
+    		return ResponseEntity.status(HttpStatus.CREATED).body(merchant);
+			
+		} catch (Exception e) {
+			// TODO: handle exception
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error occured");
+		}
     }
 
     @CrossOrigin(origins = "http://localhost:4200", allowedHeaders = {"Authorization", "Content-Type"})
     @PostMapping(path="/kiranaLocation")
-    public KiranaLocationDto addKiranaLocation(@RequestBody KiranaLocationDto location) {
-    	kiranaService.addKiranaLocation(location);
-    	return location;
+    public ResponseEntity<Object> addKiranaLocation(@RequestBody KiranaLocationDto location) {
+    	try {
+    		// TODO: if condition for empty data
+    		kiranaService.addKiranaLocation(location);
+    		return ResponseEntity.status(HttpStatus.CREATED).body(location);
+			
+		} catch (Exception e) {
+			// TODO: handle exception
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error occured");
+		}
     }
+    
+    
     @CrossOrigin(origins = "http://localhost:4200", allowedHeaders = {"Authorization", "Content-Type"})
     @PostMapping(path="/restaurantLocation")
-    public RestaurantLocationDto addRestaurantLocation(@RequestBody RestaurantLocationDto location) {
-    	restaurantService.addRestaurantLocation(location);
-    	return location;
+    public ResponseEntity<Object> addRestaurantLocation(@RequestBody RestaurantLocationDto location) {
+    	try {
+    		// TODO: if condition for empty data
+    		restaurantService.addRestaurantLocation(location);
+    		return ResponseEntity.status(HttpStatus.CREATED).body(location);
+			
+		} catch (Exception e) {
+			// TODO: handle exception
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error occured");
+		}
+    }
+    
+    @CrossOrigin(origins = "http://localhost:4200", allowedHeaders = {"Authorization", "Content-Type"})
+    @PostMapping(path="/restaurantCategories")
+    public ResponseEntity<Object> addRestaurantCategory(@RequestBody RestaurantCategoriesDto categories) {
+    	try {
+    		// TODO: if condition for empty data
+    		restaurantService.addRestaurantCategories(categories);
+    		return ResponseEntity.status(HttpStatus.CREATED).body(categories);
+			
+		} catch (Exception e) {
+			// TODO: handle exception
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error occured");
+		}
+    }
+    
+    @CrossOrigin(origins = "http://localhost:4200", allowedHeaders = {"Authorization", "Content-Type"})
+    @PostMapping(path="/restaurantProduct")
+    public ResponseEntity<Object> addRestaurantProduct(@RequestBody RestaurantProductDto product) {
+    	try {
+    		// TODO: if condition for empty data
+    		restaurantService.addRestaurantProduct(product);
+    		return ResponseEntity.status(HttpStatus.CREATED).body(product);
+			
+		} catch (Exception e) {
+			// TODO: handle exception
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error occured");
+		}
     }
 }

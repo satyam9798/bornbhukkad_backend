@@ -4,6 +4,6 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 
 import com.bornbhukkad.merchant.dto.RestaurantCategoriesDto;
 
-public interface IRestaurantCategories extends MongoRepository<RestaurantCategoriesDto, String>{
+public interface IRestaurantCategoriesRepository extends MongoRepository<RestaurantCategoriesDto, String>{
 
 }

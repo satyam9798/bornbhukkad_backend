@@ -1,6 +1,5 @@
 package com.bornbhukkad.merchant.dto;
 
-package com.bornbhukkad.merchant.dto;
 import java.util.List;
 
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -10,6 +9,7 @@ public class KiranaCategories {
 	private String id;
     private String parentCategoryId;
     private Descriptor descriptor;
+    
     public String getId() {
 		return id;
 	}
