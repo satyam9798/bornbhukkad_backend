@@ -3,21 +3,26 @@ package com.bornbhukkad.merchant.dto;
 import java.time.Instant;
 import java.util.List;
 
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document (collection = "restaurant_locations")
 public class RestaurantLocationDto {
-    private String locationId;
+	
+	@Transient
+    public static final String restLocation_sequence = "restLocation_sequence";
+	
+    private String id;
     private LocationTime time;
     private String gps;
     private Address address;
 
-	public String getLocationId() {
-		return locationId;
+	public String getId() {
+		return id;
 	}
 
-	public void setLocationId(String locationId) {
-		this.locationId = locationId;
+	public void setId(String id) {
+		this.id = id;
 	}
 
 	public LocationTime getTime() {

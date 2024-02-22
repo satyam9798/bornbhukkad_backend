@@ -1,10 +1,14 @@
 package com.bornbhukkad.merchant.dto;
 import java.util.List;
 
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document(collection = "restaurant_categories")
 public class RestaurantCategoriesDto {
+	@Transient
+    public static final String restCategories_sequence = "restCategories_sequence";
+	
 	private String id;
     private String parentCategoryId;
     private Descriptor descriptor;

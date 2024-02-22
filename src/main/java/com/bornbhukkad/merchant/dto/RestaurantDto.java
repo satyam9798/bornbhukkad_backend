@@ -4,7 +4,8 @@ package com.bornbhukkad.merchant.dto;
 import java.time.Instant;
 import java.util.List;
 
-
+import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
@@ -18,27 +19,28 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class RestaurantDto{
 
 	
+    @Transient
+    public static final String restaurant_sequence = "restaurant_sequence";
 	
 	
+    
+	private String id;
 	
-	@JsonProperty("idVendor")
-	private String vendorId;
-	
-	@JsonProperty("time")
+
     private Time time;
 	
-	@JsonProperty("descriptor")
+
     private Descriptor descriptor;
 	
 	@Field("@ondc/org/fssai_license_no")
     private String fssaiLicenseNo;
 	
-    public String getVendorId() {
-		return vendorId;
+    public String getId() {
+		return id;
 	}
 
-	public void setVendorId(String vendorId) {
-		this.vendorId = "P"+vendorId;
+	public void setId(String id) {
+		this.id = id;
 	}
 
 	public Time getTime() {
@@ -109,16 +111,13 @@ public class RestaurantDto{
 
 	private String ttl;
 	
-	@JsonProperty("locationsId")
     private List<String> locationsId;
 	
-	@JsonProperty("fulfillmentsId")
     private List<String> fulfillmentsId;
 	
-	@JsonProperty("category_id")
+	@Field("category_id")
     private List<String> categoryId;
 	
-	@JsonProperty("offersAvail")
     private List<String> offersAvail;
 
 
