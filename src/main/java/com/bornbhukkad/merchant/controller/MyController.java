@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.aggregation.ArithmeticOperators.Add;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -29,8 +30,11 @@ import com.bornbhukkad.merchant.Service.KiranaServiceImpl;
 import com.bornbhukkad.merchant.Service.RestaurantServiceImpl;
 import com.bornbhukkad.merchant.dto.KiranaDto;
 import com.bornbhukkad.merchant.dto.KiranaLocationDto;
+import com.bornbhukkad.merchant.dto.RestauranItemRequestDto;
 import com.bornbhukkad.merchant.dto.RestaurantCategoriesDto;
+import com.bornbhukkad.merchant.dto.RestaurantCustomGroupDto;
 import com.bornbhukkad.merchant.dto.RestaurantDto;
+import com.bornbhukkad.merchant.dto.RestaurantItemDto;
 import com.bornbhukkad.merchant.dto.RestaurantLocationDto;
 import com.bornbhukkad.merchant.dto.RestaurantProductDto;
 
@@ -137,12 +141,17 @@ public class MyController {
     }
     
     @CrossOrigin(origins = "http://localhost:4200", allowedHeaders = {"Authorization", "Content-Type"})
-    @PostMapping(path="/restaurantProduct")
-    public ResponseEntity<Object> addRestaurantProduct(@RequestBody RestaurantProductDto product) {
+    @PostMapping(path="/restaurantProductTest")
+    public ResponseEntity<Object> addRestaurantProduct(@RequestBody RestauranItemRequestDto RestauranItemRequestDto) {
     	try {
     		// TODO: if condition for empty data
-    		restaurantService.addRestaurantProduct(product);
-    		return ResponseEntity.status(HttpStatus.CREATED).body(product);
+    		RestaurantProductDto restaurantProductDto= RestauranItemRequestDto.getRestaurantProductDto();
+    		RestaurantCustomGroupDto restaurantCustomGroupDto = RestauranItemRequestDto.getRestaurantCustomGroupDto();
+    		RestaurantItemDto restaurantItemDto = RestauranItemRequestDto.getRestaurantItemDto();
+        	restaurantService.addRestaurantProduct(restaurantProductDto);
+    		restaurantService.addRestaurantCustomGroup(restaurantCustomGroupDto);
+    		restaurantService.addRestaurantItem(restaurantItemDto);
+    		return ResponseEntity.status(HttpStatus.CREATED).body(RestauranItemRequestDto);
 			
 		} catch (Exception e) {
 			// TODO: handle exception

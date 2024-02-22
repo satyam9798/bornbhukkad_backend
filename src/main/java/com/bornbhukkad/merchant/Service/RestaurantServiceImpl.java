@@ -9,12 +9,28 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.bornbhukkad.merchant.Repository.IRestaurantCategoriesRepository;
+import com.bornbhukkad.merchant.Repository.IRestaurantCustomGroupRepository;
+import com.bornbhukkad.merchant.Repository.IRestaurantItemRepository;
 import com.bornbhukkad.merchant.Repository.IRestaurantLocationRepository;
+import com.bornbhukkad.merchant.Repository.IRestaurantProductRepository;
 import com.bornbhukkad.merchant.Repository.IRestaurantRepository;
+import com.bornbhukkad.merchant.dto.RestaurantCategoriesDto;
+import com.bornbhukkad.merchant.dto.RestaurantCustomGroupDto;
 import com.bornbhukkad.merchant.dto.RestaurantDto;
 import com.bornbhukkad.merchant.dto.RestaurantLocationDto;
 import com.bornbhukkad.merchant.dto.RestaurantLocationDto.LocationTime;
+import com.bornbhukkad.merchant.dto.RestaurantProductDto;
 import com.bornbhukkad.merchant.dto.RestaurantDto.Time;
+import com.bornbhukkad.merchant.dto.RestaurantItemDto;
+
+import static com.bornbhukkad.merchant.dto.RestaurantDto.restaurant_sequence;
+import static com.bornbhukkad.merchant.dto.RestaurantLocationDto.restLocation_sequence;
+import static com.bornbhukkad.merchant.dto.RestaurantProductDto.restProduct_sequence;
+import static com.bornbhukkad.merchant.dto.RestaurantCustomGroupDto.restCG_sequence;
+import static com.bornbhukkad.merchant.dto.RestaurantItemDto.restItem_sequence;
+import static com.bornbhukkad.merchant.dto.RestaurantCategoriesDto.restCategories_sequence;
+
 @Service
 public class RestaurantServiceImpl implements RestaurantService{
 	
@@ -23,6 +39,17 @@ public class RestaurantServiceImpl implements RestaurantService{
 	IRestaurantRepository restaurantRepo;
 	@Autowired
 	IRestaurantLocationRepository restaurantLocationRepo;
+	@Autowired
+	IRestaurantCategoriesRepository restaurantCatgoryRepo;
+	@Autowired
+	IRestaurantProductRepository restaurantProductRepo;
+	@Autowired
+	IRestaurantCustomGroupRepository restaurantCustomGroupRepo;
+	@Autowired
+	IRestaurantItemRepository restaurantItemRepo;
+	
+	@Autowired
+	private SequenceGeneratorService sequenceGeneratorService;
 	
 private final String vendorTtl;
 	
@@ -39,10 +66,9 @@ private final String vendorTtl;
 			time.setTimestamp(Instant.now());
 			
 			merchant.setTime(merchant.getTime());
-			
 			merchant.setTtl(vendorTtl);
-			merchant.setVendorId("P" + UUID.randomUUID().toString().substring(0,2));
-//			logger.info("getLongDesc"+merchant.getDescriptor().getLongDesc());
+			
+			merchant.setId("P"+sequenceGeneratorService.getSequenceNumber(restaurant_sequence));
 			restaurantRepo.save(merchant);
 		}
 		
@@ -59,8 +85,43 @@ private final String vendorTtl;
 		
 		
 		location.setTime(time);
-		location.setLocationId("L" + UUID.randomUUID().toString().substring(0,2));
+		location.setId("L"+sequenceGeneratorService.getSequenceNumber(restLocation_sequence));
 		restaurantLocationRepo.save(location);
+		
+	}	
+	
+	@Override
+	public void addRestaurantCategories(RestaurantCategoriesDto categories) {
+		categories.setId(""+sequenceGeneratorService.getSequenceNumber(restCategories_sequence));
+		restaurantCatgoryRepo.save(categories);
+		
+	}
+	
+	@Override
+	public void addRestaurantProduct(RestaurantProductDto product) {
+		
+		Time time= new Time();
+		time.setLabel("enable");
+		time.setTimestamp(Instant.now());
+		
+		product.setTime(product.getTime());
+		product.setId("I"+sequenceGeneratorService.getSequenceNumber(restProduct_sequence));
+		restaurantProductRepo.save(product);
+		
+	}
+	
+	@Override
+	public void addRestaurantCustomGroup(RestaurantCustomGroupDto customGroup) {
+		
+		customGroup.setId("CG" + sequenceGeneratorService.getSequenceNumber(restCG_sequence));
+		restaurantCustomGroupRepo.save(customGroup);
+		
+	}
+	@Override
+	public void addRestaurantItem(RestaurantItemDto item) {
+		// TODO Auto-generated method stub
+		item.setId("C" + sequenceGeneratorService.getSequenceNumber(restItem_sequence));
+		restaurantItemRepo.save(item);
 		
 	}
 	
@@ -80,7 +141,7 @@ private final String vendorTtl;
 	    int count = 0;
 		while(repeated == false && count<merchants.size()) {
 			if (merchants.get(count).getDescriptor().getName().equalsIgnoreCase(name)) {
-				if (merchants.get(count).getDescriptor().getName().equalsIgnoreCase("Anònim")) {
+				if (merchants.get(count).getDescriptor().getName().equalsIgnoreCase("Vendor")) {
 					repeated = false;
 				} else {
 					repeated = true;
@@ -90,5 +151,11 @@ private final String vendorTtl;
 		}
 		return repeated;
 	}
+
+ 
+	
+
+
+
 
 }
