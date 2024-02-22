@@ -2,7 +2,14 @@ package com.bornbhukkad.merchant.dto;
 
 import java.util.List;
 
+import org.springframework.data.annotation.Transient;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
+
+@Document (collection = "restaurant_products")
 public class RestaurantProductDto {
+	@Transient
+    public static final String restProduct_sequence = "restProduct_sequence";
 
     private String id;
     private Time time;
@@ -18,9 +25,13 @@ public class RestaurantProductDto {
     private String location_id;
     private boolean related;
     private boolean recommended;
+    @Field("@ondc/org/returnable")
     private boolean ondc_org_returnable;
+    @Field("@ondc/org/cancellable")
     private boolean ondc_org_cancellable;
+    @Field("@ondc/org/return_window")
     private String ondc_org_return_window;
+    @Field("@ondc/org/seller_pickup_return")
     private boolean ondc_org_seller_pickup_return;
     public String getId() {
 		return id;
@@ -205,9 +216,14 @@ public class RestaurantProductDto {
 	public void setVendor_ID(String vendor_ID) {
 		this.vendor_ID = vendor_ID;
 	}
-
+	
+	@Field("@ondc/org/time_to_ship")
 	private String ondc_org_time_to_ship;
+	
+	@Field("@ondc/org/available_on_cod")
     private boolean ondc_org_available_on_cod;
+	
+	@Field("@ondc/org/contact_details_consumer_care\"")
     private String ondc_org_contact_details_consumer_care;
     private List<Tag> tags;
     private String vendor_ID;
