@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.aggregation.ArithmeticOperators.Add;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
@@ -33,6 +34,7 @@ import com.bornbhukkad.merchant.dto.KiranaLocationDto;
 import com.bornbhukkad.merchant.dto.RestauranItemRequestDto;
 import com.bornbhukkad.merchant.dto.RestaurantCategoriesDto;
 import com.bornbhukkad.merchant.dto.RestaurantCustomGroupDto;
+import com.bornbhukkad.merchant.dto.RestaurantDefaultCategoriesDto;
 import com.bornbhukkad.merchant.dto.RestaurantDto;
 import com.bornbhukkad.merchant.dto.RestaurantItemDto;
 import com.bornbhukkad.merchant.dto.RestaurantLocationDto;
@@ -156,6 +158,17 @@ public class MyController {
 		} catch (Exception e) {
 			// TODO: handle exception
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error occured");
+		}
+    }
+    @CrossOrigin(origins = "http://localhost:4200", allowedHeaders = {"Authorization", "Content-Type"})
+    @GetMapping(path="/restDefaultCategories")
+    public List <RestaurantDefaultCategoriesDto> greetings() {
+    	try {
+			
+    		return restaurantService.getRestDefaultCategories();
+		} catch (Exception e) {
+			
+			throw new BadCredentialsException("Invalid token");
 		}
     }
 }

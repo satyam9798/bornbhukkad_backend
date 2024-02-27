@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.bornbhukkad.merchant.dto.RestaurantCategoriesDto;
 import com.bornbhukkad.merchant.dto.RestaurantCustomGroupDto;
+import com.bornbhukkad.merchant.dto.RestaurantDefaultCategoriesDto;
 import com.bornbhukkad.merchant.dto.RestaurantDto;
 import com.bornbhukkad.merchant.dto.RestaurantItemDto;
 import com.bornbhukkad.merchant.dto.RestaurantLocationDto;
@@ -17,5 +18,6 @@ public interface RestaurantService {
 	public void addRestaurantCustomGroup(RestaurantCustomGroupDto customGroup);
 	public void addRestaurantItem(RestaurantItemDto item);
 	public List<RestaurantDto> getAll();
+	public List<RestaurantDefaultCategoriesDto> getRestDefaultCategories();
 
 }

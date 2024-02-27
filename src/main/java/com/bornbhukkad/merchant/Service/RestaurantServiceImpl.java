@@ -11,12 +11,14 @@ import org.springframework.stereotype.Service;
 
 import com.bornbhukkad.merchant.Repository.IRestaurantCategoriesRepository;
 import com.bornbhukkad.merchant.Repository.IRestaurantCustomGroupRepository;
+import com.bornbhukkad.merchant.Repository.IRestaurantDefaultCategoriesRepository;
 import com.bornbhukkad.merchant.Repository.IRestaurantItemRepository;
 import com.bornbhukkad.merchant.Repository.IRestaurantLocationRepository;
 import com.bornbhukkad.merchant.Repository.IRestaurantProductRepository;
 import com.bornbhukkad.merchant.Repository.IRestaurantRepository;
 import com.bornbhukkad.merchant.dto.RestaurantCategoriesDto;
 import com.bornbhukkad.merchant.dto.RestaurantCustomGroupDto;
+import com.bornbhukkad.merchant.dto.RestaurantDefaultCategoriesDto;
 import com.bornbhukkad.merchant.dto.RestaurantDto;
 import com.bornbhukkad.merchant.dto.RestaurantLocationDto;
 import com.bornbhukkad.merchant.dto.RestaurantLocationDto.LocationTime;
@@ -47,6 +49,8 @@ public class RestaurantServiceImpl implements RestaurantService{
 	IRestaurantCustomGroupRepository restaurantCustomGroupRepo;
 	@Autowired
 	IRestaurantItemRepository restaurantItemRepo;
+	@Autowired
+	IRestaurantDefaultCategoriesRepository restDefCategoriesRepo;
 	
 	@Autowired
 	private SequenceGeneratorService sequenceGeneratorService;
@@ -133,6 +137,15 @@ private final String vendorTtl;
 		return merchants;
 		
 	}
+	
+	@Override
+	public List<RestaurantDefaultCategoriesDto> getRestDefaultCategories() {
+		List<RestaurantDefaultCategoriesDto> categories = new ArrayList<>();
+		restDefCategoriesRepo.findAll().forEach(category -> categories.add(category));
+		return categories;
+		
+	}
+	
 	
 	public boolean checkName (String name) {
 		boolean repeated = false;
