@@ -36,6 +36,7 @@ import com.bornbhukkad.merchant.dto.RestaurantCategoriesDto;
 import com.bornbhukkad.merchant.dto.RestaurantCustomGroupDto;
 import com.bornbhukkad.merchant.dto.RestaurantDefaultCategoriesDto;
 import com.bornbhukkad.merchant.dto.RestaurantDto;
+import com.bornbhukkad.merchant.dto.RestaurantFulfillmentDto;
 import com.bornbhukkad.merchant.dto.RestaurantItemDto;
 import com.bornbhukkad.merchant.dto.RestaurantLocationDto;
 import com.bornbhukkad.merchant.dto.RestaurantProductDto;
@@ -58,8 +59,15 @@ public class MyController {
         this.kiranaService = kiranaService;
     }
     
+    @CrossOrigin(origins = "http://localhost:4200", allowedHeaders = {"Authorization", "Content-Type"})
+    @PostMapping(path="/restFulfillment")
+    public ResponseEntity<Object> addRestFulfillment(@RequestBody RestaurantFulfillmentDto fulfillment){
+    	restaurantService.addRestaurantFulfillment(fulfillment);
+    	return ResponseEntity.status(HttpStatus.CREATED).body(fulfillment);
+    }
     
-
+    
+    
     @CrossOrigin(origins = "http://localhost:4200", allowedHeaders = {"Authorization", "Content-Type"})
     @PostMapping(path="/kirana")
     public ResponseEntity<Object> addKirana(@RequestBody KiranaDto merchant) {
@@ -89,8 +97,10 @@ public class MyController {
     			// Customize the response for an empty merchant
     			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Merchant is empty");
     		}
-    		
     		restaurantService.addRestaurant(merchant);
+    		if(merchant.getId()==null) {
+    			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Already Exists");
+    		}
     		return ResponseEntity.status(HttpStatus.CREATED).body(merchant);
 			
 		} catch (Exception e) {
