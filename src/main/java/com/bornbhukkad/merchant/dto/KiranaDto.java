@@ -21,7 +21,7 @@ public class KiranaDto{
 	
 	
 	
-	@JsonProperty("idVendor")
+	@Field("id")
 	private String vendorId;
 	
 	@JsonProperty("time")

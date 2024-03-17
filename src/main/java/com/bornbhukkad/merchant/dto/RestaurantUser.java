@@ -19,7 +19,14 @@ public class RestaurantUser {
     private String email;
     private Integer phone;
     private String password;
-    public String getMerchantType() {
+    private String merchantId;
+    public String getMerchantId() {
+		return merchantId;
+	}
+	public void setMerchantId(String merchantId) {
+		this.merchantId = merchantId;
+	}
+	public String getMerchantType() {
 		return merchantType;
 	}
 	public void setMerchantType(String merchantType) {

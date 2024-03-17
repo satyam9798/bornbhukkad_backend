@@ -3,13 +3,14 @@ import java.util.List;
 
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
-
-@Document(collection = "restaurant_categories")
+import org.springframework.data.mongodb.core.mapping.Field;
+@Document(collection = "bb_admin_panel_vendors_categories")
 public class RestaurantCategoriesDto {
 	@Transient
     public static final String restCategories_sequence = "restCategories_sequence";
-	
+	@Field("id")
 	private String id;
+	@Field("parent_category_id")
     private String parentCategoryId;
     private Descriptor descriptor;
     public String getId() {

@@ -6,11 +6,11 @@ import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
-@Document (collection = "restaurant_items")
+@Document (collection = "bb_admin_panel_vendors_items")
 public class RestaurantItemDto {
 	@Transient
     public static final String restItem_sequence = "restItem_sequence";
-
+	@Field("id")
     private String id;
 
     private String parentCategoryId;

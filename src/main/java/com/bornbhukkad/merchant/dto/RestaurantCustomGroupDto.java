@@ -3,16 +3,16 @@ package com.bornbhukkad.merchant.dto;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
-
+import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.util.List;
 
-@Document(collection = "restaurant_custom_group")
+@Document(collection = "bb_admin_panel_vendors_custom_groups")
 public class RestaurantCustomGroupDto {
 
 	@Transient
     public static final String restCG_sequence = "restCG_sequence";
-    
+	@Field("id")
     private String id;
 
     private Descriptor descriptor;

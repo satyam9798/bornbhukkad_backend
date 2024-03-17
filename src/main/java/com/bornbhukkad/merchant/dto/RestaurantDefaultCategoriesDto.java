@@ -10,7 +10,7 @@ import org.springframework.data.mongodb.core.mapping.Field;
 public class RestaurantDefaultCategoriesDto {
 	@Transient
     public static final String restCategories_sequence = "restCategories_sequence";
-	
+	@Field("id")
 	private String id;
 	@Field("parent_category_id")
     private String parentCategoryId;

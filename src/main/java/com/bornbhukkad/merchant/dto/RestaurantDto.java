@@ -4,18 +4,18 @@ package com.bornbhukkad.merchant.dto;
 import java.time.Instant;
 import java.util.List;
 
-import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 
 
 
 
-@Document (collection = "restaurant")
+@Document (collection = "bb_admin_panel_vendors")
 public class RestaurantDto{
 
 	
@@ -23,11 +23,20 @@ public class RestaurantDto{
     public static final String restaurant_sequence = "restaurant_sequence";
 	
 	
-    
+    @Field("id")
 	private String id;
+//    @JsonIgnore
+    private String userEmail;
 	
 
-    private Time time;
+    public String getUserEmail() {
+		return userEmail;
+	}
+	public void setUserEmailString(String userEmail) {
+		this.userEmail = userEmail;
+	}
+
+	private Time time;
 	
 
     private Descriptor descriptor;
@@ -132,8 +141,8 @@ public class RestaurantDto{
 		public Instant getTimestamp() {
 			return timestamp;
 		}
-		public void setTimestamp(Instant timestamp) {
-			this.timestamp = timestamp;
+		public void setTimestamp(Instant string) {
+			this.timestamp = string;
 		}
 		private String label;
         private Instant timestamp;

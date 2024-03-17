@@ -1,24 +1,25 @@
 package com.bornbhukkad.merchant.dto;
 
+import java.time.Instant;
 import java.util.List;
 
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
-@Document (collection = "restaurant_products")
+@Document (collection = "bb_admin_panel_vendors_products")
 public class RestaurantProductDto {
 	@Transient
     public static final String restProduct_sequence = "restProduct_sequence";
-
+	@Field("id")
     private String id;
-    private Time time;
+    private ProductTime time;
     private Descriptor descriptor;
     private Quantity quantity;
     private Price price;
     private String category_id;
     private List<String> category_ids;
-    private String vendorId;
+//    private String vendorId;
     private List<String> customizationItems;
     private String parent_category_id;
     private String fulfillment_id;
@@ -41,11 +42,11 @@ public class RestaurantProductDto {
 		this.id = id;
 	}
 
-	public Time getTime() {
+	public ProductTime getTime() {
 		return time;
 	}
 
-	public void setTime(Time time) {
+	public void setTime(ProductTime time) {
 		this.time = time;
 	}
 
@@ -89,13 +90,13 @@ public class RestaurantProductDto {
 		this.category_ids = category_ids;
 	}
 
-	public String getVendorId() {
-		return vendorId;
-	}
-
-	public void setVendorId(String vendorId) {
-		this.vendorId = vendorId;
-	}
+//	public String getVendorId() {
+//		return vendorId;
+//	}
+//
+//	public void setVendorId(String vendorId) {
+//		this.vendorId = vendorId;
+//	}
 
 	public List<String> getCustomizationItems() {
 		return customizationItems;
@@ -230,21 +231,21 @@ public class RestaurantProductDto {
 
     // Constructors, getters, and setters
 
-    public static class Time {
+    public static class ProductTime {
         public String getLabel() {
 			return label;
 		}
 		public void setLabel(String label) {
 			this.label = label;
 		}
-		public String getTimestamp() {
+		public Instant getTimestamp() {
 			return timestamp;
 		}
-		public void setTimestamp(String timestamp) {
+		public void setTimestamp(Instant timestamp) {
 			this.timestamp = timestamp;
 		}
 		private String label;
-        private String timestamp;
+        private Instant timestamp;
 
         
     }

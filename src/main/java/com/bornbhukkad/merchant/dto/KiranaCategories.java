@@ -3,9 +3,11 @@ package com.bornbhukkad.merchant.dto;
 import java.util.List;
 
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 @Document(collection = "kirana_categories")
 public class KiranaCategories {
+	@Field("id")
 	private String id;
     private String parentCategoryId;
     private Descriptor descriptor;

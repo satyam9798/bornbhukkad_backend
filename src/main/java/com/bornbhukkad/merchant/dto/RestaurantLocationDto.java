@@ -5,20 +5,30 @@ import java.util.List;
 
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
-@Document (collection = "restaurant_locations")
+@Document (collection = "bb_admin_panel_vendors_locations")
 public class RestaurantLocationDto {
 	
 	@Transient
     public static final String restLocation_sequence = "restLocation_sequence";
-	
+	@Field("id")
     private String id;
     private LocationTime time;
     private String gps;
     private Address address;
+    private String vendorId;
 
 	public String getId() {
 		return id;
+	}
+
+	public String getVendorId() {
+		return vendorId;
+	}
+
+	public void setVendorId(String vendorId) {
+		this.vendorId = vendorId;
 	}
 
 	public void setId(String id) {

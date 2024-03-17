@@ -4,9 +4,11 @@ import java.time.Instant;
 import java.util.List;
 
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 @Document (collection = "kirana_locations")
 public class KiranaLocationDto {
+	@Field("id")
     private String locationId;
     private LocationTime time;
     private String gps;
