@@ -9,12 +9,12 @@ public class SearchBody {
 	public void setCity(String city) {
 		this.city = city;
 	}
-	public String getVendorId() {
-		return vendorId;
+	public String getItem() {
+		return item;
 	}
-	public void setVendorId(String vendorId) {
-		this.vendorId = vendorId;
+	public void setItem(String item) {
+		this.item = item;
 	}
-	public String vendorId;
+	public String item;
 
 }

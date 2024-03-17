@@ -161,8 +161,13 @@ public class MyController {
     		RestaurantCustomGroupDto restaurantCustomGroupDto = RestauranItemRequestDto.getRestaurantCustomGroupDto();
     		RestaurantItemDto restaurantItemDto = RestauranItemRequestDto.getRestaurantItemDto();
         	restaurantService.addRestaurantProduct(restaurantProductDto);
-    		restaurantService.addRestaurantCustomGroup(restaurantCustomGroupDto);
-    		restaurantService.addRestaurantItem(restaurantItemDto);
+        	if(restaurantCustomGroupDto!= null) {
+        		restaurantService.addRestaurantCustomGroup(restaurantCustomGroupDto);
+        	}
+        	if(restaurantItemDto!= null) {
+        		restaurantService.addRestaurantItem(restaurantItemDto);
+        	}
+    		
     		return ResponseEntity.status(HttpStatus.CREATED).body(RestauranItemRequestDto);
 			
 		} catch (Exception e) {

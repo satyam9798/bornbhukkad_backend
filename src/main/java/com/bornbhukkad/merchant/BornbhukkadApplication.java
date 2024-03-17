@@ -12,7 +12,6 @@ import com.bornbhukkad.merchant.dto.Role;
 
 
 @SpringBootApplication
-
 public class BornbhukkadApplication {
 	
 	

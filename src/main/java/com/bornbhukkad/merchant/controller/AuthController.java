@@ -74,15 +74,15 @@ public class AuthController {
     public List<Object> greetings(@RequestBody SearchBody data) {
     	try {
 			
-    		return bbService.getFulfillmentChannels(data.getVendorId(),data.getCity());
+    		return bbService.getFulfillmentChannels(data.getItem(),data.getCity());
 		} catch (Exception e) {
 			
 			throw new BadCredentialsException("Invalid token");
 		}
     }
-    @GetMapping(path="/test1")
-    public List<Object> test2() {
-    	return bbdataService.runCustomQuery();
+    @GetMapping(path="/getByItemAndCity")
+    public List<Object> getByItemAndCity(@RequestBody SearchBody data) {
+    	return bbdataService.getByItemAndCity(data.getItem(),data.getCity());
 
     }
     @CrossOrigin(origins = "http://localhost:4200", allowedHeaders = {"Authorization", "Content-Type"})
