@@ -1,4 +1,5 @@
 package com.bornbhukkad.merchant.controller;
+import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,7 +83,8 @@ public class AuthController {
     }
     @GetMapping(path="/getByItemAndCity")
     public List<Object> getByItemAndCity(@RequestBody SearchBody data) {
-    	return bbdataService.getByItemAndCity(data.getItem(),data.getCity());
+    	return bbService.getFulfillmentChannels(data.getItem(),data.getCity());
+//    	return bbdataService.getByItemAndCity(data.getItem(),data.getCity());
 
     }
     @CrossOrigin(origins = "http://localhost:4200", allowedHeaders = {"Authorization", "Content-Type"})

@@ -14,6 +14,13 @@ public class RestaurantCustomGroupDto {
     public static final String restCG_sequence = "restCG_sequence";
 	@Field("id")
     private String id;
+	public String getParentProductId() {
+		return parentProductId;
+	}
+	public void setParentProductId(String parentProductId) {
+		this.parentProductId = parentProductId;
+	}
+	private String parentProductId;
 
     private Descriptor descriptor;
     public String getId() {

@@ -1,12 +1,14 @@
 package com.bornbhukkad.merchant.dto;
 
+import java.util.List;
+
 public class RestauranItemRequestDto {
-	private RestaurantItemDto restaurantItem;
+	private List<RestaurantItemDto> restaurantItem;
 	
-	public RestaurantItemDto getRestaurantItemDto() {
+	public List<RestaurantItemDto> getRestaurantItemDto() {
 		return restaurantItem;
 	}
-	public void setRestaurantItemDto(RestaurantItemDto restaurantItem) {
+	public void setRestaurantItemDto(List<RestaurantItemDto> restaurantItem) {
 		this.restaurantItem = restaurantItem;
 	}
 	private RestaurantProductDto restaurantProduct;
@@ -16,12 +18,12 @@ public class RestauranItemRequestDto {
 	public void setRestaurantProductDto(RestaurantProductDto restaurantProduct) {
 		this.restaurantProduct = restaurantProduct;
 	}
-	public RestaurantCustomGroupDto getRestaurantCustomGroupDto() {
+	public List<RestaurantCustomGroupDto> getRestaurantCustomGroup() {
 		return restaurantCustomGroup;
 	}
-	public void setRestaurantCustomGroupDto(RestaurantCustomGroupDto restaurantCustomGroup) {
+	public void setRestaurantCustomGroup(List<RestaurantCustomGroupDto> restaurantCustomGroup) {
 		this.restaurantCustomGroup = restaurantCustomGroup;
 	}
-	private RestaurantCustomGroupDto restaurantCustomGroup;
+	private List<RestaurantCustomGroupDto> restaurantCustomGroup;
 	
 }

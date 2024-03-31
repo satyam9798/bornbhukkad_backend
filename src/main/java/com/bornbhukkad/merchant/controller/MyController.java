@@ -158,14 +158,20 @@ public class MyController {
     	try {
     		// TODO: if condition for empty data
     		RestaurantProductDto restaurantProductDto= RestauranItemRequestDto.getRestaurantProductDto();
-    		RestaurantCustomGroupDto restaurantCustomGroupDto = RestauranItemRequestDto.getRestaurantCustomGroupDto();
-    		RestaurantItemDto restaurantItemDto = RestauranItemRequestDto.getRestaurantItemDto();
+    		List<RestaurantCustomGroupDto> restaurantCustomGroupDto = RestauranItemRequestDto.getRestaurantCustomGroup();
+    		List<RestaurantItemDto> restaurantItemDto = RestauranItemRequestDto.getRestaurantItemDto();
         	restaurantService.addRestaurantProduct(restaurantProductDto);
         	if(restaurantCustomGroupDto!= null) {
-        		restaurantService.addRestaurantCustomGroup(restaurantCustomGroupDto);
+        		for (RestaurantCustomGroupDto dto : restaurantCustomGroupDto) {
+        			dto.setParentProductId(restaurantProductDto.getId());
+        			restaurantService.addRestaurantCustomGroup(dto);
+        		}
+//        		restaurantService.addRestaurantCustomGroup(restaurantCustomGroupDto);
         	}
         	if(restaurantItemDto!= null) {
-        		restaurantService.addRestaurantItem(restaurantItemDto);
+        		for (RestaurantItemDto dto : restaurantItemDto) {
+        		restaurantService.addRestaurantItem(dto);
+        		}
         	}
     		
     		return ResponseEntity.status(HttpStatus.CREATED).body(RestauranItemRequestDto);

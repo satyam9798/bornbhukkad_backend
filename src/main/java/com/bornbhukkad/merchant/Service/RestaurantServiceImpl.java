@@ -148,10 +148,10 @@ public class RestaurantServiceImpl implements RestaurantService{
 	}
 	
 	@Override
-	public void addRestaurantCustomGroup(RestaurantCustomGroupDto customGroup) {
+	public void addRestaurantCustomGroup(RestaurantCustomGroupDto restaurantCustomGroupDto) {
 		
-		customGroup.setId("CG" + sequenceGeneratorService.getSequenceNumber(restCG_sequence));
-		restaurantCustomGroupRepo.save(customGroup);
+		restaurantCustomGroupDto.setId("CG" + sequenceGeneratorService.getSequenceNumber(restCG_sequence));
+		restaurantCustomGroupRepo.save(restaurantCustomGroupDto);
 		
 	}
 	@Override
