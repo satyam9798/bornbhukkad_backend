@@ -1,4 +1,4 @@
-package com.bornbhukkad.merchant.controller;
+ package com.bornbhukkad.merchant.controller;
 
 import static org.springframework.http.ResponseEntity.ok;
 
@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.bornbhukkad.merchant.Service.KiranaServiceImpl;
@@ -191,19 +192,19 @@ public class MyController {
     
     @CrossOrigin(origins = "http://localhost:4200", allowedHeaders = {"Authorization", "Content-Type"})
     @GetMapping("/products")
-    public List<RestaurantProductDto> getProductByVendorId(@RequestBody SearchBody data) {
+    public List<RestaurantProductDto> getProductByVendorId(@RequestParam("vendorId") String vendorId) {
 //    	logger.info("search product in controller  by vendorId:"+vendorId);
-        return restaurantService.getProductsByVendorId(data.getVendorId());
+        return restaurantService.getProductsByVendorId(vendorId);
     }
-    @CrossOrigin(origins = "http://localhost:4200", allowedHeaders = {"Authorization", "Content-Type"})
+    
     @PutMapping("/products")
     public RestaurantProductDto updateItem(@RequestBody RestaurantProductDto product) {
         return restaurantService.updateProduct(product.getId(), product);
     }
-    @CrossOrigin(origins = "http://localhost:4200", allowedHeaders = {"Authorization", "Content-Type"})
+
     @DeleteMapping("/products")
-    public void deleteItem(@RequestBody SearchBody data) {
-    	restaurantService.deleteProduct(data.getId());
+    public void deleteItem(@RequestParam("id") String id) {
+    	restaurantService.deleteProduct(id);
     }
     
     

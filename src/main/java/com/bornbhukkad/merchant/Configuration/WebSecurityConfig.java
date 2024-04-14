@@ -1,3 +1,6 @@
+
+
+
 package com.bornbhukkad.merchant.Configuration;
 
 import javax.servlet.http.HttpServletResponse;
@@ -38,15 +41,32 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	//Method to configure Spring Security HTTP security
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
-		http.httpBasic().disable().csrf().disable().sessionManagement()
-        .sessionCreationPolicy(SessionCreationPolicy.STATELESS).and().authorizeRequests()
-        .antMatchers("/api/auth/login").permitAll().antMatchers("/api/auth/register").permitAll()
-        .antMatchers("/api/auth/registerKirana").permitAll().antMatchers("/api/auth/registerRestaurant").permitAll().antMatchers("/merchants/restaurant").permitAll()
-        .antMatchers("/merchants/restaurantLocation").permitAll().antMatchers("/merchants/restFulfillment").permitAll().antMatchers("/merchants/restaurantProductTest").permitAll().antMatchers("/merchants/restaurantCategories").permitAll()
-        .antMatchers("/merchants/products").permitAll().antMatchers("/merchants/**").hasAuthority("ADMIN").anyRequest().authenticated().and().csrf()
-        .disable().exceptionHandling().authenticationEntryPoint(unauthorizedEntryPoint()).and()
-        .apply(new JwtConfigurer(jwtTokenProvider));
-
+	    http
+	        .httpBasic().disable()
+	        .csrf().disable()
+	        .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+	        .and()
+	        .cors() // Enable CORS configuration
+	        .and()
+	        .authorizeRequests()
+	            .antMatchers("/api/auth/login").permitAll()
+	            .antMatchers("/api/auth/register").permitAll()
+	            .antMatchers("/api/auth/registerKirana").permitAll()
+	            .antMatchers("/api/auth/registerRestaurant").permitAll()
+	            .antMatchers("/merchants/restaurant").permitAll()
+	            .antMatchers("/merchants/restaurantLocation").permitAll()
+	            .antMatchers("/merchants/restFulfillment").permitAll()
+	            .antMatchers("/merchants/restaurantProductTest").permitAll()
+	            .antMatchers("/merchants/restaurantCategories").permitAll()
+	            .antMatchers("/products").permitAll()
+	            .antMatchers("/merchants/products").permitAll()
+	            .antMatchers("/merchants/**").hasAuthority("ADMIN")
+	            .anyRequest().authenticated()
+	        .and()
+	        .csrf().disable()
+	        .exceptionHandling().authenticationEntryPoint(unauthorizedEntryPoint())
+	        .and()
+	        .apply(new JwtConfigurer(jwtTokenProvider));
 	}
 	
 	@Bean
