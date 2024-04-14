@@ -7,6 +7,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.aggregation.ArithmeticOperators.Add;
 import org.springframework.http.HttpStatus;
@@ -49,6 +52,8 @@ import com.bornbhukkad.merchant.dto.RestaurantProductDto;
 @RequestMapping("/merchants")
 @CrossOrigin(origins = "http://localhost:4200", allowedHeaders = {"Authorization", "Content-Type"})
 public class MyController {
+	
+	private static final Logger logger = LoggerFactory.getLogger(MyController.class);
 	
 	
 	private final RestaurantServiceImpl restaurantService;
@@ -181,6 +186,28 @@ public class MyController {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error occured");
 		}
     }
+    
+    
+    
+    @CrossOrigin(origins = "http://localhost:4200", allowedHeaders = {"Authorization", "Content-Type"})
+    @GetMapping("/products")
+    public List<RestaurantProductDto> getProductByVendorId(@RequestBody SearchBody data) {
+//    	logger.info("search product in controller  by vendorId:"+vendorId);
+        return restaurantService.getProductsByVendorId(data.getVendorId());
+    }
+    @CrossOrigin(origins = "http://localhost:4200", allowedHeaders = {"Authorization", "Content-Type"})
+    @PutMapping("/products")
+    public RestaurantProductDto updateItem(@RequestBody RestaurantProductDto product) {
+        return restaurantService.updateProduct(product.getId(), product);
+    }
+    @CrossOrigin(origins = "http://localhost:4200", allowedHeaders = {"Authorization", "Content-Type"})
+    @DeleteMapping("/products")
+    public void deleteItem(@RequestBody SearchBody data) {
+    	restaurantService.deleteProduct(data.getId());
+    }
+    
+    
+    
     @CrossOrigin(origins = "http://localhost:4200", allowedHeaders = {"Authorization", "Content-Type"})
     @GetMapping(path="/restDefaultCategories")
     public List <RestaurantDefaultCategoriesDto> greetings() {

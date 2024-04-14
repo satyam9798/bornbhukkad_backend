@@ -210,12 +210,12 @@ public class RestaurantProductDto {
 		this.tags = tags;
 	}
 
-	public String getVendor_ID() {
-		return vendor_ID;
+	public String getVendorId() {
+		return vendorId;
 	}
 
-	public void setVendor_ID(String vendor_ID) {
-		this.vendor_ID = vendor_ID;
+	public void setVendorId(String vendorId) {
+		this.vendorId = vendorId;
 	}
 	
 	@Field("@ondc/org/time_to_ship")
@@ -227,7 +227,7 @@ public class RestaurantProductDto {
 	@Field("@ondc/org/contact_details_consumer_care\"")
     private String ondc_org_contact_details_consumer_care;
     private List<Tag> tags;
-    private String vendor_ID;
+    private String vendorId;
 
     // Constructors, getters, and setters
 
@@ -407,7 +407,7 @@ public class RestaurantProductDto {
 		private String maximum_value;
         private List<Tag> tags;
 
-        
+       
     }
 
     public static class Tag {

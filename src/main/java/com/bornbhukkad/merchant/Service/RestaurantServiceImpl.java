@@ -208,6 +208,33 @@ public class RestaurantServiceImpl implements RestaurantService{
 	   UpdateResult(query, update, RestaurantDto.class);
 	}
 
+	@Override
+	public List<RestaurantProductDto> getProductsByVendorId(String vendorId) {
+		// TODO Auto-generated method stub
+		logger.info("search product in service by vendorId:"+vendorId);
+		return restaurantProductRepo.findByVendorId(vendorId);
+	}
+	
+	 public RestaurantProductDto updateProduct(String id, RestaurantProductDto newProduct) {
+	        Optional<RestaurantProductDto> existingProduct = restaurantProductRepo.findById(id);
+	        if (existingProduct.isPresent()) {
+	        	RestaurantProductDto product = existingProduct.get();
+	        	if (newProduct.getPrice() != null) {
+	        		product.setPrice(newProduct.getPrice());
+	            }
+	            if (newProduct.getVendorId() != null) {
+	            	product.setVendorId(newProduct.getVendorId());
+	            }
+	            
+	            return restaurantProductRepo.save(product);
+	        }
+	        return null; // or throw an exception indicating item not found
+	    }
+
+	    public void deleteProduct(String id) {
+	    	restaurantProductRepo.deleteById(id);
+	    }
+
 
 
  

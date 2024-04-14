@@ -23,5 +23,6 @@ public interface RestaurantService {
 	public void addRestaurantFulfillment(RestaurantFulfillmentDto filfillment);
 	public List<RestaurantDto> getAll();
 	public List<RestaurantDefaultCategoriesDto> getRestDefaultCategories();
+	public List<RestaurantProductDto> getProductsByVendorId(String vendorId);
 
 }

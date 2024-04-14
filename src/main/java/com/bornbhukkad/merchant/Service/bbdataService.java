@@ -23,6 +23,7 @@ import org.springframework.data.mongodb.core.query.Criteria;
 
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.*;
 
+import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 
@@ -80,11 +81,11 @@ public class bbdataService {
     public List<Object> getFulfillmentChannels(
     	    String item, 
     	    String city) {
-   
+    	System.out.println("enter:"+Instant.now());
     	String query1 ="{$lookup: {from: 'bb_admin_panel_vendors_locations',localField: 'locationsId',foreignField: 'id',pipeline: [{$project: {'_id':0,'id': 1, 'address': 1,'time':1,'gps':1,'circle':1} }], as: 'locations'}},";
     	    String query2 ="{$lookup: {from: 'bb_admin_panel_vendors_locations',localField: 'locationsId',foreignField: 'id',pipeline: [{$project: {'_id':0,'tags': 1 } }], as: 'vendorTags'}},";
     	    String query3 ="{$lookup: {from: 'bb_admin_panel_vendors_fulfillments',localField: 'fulfillmentsId',foreignField: 'id',pipeline: [{$project: {'_id': 0,'id':1,'type':1,'contact':1} }], as: 'fulfillments'}},";
-    	    String query4 ="{$lookup: {from: 'bb_admin_panel_vendors_products',localField: 'id',foreignField: 'vendor_ID',pipeline: [{$project: {'_id': 0,'id':1,'descriptor':1,'tags':1,'quantity': 1,'price':1,'time':1,'category_id':1,'category_ids':1,'fulfillment_id':1,'location_id':1,'related':1,'recommended':1,'@ondc/org/returnable':1,'@ondc/org/cancellable':1,'@ondc/org/return_window':1 ,'@ondc/org/seller_pickup_return':1,'@ondc/org/time_to_ship':1,'@ondc/org/available_on_cod':1,'@ondc/org/contact_details_consumer_care\':1  } }], as: 'itemsMain'}},";
+    	    String query4 ="{$lookup: {from: 'bb_admin_panel_vendors_products',localField: 'id',foreignField: 'vendorId',pipeline: [{$project: {'_id': 0,'id':1,'descriptor':1,'tags':1,'quantity': 1,'price':1,'time':1,'category_id':1,'category_ids':1,'fulfillment_id':1,'location_id':1,'related':1,'recommended':1,'@ondc/org/returnable':1,'@ondc/org/cancellable':1,'@ondc/org/return_window':1 ,'@ondc/org/seller_pickup_return':1,'@ondc/org/time_to_ship':1,'@ondc/org/available_on_cod':1,'@ondc/org/contact_details_consumer_care\':1  } }], as: 'itemsMain'}},";
     	    String query8 ="{$lookup: {from: 'bb_admin_panel_vendors_categories',localField: 'id',foreignField: 'parent_category_id',pipeline: [{$project: {'_id': 0,'id':1,'parent_category_id':1,'descriptor':1,'tags':1} }],as: 'categoriesMain'}},";
     	    String query5 ="{$lookup: {from: 'bb_admin_panel_vendors_custom_groups',localField: 'itemsMain.id',foreignField: 'parentProductId',pipeline: [{$project: {'_id': 0,'id':1,'descriptor':1,'tags':1} }], as: 'customGroups'}},";
     	    String query6 ="{$lookup: {from: 'bb_admin_panel_vendors_items',localField: 'customGroups.id',foreignField: 'parentCategoryId',pipeline: [{$project: {'_id': 0,'id':1,'descriptor':1,'tags':1,'quantity': 1,'price':1,'catgory_id':1,'related':1 } }], as: 'itemCollection'}},";
@@ -109,6 +110,7 @@ public class bbdataService {
     	    AggregationResults<Object> results = 
         	        mongoTemplate.aggregate(aggregation, "bb_admin_panel_vendors", Object.class);
         	    List<Object> resultDtoString=results.getMappedResults();
+        	    System.out.println("exit:"+Instant.now());
         	    return resultDtoString;            
     	}
 

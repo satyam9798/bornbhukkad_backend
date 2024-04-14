@@ -43,7 +43,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         .antMatchers("/api/auth/login").permitAll().antMatchers("/api/auth/register").permitAll()
         .antMatchers("/api/auth/registerKirana").permitAll().antMatchers("/api/auth/registerRestaurant").permitAll().antMatchers("/merchants/restaurant").permitAll()
         .antMatchers("/merchants/restaurantLocation").permitAll().antMatchers("/merchants/restFulfillment").permitAll().antMatchers("/merchants/restaurantProductTest").permitAll().antMatchers("/merchants/restaurantCategories").permitAll()
-        .antMatchers("/merchants/**").hasAuthority("ADMIN").anyRequest().authenticated().and().csrf()
+        .antMatchers("/merchants/products").permitAll().antMatchers("/merchants/**").hasAuthority("ADMIN").anyRequest().authenticated().and().csrf()
         .disable().exceptionHandling().authenticationEntryPoint(unauthorizedEntryPoint()).and()
         .apply(new JwtConfigurer(jwtTokenProvider));
 
