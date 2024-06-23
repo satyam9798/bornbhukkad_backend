@@ -71,14 +71,19 @@ public class AuthController {
     
     //test
     @CrossOrigin(origins = "http://localhost:4200", allowedHeaders = {"Authorization", "Content-Type"})
-    @GetMapping(path="/test")
-    public List<Object> greetings(@RequestBody SearchBody data) {
+    @SuppressWarnings("rawtypes")
+    @GetMapping(path="/getByLocation")
+    public ResponseEntity<Object> greetings(@RequestBody SearchBody data) {
     	try {
 			
-    		return bbService.getFulfillmentChannels(data.getItem(),data.getCity());
-		} catch (Exception e) {
-			
-			throw new BadCredentialsException("Invalid token");
+//    		 bbService.getFulfillmentChannelsByGeoLocation(data.getLatitude(),data.getLongitude(), data.getMaxDistance());
+    		return ResponseEntity.status(HttpStatus.CREATED).body(bbService.getFulfillmentChannelsByGeoLocation(data.getLatitude(),data.getLongitude(), data.getMaxDistance()));
+    	} catch (Exception e) {
+			Map<Object, Object> model = new HashMap<>();
+			model.put("error", e);
+        	return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(model);
+        	
+//			return null;
 		}
     }
     @GetMapping(path="/getByItemAndCity")
@@ -100,6 +105,7 @@ public class AuthController {
         	if ((data.getMerchantType()).equals("kirana") && this.kiranaUsers.findByEmail(email)!=null) {
         		authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, data.getPassword()));
         		String token = jwtTokenProvider.createToken(email, this.kiranaUsers.findByEmail(email).getRoles());
+        		
         		model.put("email", email);
         		model.put("token", token);
         		model.put("merchantType", "kirana");
@@ -108,8 +114,10 @@ public class AuthController {
 			} else if((data.getMerchantType()).equals("restaurant")&& this.restaurantUsers.findByEmail(email)!=null){
         		authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, data.getPassword()));
 				String token = jwtTokenProvider.createToken(email, this.restaurantUsers.findByEmail(email).getRoles());
+				String merchantId= this.restaurantUsers.findByEmail(email).getMerchantId();
         		model.put("email", email);
         		model.put("token", token);
+        		model.put("merchantId",merchantId);
         		model.put("merchantType", "restaurant");
         		return ok(model);
 			} else {

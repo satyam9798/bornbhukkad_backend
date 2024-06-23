@@ -1,4 +1,4 @@
- package com.bornbhukkad.merchant.controller;
+package com.bornbhukkad.merchant.controller;
 
 import static org.springframework.http.ResponseEntity.ok;
 
@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.TreeMap;
 
 import org.slf4j.Logger;
@@ -146,10 +147,17 @@ public class MyController {
     
     @CrossOrigin(origins = "http://localhost:4200", allowedHeaders = {"Authorization", "Content-Type"})
     @PostMapping(path="/restaurantCategories")
-    public ResponseEntity<Object> addRestaurantCategory(@RequestBody RestaurantCategoriesDto categories) {
+    public ResponseEntity<Object> addRestaurantCategory(@RequestBody List<RestaurantCategoriesDto>  categories) {
     	try {
     		// TODO: if condition for empty data
-    		restaurantService.addRestaurantCategories(categories);
+    		List<RestaurantCategoriesDto> restCategoriesDto= categories;
+        	if(restCategoriesDto!= null) {
+        		for (RestaurantCategoriesDto dto : restCategoriesDto) {
+
+        			restaurantService.addRestaurantCategories(dto);
+        		}
+        	}
+
     		return ResponseEntity.status(HttpStatus.CREATED).body(categories);
 			
 		} catch (Exception e) {
@@ -157,9 +165,15 @@ public class MyController {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error occured");
 		}
     }
+    @CrossOrigin(origins = "http://localhost:4200", allowedHeaders = {"Authorization", "Content-Type"})
+    @GetMapping("/categories")
+    public List<RestaurantCategoriesDto> getCategoriesByVendorId(@RequestParam("vendorId") String vendorId) {
+    	logger.info("search product in controller  by vendorId:"+vendorId);
+        return restaurantService.getCategoriesByVendorId(vendorId);
+    }
     
     @CrossOrigin(origins = "http://localhost:4200", allowedHeaders = {"Authorization", "Content-Type"})
-    @PostMapping(path="/restaurantProductTest")
+    @PostMapping(path="/restaurantProduct")
     public ResponseEntity<Object> addRestaurantProduct(@RequestBody RestauranItemRequestDto RestauranItemRequestDto) {
     	try {
     		// TODO: if condition for empty data
@@ -176,7 +190,8 @@ public class MyController {
         	}
         	if(restaurantItemDto!= null) {
         		for (RestaurantItemDto dto : restaurantItemDto) {
-        		restaurantService.addRestaurantItem(dto);
+        			dto.setParentItemId(restaurantProductDto.getId());
+        			restaurantService.addRestaurantItem(dto);
         		}
         	}
     		
@@ -192,19 +207,72 @@ public class MyController {
     
     @CrossOrigin(origins = "http://localhost:4200", allowedHeaders = {"Authorization", "Content-Type"})
     @GetMapping("/products")
-    public List<RestaurantProductDto> getProductByVendorId(@RequestParam("vendorId") String vendorId) {
+    public List<Object> getProductByVendorId(@RequestParam("vendorId") String vendorId) {
 //    	logger.info("search product in controller  by vendorId:"+vendorId);
         return restaurantService.getProductsByVendorId(vendorId);
     }
     
-    @PutMapping("/products")
-    public RestaurantProductDto updateItem(@RequestBody RestaurantProductDto product) {
-        return restaurantService.updateProduct(product.getId(), product);
+    @CrossOrigin(origins = "http://localhost:4200", allowedHeaders = {"Authorization", "Content-Type"})
+    @GetMapping("/location")
+    public List<RestaurantLocationDto> getLocationByVendorId(@RequestParam("vendorId") String vendorId) {
+//    	logger.info("search product in controller  by vendorId:"+vendorId);
+        return restaurantService.getLocationByVendorId(vendorId);
+    }
+    
+    @CrossOrigin(origins = "http://localhost:4200", allowedHeaders = {"Authorization", "Content-Type"})
+    @GetMapping("/vendor")
+    public RestaurantDto getVendorByVendorId(@RequestParam("vendorId") String vendorId) {
+//    	logger.info("search product in controller  by vendorId:"+vendorId);
+        return restaurantService.getVendorById(vendorId);
+    }
+    
+
+    @CrossOrigin(origins = "http://localhost:4200", allowedHeaders = {"Authorization", "Content-Type"})
+    @PutMapping(path="/restaurantProduct")
+    public ResponseEntity<Object> updateRestaurantProduct(@RequestBody RestauranItemRequestDto RestauranItemRequestDto) {
+    	try {
+    		// TODO: if condition for empty data
+    		RestaurantProductDto restaurantProductDto= RestauranItemRequestDto.getRestaurantProductDto();
+    		List<RestaurantCustomGroupDto> restaurantCustomGroupDto = RestauranItemRequestDto.getRestaurantCustomGroup();
+    		List<RestaurantItemDto> restaurantItemDto = RestauranItemRequestDto.getRestaurantItemDto();
+    		logger.info("search product in controller  by vendorId:"+restaurantProductDto.getId());
+    		if(restaurantProductDto!=null) {
+    			restaurantService.updateProduct(restaurantProductDto.getId(),restaurantProductDto);
+    		
+	        	if(restaurantCustomGroupDto!= null) {
+	        		for (RestaurantCustomGroupDto dto : restaurantCustomGroupDto) {
+	        			restaurantService.updateCustomGroup(dto.getId(),dto);
+	        		}
+
+	        	}
+	        	if(restaurantItemDto!= null) {
+	        		for (RestaurantItemDto dto : restaurantItemDto) {
+	        		restaurantService.updateItem(dto.getId(),dto);
+	        		}
+	        	}
+        	
+        	return ResponseEntity.status(HttpStatus.CREATED).body(RestauranItemRequestDto);
+    		}
+    		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No item found with the given ID");
+			
+		} catch (Exception e) {
+			// TODO: handle exception
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error occured");
+		}
     }
 
-    @DeleteMapping("/products")
-    public void deleteItem(@RequestParam("id") String id) {
+
+    @DeleteMapping("/restProduct")
+    public void deleteProduct(@RequestParam("id") String id) {
     	restaurantService.deleteProduct(id);
+    }
+    @DeleteMapping("/restCustomGroup")
+    public void deleteCustomGroup(@RequestParam("id") String id) {
+    	restaurantService.deleteCustomGroup(id);
+    }
+    @DeleteMapping("/restItem")
+    public void deleteItem(@RequestParam("id") String id) {
+    	restaurantService.deleteItem(id);
     }
     
     

@@ -1,14 +1,20 @@
 package com.bornbhukkad.merchant.Service;
 
+import java.security.KeyStore.Entry.Attribute;
 import java.time.Instant;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.data.mongodb.core.query.UpdateDefinition;
 import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.CriteriaDefinition;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.aggregation.AggregationResults;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +37,7 @@ import com.bornbhukkad.merchant.dto.RestaurantCustomGroupDto;
 import com.bornbhukkad.merchant.dto.RestaurantDefaultCategoriesDto;
 import com.bornbhukkad.merchant.dto.RestaurantDto;
 import com.bornbhukkad.merchant.dto.RestaurantLocationDto;
+import com.bornbhukkad.merchant.dto.RestaurantLocationDto.Item;
 import com.bornbhukkad.merchant.dto.RestaurantLocationDto.LocationTime;
 import com.bornbhukkad.merchant.dto.RestaurantProductDto;
 import com.bornbhukkad.merchant.dto.RestaurantProductDto.ProductTime;
@@ -50,6 +57,13 @@ import static com.bornbhukkad.merchant.dto.RestaurantFulfillmentDto.fulfillment_
 
 @Service
 public class RestaurantServiceImpl implements RestaurantService{
+private static MongoTemplate mongoTemplate;
+	
+	@Autowired
+	public RestaurantServiceImpl(MongoTemplate mongoTemplate,@Value("${app.service.vendorTTL}") String vendorTtl) {
+		this.vendorTtl = vendorTtl;
+		this.mongoTemplate = mongoTemplate;
+	}
 	
 	private static final Logger logger = LoggerFactory.getLogger(RestaurantServiceImpl.class);
 	@Autowired
@@ -76,12 +90,10 @@ public class RestaurantServiceImpl implements RestaurantService{
 	
     private final String vendorTtl;
     
-    @Autowired
-    private MongoTemplate mongoTemplate;
-	
-	public RestaurantServiceImpl(@Value("${app.service.vendorTTL}") String vendorTtl) {
-		this.vendorTtl = vendorTtl;
-	}
+//	@Autowired
+//	public RestaurantServiceImpl(@Value("${app.service.vendorTTL}") String vendorTtl) {
+//		this.vendorTtl = vendorTtl;
+//	}
 
 	@Override
 	public void addRestaurant(RestaurantDto merchant) {
@@ -118,7 +130,17 @@ public class RestaurantServiceImpl implements RestaurantService{
 		
 		
 		location.setTime(time);
-		location.setId("L"+sequenceGeneratorService.getSequenceNumber(restLocation_sequence));
+		String locationId="L"+sequenceGeneratorService.getSequenceNumber(restLocation_sequence);
+		location.setId(locationId);
+		
+		List<Item> locationAttributes = location.getTags().stream()
+                .flatMap(tag -> tag.getList().stream())
+                .filter(attribute -> "location".equals(attribute.getCode()))
+                .collect(Collectors.toList());
+
+        locationAttributes.forEach(attribute -> attribute.setValue(locationId));
+		
+		
 		restaurantLocationRepo.save(location);
 		Query query = new Query(Criteria.where("id").is(location.getVendorId()));
 		Update update = new Update()
@@ -137,7 +159,7 @@ public class RestaurantServiceImpl implements RestaurantService{
 	
 	@Override
 	public void addRestaurantProduct(RestaurantProductDto product) {
-		
+		logger.info("Adding product by post service");
 		ProductTime time= new ProductTime();
 		time.setLabel("enable");
 		time.setTimestamp(Instant.now());
@@ -156,7 +178,6 @@ public class RestaurantServiceImpl implements RestaurantService{
 	}
 	@Override
 	public void addRestaurantItem(RestaurantItemDto item) {
-		// TODO Auto-generated method stub
 		item.setId("C" + sequenceGeneratorService.getSequenceNumber(restItem_sequence));
 		restaurantItemRepo.save(item);
 		
@@ -209,30 +230,150 @@ public class RestaurantServiceImpl implements RestaurantService{
 	}
 
 	@Override
-	public List<RestaurantProductDto> getProductsByVendorId(String vendorId) {
+	public List<Object> getProductsByVendorId(String vendorId) {
 		// TODO Auto-generated method stub
-		logger.info("search product in service by vendorId:"+vendorId);
-		return restaurantProductRepo.findByVendorId(vendorId);
+//		logger.info("search product in service by vendorId:"+vendorId);
+//		return restaurantProductRepo.findByVendorId(vendorId);
+		//return after lookup
+    	System.out.println("enter:"+Instant.now());
+    	
+    	    String query4 ="{$lookup: {from: 'bb_admin_panel_vendors_products',localField: 'id',foreignField: 'vendorId',pipeline: [{$project: {'_id': 0,'id':1,'descriptor':1,'tags':1,'price':1,'category_id':1,'category_ids':1,'dimension':1,'packagingPrice':1,'timing':1,'weight':1  } }], as: 'product'}},";
+    	    String query5 ="{$lookup: {from: 'bb_admin_panel_vendors_custom_groups',localField: 'product.id',foreignField: 'parentProductId',pipeline: [{$project: {'_id': 0,'id':1,'descriptor':1,'tags':1} }], as: 'customGroups'}},";
+    	    String query6 ="{$lookup: {from: 'bb_admin_panel_vendors_items',localField: 'product.id',foreignField: 'parentItemId',pipeline: [{$project: {'_id': 0,'id':1,'parentItemId':1, 'parentCategoryId':1, 'descriptor':1,'tags':1,'quantity': 1,'price':1,'catgory_id':1,'related':1 } }], as: 'items'}},";
+    	    
+    	    Aggregation aggregation = Aggregation.newAggregation(
+
+    	    		new CustomProjectAggregationOperation(query4),
+    	    		new CustomProjectAggregationOperation(query5),
+    	    		new CustomProjectAggregationOperation(query6),
+//    	            Aggregation.unwind("vendorTags"),
+    	            Aggregation.match(Criteria.where("id").is(vendorId)),
+    	            Aggregation.project()
+	                .andExclude("_id")
+	                .andInclude("product","customGroups","items")
+    	    		);
+    	    AggregationResults<Object> results = 
+        	        mongoTemplate.aggregate(aggregation, "bb_admin_panel_vendors", Object.class);
+        	    List<Object> resultDtoString=results.getMappedResults();
+        	    System.out.println("exit:"+Instant.now());
+        	    return resultDtoString;  
 	}
 	
+	@Override
+	public List<RestaurantCategoriesDto> getCategoriesByVendorId(String vendorId) {
+		// TODO Auto-generated method stub
+		logger.info("Get categories in service by vendorId:"+vendorId);
+		return restaurantCatgoryRepo.findByParentCategoryId(vendorId);
+	}
+	
+	@Override
+	public List<RestaurantLocationDto> getLocationByVendorId(String vendorId) {
+		// TODO Auto-generated method stub
+		logger.info("Get Location in service by vendorId:"+vendorId);
+		return restaurantLocationRepo.findByVendorId(vendorId);
+	}
+	
+	@Override
+	public RestaurantDto getVendorById(String vendorId) {
+		// TODO Auto-generated method stub
+		logger.info("Get Location in service by vendorId:"+vendorId);
+//		return restaurantRepo.findById(vendorId);
+        Query query = new Query();
+		query.addCriteria(Criteria.where("id").is(vendorId));
+        RestaurantDto vendor = mongoTemplate.findOne(query, RestaurantDto.class);
+        return vendor;
+	}
+	
+	
+	
+	
 	 public RestaurantProductDto updateProduct(String id, RestaurantProductDto newProduct) {
-	        Optional<RestaurantProductDto> existingProduct = restaurantProductRepo.findById(id);
-	        if (existingProduct.isPresent()) {
-	        	RestaurantProductDto product = existingProduct.get();
-	        	if (newProduct.getPrice() != null) {
-	        		product.setPrice(newProduct.getPrice());
-	            }
-	            if (newProduct.getVendorId() != null) {
-	            	product.setVendorId(newProduct.getVendorId());
-	            }
+	        Query query = new Query();
+	        query.addCriteria(Criteria.where("id").is(id));
+	        RestaurantProductDto product = mongoTemplate.findOne(query, RestaurantProductDto.class);
+	        if (product!= null) {
+	        	logger.info("Updating product from updateProduct service with id :"+product.getId());
+	        	product.setDescriptor(newProduct.getDescriptor());
+	        	product.setPrice(newProduct.getPrice());
+	        	product.setCategory_id(newProduct.getCategory_id());
+	        	product.setCategory_ids(newProduct.getCategory_ids());
+	        	product.setRelated(newProduct.isRelated());
+	        	product.setRecommended(newProduct.isRecommended());
+	        	product.setWeight(newProduct.getWeight());
+	        	product.setTiming(newProduct.getTiming());
+	        	product.setPackagingPrice(newProduct.getPackagingPrice());
+	        	product.setDimension(newProduct.getDimension());
+	        	product.setOndc_org_returnable(newProduct.isOndc_org_returnable());
+	        	product.setOndc_org_cancellable(newProduct.isOndc_org_cancellable());
+	        	product.setOndc_org_seller_pickup_return(newProduct.isOndc_org_seller_pickup_return());
+	        	product.setOndc_org_available_on_cod(newProduct.isOndc_org_available_on_cod());
+	        	product.setTags(newProduct.getTags());
+
 	            
 	            return restaurantProductRepo.save(product);
+	        }
+	        return null; // or throw an exception indicating item not found
+
+	        
+	    }
+	 public RestaurantCustomGroupDto updateCustomGroup(String id, RestaurantCustomGroupDto newCustomGroup) {
+		 	Query query = new Query();
+	        query.addCriteria(Criteria.where("id").is(id));
+	        RestaurantCustomGroupDto customGroup = mongoTemplate.findOne(query, RestaurantCustomGroupDto.class);
+	        if (customGroup!=null) {
+	        	customGroup.setDescriptor(newCustomGroup.getDescriptor());
+	        	customGroup.setTags(newCustomGroup.getTags());
+	            
+	            return restaurantCustomGroupRepo.save(customGroup);
+	        }
+	        return null; // or throw an exception indicating item not found
+	    }
+	 public RestaurantItemDto updateItem(String id, RestaurantItemDto newItem) {
+		 	Query query = new Query();
+	        query.addCriteria(Criteria.where("id").is(id));
+	        RestaurantItemDto item = mongoTemplate.findOne(query, RestaurantItemDto.class);
+	        if (item!=null) {
+	        	if (newItem.getPrice() != null) {
+	        		item.setParentCategoryId(newItem.getParentCategoryId());
+	        		item.setDescriptor(newItem.getDescriptor());
+	        		item.setQuantity(newItem.getQuantity());
+	        		item.setPrice(newItem.getPrice());
+	        		item.setCategoryId(newItem.getCategoryId());
+	        		item.setRelated(newItem.isRelated());
+	        		item.setTags(newItem.getTags());
+	        		return restaurantItemRepo.save(item);
+	            }
+	           
+	            
 	        }
 	        return null; // or throw an exception indicating item not found
 	    }
 
 	    public void deleteProduct(String id) {
-	    	restaurantProductRepo.deleteById(id);
+	    	//delete from product
+	    	Query query = new Query();
+	    	query.addCriteria(Criteria.where("id").is(id));
+	    	mongoTemplate.remove(query, "bb_admin_panel_vendors_products");
+	    	
+	    	//delete from customGroup
+	    	Query query2 = new Query();
+	    	query2.addCriteria(Criteria.where("parentProductId").is(id));
+	    	mongoTemplate.remove(query2, "bb_admin_panel_vendors_custom_groups");
+	    	
+	    	//delete from item
+	    	Query query3 = new Query();
+	        query3.addCriteria(Criteria.where("parentItemId").is(id));
+	        mongoTemplate.remove(query3, "bb_admin_panel_vendors_items");
+	    }
+	    public void deleteCustomGroup(String id) {
+	    	Query query = new Query();
+	        query.addCriteria(Criteria.where("id").is(id));
+	        mongoTemplate.remove(query, "bb_admin_panel_vendors_custom_groups");
+	    }
+	    public void deleteItem(String id) {
+	    	Query query = new Query();
+	        query.addCriteria(Criteria.where("id").is(id));
+	        mongoTemplate.remove(query, "bb_admin_panel_vendors_items");
 	    }
 
 

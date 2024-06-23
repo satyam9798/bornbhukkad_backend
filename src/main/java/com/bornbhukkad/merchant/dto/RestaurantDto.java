@@ -4,6 +4,7 @@ package com.bornbhukkad.merchant.dto;
 import java.time.Instant;
 import java.util.List;
 
+import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
@@ -25,6 +26,9 @@ public class RestaurantDto{
 	
     @Field("id")
 	private String id;
+    
+    @Id
+	private String _id;
 //    @JsonIgnore
     private String userEmail;
 	

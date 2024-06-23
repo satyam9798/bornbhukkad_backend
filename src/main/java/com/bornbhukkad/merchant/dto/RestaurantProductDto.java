@@ -3,6 +3,7 @@ package com.bornbhukkad.merchant.dto;
 import java.time.Instant;
 import java.util.List;
 
+import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
@@ -11,6 +12,8 @@ import org.springframework.data.mongodb.core.mapping.Field;
 public class RestaurantProductDto {
 	@Transient
     public static final String restProduct_sequence = "restProduct_sequence";
+	@Id
+	private String _id;
 	@Field("id")
     private String id;
     private ProductTime time;
@@ -34,6 +37,98 @@ public class RestaurantProductDto {
     private String ondc_org_return_window;
     @Field("@ondc/org/seller_pickup_return")
     private boolean ondc_org_seller_pickup_return;
+    private DimensionDTO dimension;
+    private int packagingPrice;
+    private String timing;
+    private WeightDTO weight;
+    public DimensionDTO getDimension() {
+        return dimension;
+    }
+
+    public void setDimension(DimensionDTO dimension) {
+        this.dimension = dimension;
+    }
+    public int getPackagingPrice() {
+        return packagingPrice;
+    }
+
+    public void setPackagingPrice(int packagingPrice) {
+        this.packagingPrice = packagingPrice;
+    }
+    public String getTiming() {
+        return timing;
+    }
+
+    public void setTiming(String timing) {
+        this.timing = timing;
+    }
+
+    public WeightDTO getWeight() {
+        return weight;
+    }
+
+    public void setWeight(WeightDTO weight) {
+        this.weight = weight;
+    }
+    public static class DimensionDTO {
+        private String unit;
+        private int value;
+
+        // Constructor, getters, and setters
+//        public DimensionDTO() {
+//        }
+//
+//        public DimensionDTO(String unit, int value) {
+//            this.unit = unit;
+//            this.value = value;
+//        }
+
+        public String getUnit() {
+            return unit;
+        }
+
+        public void setUnit(String unit) {
+            this.unit = unit;
+        }
+
+        public int getValue() {
+            return value;
+        }
+
+        public void setValue(int value) {
+            this.value = value;
+        }
+    }
+
+    public static class WeightDTO {
+        private String unit;
+        private int value;
+
+        // Constructor, getters, and setters
+//        public WeightDTO() {
+//        }
+//
+//        public WeightDTO(String unit, int value) {
+//            this.unit = unit;
+//            this.value = value;
+//        }
+
+        public String getUnit() {
+            return unit;
+        }
+
+        public void setUnit(String unit) {
+            this.unit = unit;
+        }
+
+        public int getValue() {
+            return value;
+        }
+
+        public void setValue(int value) {
+            this.value = value;
+        }
+    }
     public String getId() {
 		return id;
 	}

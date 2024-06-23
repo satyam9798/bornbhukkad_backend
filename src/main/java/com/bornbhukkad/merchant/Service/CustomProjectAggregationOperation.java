@@ -21,7 +21,6 @@ public class CustomProjectAggregationOperation implements AggregationOperation {
 
     @Override
     public Document toDocument(AggregationOperationContext aggregationOperationContext) {
-    	logger.info("test", Document.parse(jsonOperation));
         return aggregationOperationContext.getMappedObject(Document.parse(jsonOperation));
     }
 }

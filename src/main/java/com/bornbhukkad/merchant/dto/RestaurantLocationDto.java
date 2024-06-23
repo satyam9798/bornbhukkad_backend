@@ -15,8 +15,18 @@ public class RestaurantLocationDto {
 	@Field("id")
     private String id;
     private LocationTime time;
-    private String gps;
-    private Address address;
+//    private String gps;
+    private Gps gps;
+    public Gps getGps() {
+		return gps;
+	}
+
+	public void setGps(Gps gps) {
+		this.gps = gps;
+	}
+
+
+	private Address address;
     private String vendorId;
 
 	public String getId() {
@@ -43,13 +53,13 @@ public class RestaurantLocationDto {
 		this.time = time;
 	}
 
-	public String getGps() {
-		return gps;
-	}
-
-	public void setGps(String gps) {
-		this.gps = gps;
-	}
+//	public String getGps() {
+//		return gps;
+//	}
+//
+//	public void setGps(String gps) {
+//		this.gps = gps;
+//	}
 
 	public Address getAddress() {
 		return address;
@@ -80,7 +90,22 @@ public class RestaurantLocationDto {
     private List<Tag> tags;
 
      
-
+    public static class Gps{
+    	private String type;
+    	private double[] coordinates;
+		public String getType() {
+			return type;
+		}
+		public void setType(String type) {
+			this.type = type;
+		}
+		public double[] getCoordinates() {
+			return coordinates;
+		}
+		public void setCoordinates(double[] coordinates) {
+			this.coordinates = coordinates;
+		}
+    }
     // Inner classes for nested structures
     public static class LocationTime {
         public String getLabel() {

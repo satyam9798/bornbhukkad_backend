@@ -2,6 +2,7 @@ package com.bornbhukkad.merchant.dto;
 
 import java.util.List;
 
+import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
@@ -10,12 +11,23 @@ import org.springframework.data.mongodb.core.mapping.Field;
 public class RestaurantItemDto {
 	@Transient
     public static final String restItem_sequence = "restItem_sequence";
+	@Id
+	public String _id;
 	@Field("id")
     private String id;
 
     private String parentCategoryId;
+    private String parentItemId;
 
-    private Descriptor descriptor;
+    public String getParentItemId() {
+		return parentItemId;
+	}
+
+	public void setParentItemId(String parentItemId) {
+		this.parentItemId = parentItemId;
+	}
+
+	private Descriptor descriptor;
 
     private Quantity quantity;
 

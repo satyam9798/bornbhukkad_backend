@@ -12,10 +12,19 @@ public class RestaurantCustomGroupDto {
 
 	@Transient
     public static final String restCG_sequence = "restCG_sequence";
+	@Id
+	public String _id;
 	@Field("id")
     private String id;
+	private String defaultId;
 	public String getParentProductId() {
 		return parentProductId;
+	}
+	public String getDefaultId() {
+		return defaultId;
+	}
+	public void setDefaultId(String defaultId) {
+		this.defaultId = defaultId;
 	}
 	public void setParentProductId(String parentProductId) {
 		this.parentProductId = parentProductId;

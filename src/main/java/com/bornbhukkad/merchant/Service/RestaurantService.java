@@ -1,6 +1,7 @@
 package com.bornbhukkad.merchant.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.mongodb.core.query.Query;
 
@@ -23,6 +24,9 @@ public interface RestaurantService {
 	public void addRestaurantFulfillment(RestaurantFulfillmentDto filfillment);
 	public List<RestaurantDto> getAll();
 	public List<RestaurantDefaultCategoriesDto> getRestDefaultCategories();
-	public List<RestaurantProductDto> getProductsByVendorId(String vendorId);
+	public List<Object> getProductsByVendorId(String vendorId);
+	public List<RestaurantCategoriesDto> getCategoriesByVendorId(String vendorId);
+	public List<RestaurantLocationDto> getLocationByVendorId(String vendorId);
+	public RestaurantDto getVendorById(String vendorId);
 
 }
