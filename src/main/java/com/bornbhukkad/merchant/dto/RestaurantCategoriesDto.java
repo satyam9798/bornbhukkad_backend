@@ -84,7 +84,9 @@ public class RestaurantCategoriesDto {
 			this.images = images;
 		}
 		private String name;
+		@Field("short_desc")
         private String shortDesc;
+		@Field("long_desc")
         private String longDesc;
         private List<String> images;
 

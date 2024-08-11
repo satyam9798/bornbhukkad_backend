@@ -142,14 +142,14 @@ public class RestaurantDto{
 		public void setLabel(String label) {
 			this.label = label;
 		}
-		public Instant getTimestamp() {
+		public String getTimestamp() {
 			return timestamp;
 		}
-		public void setTimestamp(Instant string) {
-			this.timestamp = string;
+		public void setTimestamp(String timestampString) {
+			this.timestamp = timestampString;
 		}
 		private String label;
-        private Instant timestamp;
+        private String timestamp;
 
 
     }
@@ -192,7 +192,7 @@ public class RestaurantDto{
 		@Field("long_desc")
 		private String longDesc;
 		
-
+		@Field("short_desc")
         private String shortDesc;
 		
 		@JsonProperty("images")

@@ -32,6 +32,8 @@ import com.bornbhukkad.merchant.Repository.IRestaurantProductRepository;
 import com.bornbhukkad.merchant.Repository.IRestaurantRepository;
 import com.bornbhukkad.merchant.Repository.IUserRepository;
 import com.bornbhukkad.merchant.controller.AuthController;
+import com.bornbhukkad.merchant.dto.KiranaLocationDto;
+import com.bornbhukkad.merchant.dto.KiranaProductDto;
 import com.bornbhukkad.merchant.dto.RestaurantCategoriesDto;
 import com.bornbhukkad.merchant.dto.RestaurantCustomGroupDto;
 import com.bornbhukkad.merchant.dto.RestaurantDefaultCategoriesDto;
@@ -101,7 +103,8 @@ private static MongoTemplate mongoTemplate;
 		if (repeated==false) {
 			Time time= new Time();
 			time.setLabel("enable");
-			time.setTimestamp(Instant.now());
+			String timestampString = Instant.now().toString();
+			time.setTimestamp(timestampString);
 			
 			merchant.setTime(time);
 			merchant.setTtl(vendorTtl);
@@ -123,7 +126,8 @@ private static MongoTemplate mongoTemplate;
 	public void addRestaurantLocation(RestaurantLocationDto location) {
 		LocationTime time= new LocationTime();
 		time.setLabel("enable");
-		time.setTimestamp(Instant.now());
+		String timestampString = Instant.now().toString();
+		time.setTimestamp(timestampString);
 		time.setDays(location.getTime().getDays());
 		time.setSchedule(location.getTime().getSchedule());
 		time.setRange(location.getTime().getRange());
@@ -162,7 +166,8 @@ private static MongoTemplate mongoTemplate;
 		logger.info("Adding product by post service");
 		ProductTime time= new ProductTime();
 		time.setLabel("enable");
-		time.setTimestamp(Instant.now());
+		String timestampString = Instant.now().toString();
+		time.setTimestamp(timestampString);
 		product.setTime(time);
 		product.setId("I"+sequenceGeneratorService.getSequenceNumber(restProduct_sequence));
 		restaurantProductRepo.save(product);
@@ -225,7 +230,7 @@ private static MongoTemplate mongoTemplate;
 		restaurantFulfillmentRepo.save(fulfillment);
 		Query query = new Query(Criteria.where("id").is(fulfillment.getVendorId()));
 		Update update = new Update()
-	            .set("fulfillmentsId",fulfillment.getId());
+	            .addToSet("fulfillmentsId",fulfillment.getId());
 	   UpdateResult(query, update, RestaurantDto.class);
 	}
 
@@ -284,7 +289,42 @@ private static MongoTemplate mongoTemplate;
         return vendor;
 	}
 	
-	
+	 public RestaurantLocationDto updateMinOrder(String id, String minOrder) {
+	        Query query = new Query(Criteria.where("id").is(id));
+	        RestaurantLocationDto location = mongoTemplate.findOne(query, RestaurantLocationDto.class);
+	        if (location != null) {
+	            logger.info("Updating min order value from updateMinOrder service with id :" + location.getId());
+	            List<Item> locationAttributes = location.getTags().stream()
+	    				.flatMap(tag -> tag.getList().stream())
+	    				.filter(attribute -> "min_value".equals(attribute.getCode()))
+	    				.collect(Collectors.toList());
+
+	    		locationAttributes.forEach(attribute -> attribute.setValue(minOrder));
+
+	    		restaurantLocationRepo.save(location);
+	        }
+	        return null; // or throw an exception indicating item not found
+	    }
+	    
+	    @Override
+	    public RestaurantLocationDto updateRadius(String id, String radius) {
+	        Query query = new Query(Criteria.where("id").is(id));
+	        RestaurantLocationDto location = mongoTemplate.findOne(query, RestaurantLocationDto.class);
+	        if (location != null) {
+	            logger.info("Updating min order value from updateMinOrder service with id :" + location.getId());
+	            List<Item> locationAttributes = location.getTags().stream()
+	    				.flatMap(tag -> tag.getList().stream())
+	    				.filter(attribute -> "val".equals(attribute.getCode()))
+	    				.collect(Collectors.toList());
+
+	    		locationAttributes.forEach(attribute -> attribute.setValue(radius));
+	    		location.getCircle().getRadius().setValue(radius);
+
+	    		restaurantLocationRepo.save(location);
+	        }
+	        return null; // or throw an exception indicating item not found
+	    }
+
 	
 	
 	 public RestaurantProductDto updateProduct(String id, RestaurantProductDto newProduct) {
@@ -375,6 +415,11 @@ private static MongoTemplate mongoTemplate;
 	        query.addCriteria(Criteria.where("id").is(id));
 	        mongoTemplate.remove(query, "bb_admin_panel_vendors_items");
 	    }
+	    
+	    
+	    
+	    
+	    
 
 
 

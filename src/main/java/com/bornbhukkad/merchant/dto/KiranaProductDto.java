@@ -8,12 +8,23 @@ import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
-import com.bornbhukkad.merchant.dto.KiranaProductDto.DimensionDTO.Measurement;
+import com.bornbhukkad.merchant.dto.RestaurantProductDto.Available;
+import com.bornbhukkad.merchant.dto.RestaurantProductDto.Descriptor;
+import com.bornbhukkad.merchant.dto.RestaurantProductDto.DimensionDTO;
+import com.bornbhukkad.merchant.dto.RestaurantProductDto.Maximum;
+import com.bornbhukkad.merchant.dto.RestaurantProductDto.Measure;
+import com.bornbhukkad.merchant.dto.RestaurantProductDto.Price;
+import com.bornbhukkad.merchant.dto.RestaurantProductDto.ProductTime;
+import com.bornbhukkad.merchant.dto.RestaurantProductDto.Quantity;
+import com.bornbhukkad.merchant.dto.RestaurantProductDto.Tag;
+import com.bornbhukkad.merchant.dto.RestaurantProductDto.TagValue;
+import com.bornbhukkad.merchant.dto.RestaurantProductDto.Unitized;
+import com.bornbhukkad.merchant.dto.RestaurantProductDto.WeightDTO;
 
-@Document (collection = "bb_admin_panel_vendors_products")
-public class RestaurantProductDto {
+@Document(collection = "bb_admin_panel_kirana_products")
+public class KiranaProductDto {
 	@Transient
-    public static final String restProduct_sequence = "restProduct_sequence";
+    public static final String kiranaProduct_sequence = "kiranaProduct_sequence";
 	@Id
 	private String _id;
 	@Field("id")
@@ -72,7 +83,7 @@ public class RestaurantProductDto {
     public void setWeight(WeightDTO weight) {
         this.weight = weight;
     }
-   public static class DimensionDTO {
+    public static class DimensionDTO {
     	private Measurement length;
         private Measurement width;
         public Measurement getLength() {
@@ -110,7 +121,7 @@ public class RestaurantProductDto {
                 return unit;
             }
 
-            public void setUnit(String unit) {
+            public void setCode(String unit) {
                 this.unit = unit;
             }
 
@@ -127,7 +138,6 @@ public class RestaurantProductDto {
     public static class WeightDTO {
         private String unit;
         private int value;
-
 
         public String getUnit() {
             return unit;
@@ -321,12 +331,12 @@ public class RestaurantProductDto {
 		this.tags = tags;
 	}
 
-	public String getVendorId() {
-		return vendorId;
+	public String getKiranaId() {
+		return kiranaId;
 	}
 
-	public void setVendorId(String vendorId) {
-		this.vendorId = vendorId;
+	public void setKiranaId(String kiranaId) {
+		this.kiranaId = kiranaId;
 	}
 	
 	@Field("@ondc/org/time_to_ship")
@@ -338,7 +348,7 @@ public class RestaurantProductDto {
 	@Field("@ondc/org/contact_details_consumer_care\"")
     private String ondc_org_contact_details_consumer_care;
     private List<Tag> tags;
-    private String vendorId;
+    private String kiranaId;
 
     // Constructors, getters, and setters
 
@@ -558,5 +568,5 @@ public class RestaurantProductDto {
 
         
     }
-}
 
+}

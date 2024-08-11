@@ -25,8 +25,8 @@ public class ImageController {
         this.imageService = imageService;
     }
 
-    @PostMapping("/upload")
     @CrossOrigin(origins = "http://127.0.0.1:5500", allowedHeaders = {"Authorization", "Content-Type"})
+    @PostMapping("/upload")
     public ResponseEntity<Map<String, String>> uploadImage(@RequestParam("image") MultipartFile file) {
         String imagePath = imageService.saveImage(file);
         Map<String, String> response = new HashMap<>();

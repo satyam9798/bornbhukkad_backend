@@ -5,10 +5,14 @@ import java.util.List;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
+
+import com.bornbhukkad.merchant.dto.RestaurantCategoriesDto.Descriptor;
+import com.bornbhukkad.merchant.dto.RestaurantCategoriesDto.Tag;
+import com.bornbhukkad.merchant.dto.RestaurantCategoriesDto.TagValue;
 @Document(collection = "bb_admin_panel_kirana_categories")
 public class KiranaCategoriesDto {
 	@Transient
-    public static final String restCategories_sequence = "kiranaCategories_sequence";
+    public static final String kiranaCategories_sequence = "kiranaCategories_sequence";
 	@Field("id")
 	private String id;
 	@Field("parent_category_id")
@@ -46,16 +50,16 @@ public class KiranaCategoriesDto {
 		this.tags = tags;
 	}
 
-	public String getVendorId() {
-		return vendorId;
+	public String getKiranaId() {
+		return kiranaId;
 	}
 
-	public void setVendorId(String vendorId) {
-		this.vendorId = vendorId;
+	public void setKiranaId(String kiranaId) {
+		this.kiranaId = kiranaId;
 	}
 
 	private List<Tag> tags;
-    private String vendorId;
+    private String kiranaId;
 
     
 
@@ -85,7 +89,9 @@ public class KiranaCategoriesDto {
 			this.images = images;
 		}
 		private String name;
+		@Field("short_desc")
         private String shortDesc;
+		@Field("long_desc")
         private String longDesc;
         private List<String> images;
 

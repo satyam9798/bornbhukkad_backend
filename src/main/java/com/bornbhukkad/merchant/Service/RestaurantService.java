@@ -28,5 +28,6 @@ public interface RestaurantService {
 	public List<RestaurantCategoriesDto> getCategoriesByVendorId(String vendorId);
 	public List<RestaurantLocationDto> getLocationByVendorId(String vendorId);
 	public RestaurantDto getVendorById(String vendorId);
+	RestaurantLocationDto updateRadius(String id, String radius);
 
 }

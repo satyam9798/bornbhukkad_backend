@@ -7,6 +7,22 @@ public class SearchBody {
 	public String Latitude;
 	public String longitude;
 	public String maxDistance;
+	public String minOrder;
+	public String radius;
+	
+	public String getRadius() {
+		return radius;
+	}
+	public void setRadius(String Radius) {
+		radius= Radius;
+	}
+	
+	public String getMinOrder() {
+		return minOrder;
+	}
+	public void setMinOrder(String MinOrder) {
+		minOrder = MinOrder;
+	}
 	public String getLatitude() {
 		return Latitude;
 	}

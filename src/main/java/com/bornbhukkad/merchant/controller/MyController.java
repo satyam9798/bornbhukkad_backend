@@ -34,8 +34,15 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.bornbhukkad.merchant.Service.KiranaServiceImpl;
 import com.bornbhukkad.merchant.Service.RestaurantServiceImpl;
+import com.bornbhukkad.merchant.dto.KiranaCategoriesDto;
+import com.bornbhukkad.merchant.dto.KiranaCustomGroupDto;
+import com.bornbhukkad.merchant.dto.KiranaDefaultCategoriesDto;
 import com.bornbhukkad.merchant.dto.KiranaDto;
+import com.bornbhukkad.merchant.dto.KiranaFulfillmentDto;
+import com.bornbhukkad.merchant.dto.KiranaItemDto;
+import com.bornbhukkad.merchant.dto.KiranaItemRequestDto;
 import com.bornbhukkad.merchant.dto.KiranaLocationDto;
+import com.bornbhukkad.merchant.dto.KiranaProductDto;
 import com.bornbhukkad.merchant.dto.RestauranItemRequestDto;
 import com.bornbhukkad.merchant.dto.RestaurantCategoriesDto;
 import com.bornbhukkad.merchant.dto.RestaurantCustomGroupDto;
@@ -68,32 +75,19 @@ public class MyController {
     
     @CrossOrigin(origins = "http://localhost:4200", allowedHeaders = {"Authorization", "Content-Type"})
     @PostMapping(path="/restFulfillment")
-    public ResponseEntity<Object> addRestFulfillment(@RequestBody RestaurantFulfillmentDto fulfillment){
-    	restaurantService.addRestaurantFulfillment(fulfillment);
+    public ResponseEntity<Object> addRestFulfillment(@RequestBody List<RestaurantFulfillmentDto> fulfillment){
+    	List<RestaurantFulfillmentDto> restFulfillmentDto= fulfillment;
+    	if(restFulfillmentDto!= null) {
+    		for (RestaurantFulfillmentDto dto : restFulfillmentDto) {
+    			restaurantService.addRestaurantFulfillment(dto);
+    			}
+    		}
+
     	return ResponseEntity.status(HttpStatus.CREATED).body(fulfillment);
     }
     
     
     
-    @CrossOrigin(origins = "http://localhost:4200", allowedHeaders = {"Authorization", "Content-Type"})
-    @PostMapping(path="/kirana")
-    public ResponseEntity<Object> addKirana(@RequestBody KiranaDto merchant) {
-    	try {
-    		
-    		if (merchant == null || merchant.getDescriptor()==null) {
-    			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Merchant is empty");
-    		}
-    		
-    		kiranaService.addKirana(merchant);
-    		return ResponseEntity.status(HttpStatus.CREATED).body(merchant);
-			
-		} catch (Exception e) {
-			
-			Map<String,String> model = new HashMap<>();
-        	model.put("error", "Unable to save details");
-        	return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(model);
-		}
-    }
     
     
     @CrossOrigin(origins = "http://localhost:4200", allowedHeaders = {"Authorization", "Content-Type"})
@@ -116,19 +110,6 @@ public class MyController {
 		}
     }
 
-    @CrossOrigin(origins = "http://localhost:4200", allowedHeaders = {"Authorization", "Content-Type"})
-    @PostMapping(path="/kiranaLocation")
-    public ResponseEntity<Object> addKiranaLocation(@RequestBody KiranaLocationDto location) {
-    	try {
-    		// TODO: if condition for empty data
-    		kiranaService.addKiranaLocation(location);
-    		return ResponseEntity.status(HttpStatus.CREATED).body(location);
-			
-		} catch (Exception e) {
-			// TODO: handle exception
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error occured");
-		}
-    }
     
     
     @CrossOrigin(origins = "http://localhost:4200", allowedHeaders = {"Authorization", "Content-Type"})
@@ -143,6 +124,32 @@ public class MyController {
 			// TODO: handle exception
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error occured");
 		}
+    }
+    
+    @CrossOrigin(origins = "http://localhost:4200", allowedHeaders = {"Authorization", "Content-Type"})
+    @PostMapping(path="/restaurantMinOrder")
+    public ResponseEntity<Object> updateRestMinOrder(@RequestParam("locationId") String locationId,@RequestBody SearchBody data) {
+        try {
+            // TODO: if condition for empty data
+        	restaurantService.updateMinOrder(locationId, data.getMinOrder());
+            return ResponseEntity.status(HttpStatus.CREATED).body("Success");
+        } catch (Exception e) {
+            // TODO: handle exception
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error occurred");
+        }
+    }
+    
+    @CrossOrigin(origins = "http://localhost:4200", allowedHeaders = {"Authorization", "Content-Type"})
+    @PostMapping(path="/restaurantRadius")
+    public ResponseEntity<Object> updateRestRadius(@RequestParam("locationId") String locationId,@RequestBody SearchBody data) {
+        try {
+            // TODO: if condition for empty data
+        	restaurantService.updateRadius(locationId, data.getRadius());
+            return ResponseEntity.status(HttpStatus.CREATED).body("Success");
+        } catch (Exception e) {
+            // TODO: handle exception
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error occurred");
+        }
     }
     
     @CrossOrigin(origins = "http://localhost:4200", allowedHeaders = {"Authorization", "Content-Type"})
@@ -288,4 +295,232 @@ public class MyController {
 			throw new BadCredentialsException("Invalid token");
 		}
     }
+    
+    
+    // kirana apis
+    
+    @CrossOrigin(origins = "http://localhost:4200", allowedHeaders = {"Authorization", "Content-Type"})
+    @PostMapping(path="/kirana")
+    public ResponseEntity<Object> addKirana(@RequestBody KiranaDto merchant) {
+    	try {
+    		if (merchant == null || merchant.getDescriptor() == null) {
+    			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Merchant is empty");
+    		}
+    		kiranaService.addKirana(merchant);
+    		return ResponseEntity.status(HttpStatus.CREATED).body(merchant);
+		} catch (Exception e) {
+			Map<String, String> model = new HashMap<>();
+        	model.put("error", "Unable to save details");
+        	return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(model);
+		}
+    }
+
+    @CrossOrigin(origins = "http://localhost:4200", allowedHeaders = {"Authorization", "Content-Type"})
+    @PostMapping(path="/kiranaLocation")
+    public ResponseEntity<Object> addKiranaLocation(@RequestBody KiranaLocationDto location) {
+    	try {
+    		kiranaService.addKiranaLocation(location);
+    		return ResponseEntity.status(HttpStatus.CREATED).body(location);
+		} catch (Exception e) {
+			Map<String, String> model = new HashMap<>();
+        	model.put("error", "Unable to save details");
+        	return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(model);
+		}
+    }
+
+    @CrossOrigin(origins = "http://localhost:4200", allowedHeaders = {"Authorization", "Content-Type"})
+    @PostMapping(path="/kiranaProduct")
+    public ResponseEntity<Object> addKiranaProduct(@RequestBody KiranaItemRequestDto kiranaItemRequestDto) {
+        try {
+            // Extract product, custom groups, and items from the request
+            KiranaProductDto kiranaProductDto = kiranaItemRequestDto.getKiranaProductDto();
+            List<KiranaCustomGroupDto> kiranaCustomGroupDto = kiranaItemRequestDto.getKiranaCustomGroup();
+            List<KiranaItemDto> kiranaItemDto = kiranaItemRequestDto.getKiranaItem();
+
+            // Add the main product
+            kiranaService.addKiranaProduct(kiranaProductDto);
+
+            // Add custom groups if they are provided
+            if (kiranaCustomGroupDto != null) {
+                for (KiranaCustomGroupDto dto : kiranaCustomGroupDto) {
+                    dto.setParentProductId(kiranaProductDto.getId());
+                    kiranaService.addKiranaCustomGroup(dto);
+                }
+            }
+
+            // Add items if they are provided
+            if (kiranaItemDto != null) {
+                for (KiranaItemDto dto : kiranaItemDto) {
+                    dto.setParentItemId(kiranaProductDto.getId());
+                    kiranaService.addKiranaItem(dto);
+                }
+            }
+
+            // Return the created request DTO
+            return ResponseEntity.status(HttpStatus.CREATED).body(kiranaItemRequestDto);
+
+        } catch (Exception e) {
+            // Handle exceptions and return an error response
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error occurred");
+        }
+    }
+
+    @CrossOrigin(origins = "http://localhost:4200", allowedHeaders = {"Authorization", "Content-Type"})
+    @GetMapping(path="/kirana")
+    public KiranaDto getKiranaById(@RequestParam("id") String id) {
+    	return kiranaService.getKiranaById(id);
+    }
+
+    @CrossOrigin(origins = "http://localhost:4200", allowedHeaders = {"Authorization", "Content-Type"})
+    @GetMapping(path="/kiranaLocation")
+    public List<KiranaLocationDto> getLocationByKiranaId(@RequestParam("kiranaId") String kiranaId) {
+    	return kiranaService.getLocationByKiranaId(kiranaId);
+    }
+
+    @CrossOrigin(origins = "http://localhost:4200", allowedHeaders = {"Authorization", "Content-Type"})
+    @GetMapping(path="/kiranaProduct")
+    public List<Object> getProductsByKiranaId(@RequestParam("kiranaId") String kiranaId) {
+    	return kiranaService.getProductsByKiranaId(kiranaId);
+    }
+
+  
+
+  
+
+    @CrossOrigin(origins = "http://localhost:4200", allowedHeaders = {"Authorization", "Content-Type"})
+    @PutMapping(path="/kiranaProduct")
+    public ResponseEntity<Object> updateKiranaProduct(@RequestBody KiranaItemRequestDto kiranaItemRequestDto) {
+        try {
+            // Extract product, custom groups, and items from the request
+            KiranaProductDto kiranaProductDto = kiranaItemRequestDto.getKiranaProductDto();
+            List<KiranaCustomGroupDto> kiranaCustomGroupDto = kiranaItemRequestDto.getKiranaCustomGroup();
+            List<KiranaItemDto> kiranaItemDto = kiranaItemRequestDto.getKiranaItem();
+
+            logger.info("Updating product in controller by vendorId:" + kiranaProductDto.getId());
+
+            // Ensure the product DTO is not null
+            if (kiranaProductDto != null) {
+                // Update the main product
+                kiranaService.updateProduct(kiranaProductDto.getId(), kiranaProductDto);
+
+                // Update custom groups if they are provided
+                if (kiranaCustomGroupDto != null) {
+                    for (KiranaCustomGroupDto dto : kiranaCustomGroupDto) {
+                        kiranaService.updateCustomGroup(dto.getId(), dto);
+                    }
+                }
+
+                // Update items if they are provided
+                if (kiranaItemDto != null) {
+                    for (KiranaItemDto dto : kiranaItemDto) {
+                        kiranaService.updateItem(dto.getId(), dto);
+                    }
+                }
+
+                // Return the updated request DTO
+                return ResponseEntity.status(HttpStatus.CREATED).body(kiranaItemRequestDto);
+            }
+
+            // Return an error if no product was found with the given ID
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No item found with the given ID");
+
+        } catch (Exception e) {
+            // Handle exceptions and return an error response
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error occurred");
+        }
+    }
+    
+    @CrossOrigin(origins = "http://localhost:4200", allowedHeaders = {"Authorization", "Content-Type"})
+    @PostMapping(path="/kiranaMinOrder")
+    public ResponseEntity<Object> updateKiranaMinOrder(@RequestParam("locationId") String locationId,@RequestBody SearchBody data) {
+        try {
+            // TODO: if condition for empty data
+            kiranaService.updateMinOrder(locationId, data.getMinOrder());
+            return ResponseEntity.status(HttpStatus.CREATED).body("Success");
+        } catch (Exception e) {
+            // TODO: handle exception
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error occurred");
+        }
+    }
+    
+    @CrossOrigin(origins = "http://localhost:4200", allowedHeaders = {"Authorization", "Content-Type"})
+    @PostMapping(path="/kiranaRadius")
+    public ResponseEntity<Object> updateKiranaRadius(@RequestParam("locationId") String locationId,@RequestBody SearchBody data) {
+        try {
+            // TODO: if condition for empty data
+            kiranaService.updateRadius(locationId, data.getRadius());
+            return ResponseEntity.status(HttpStatus.CREATED).body("Success");
+        } catch (Exception e) {
+            // TODO: handle exception
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error occurred");
+        }
+    }
+    
+    @CrossOrigin(origins = "http://localhost:4200", allowedHeaders = {"Authorization", "Content-Type"})
+    @PostMapping(path="/kiranaCategories")
+    public ResponseEntity<Object> addKiranaCategory(@RequestBody List<KiranaCategoriesDto> categories) {
+        try {
+            // TODO: if condition for empty data
+            if (categories != null) {
+                for (KiranaCategoriesDto dto : categories) {
+                    kiranaService.addKiranaCategories(dto);
+                }
+            }
+            return ResponseEntity.status(HttpStatus.CREATED).body(categories);
+        } catch (Exception e) {
+            // TODO: handle exception
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error occurred");
+        }
+    }
+    
+    @CrossOrigin(origins = "http://localhost:4200", allowedHeaders = {"Authorization", "Content-Type"})
+    @PostMapping(path="/kiranaFulfillment")
+    public ResponseEntity<Object> addKiranaFulfillment(@RequestBody List<KiranaFulfillmentDto> fulfillment) {
+        try {
+//            kiranaService.addKiranaFulfillment(fulfillment);
+            
+            
+            List<KiranaFulfillmentDto> kiranaFulfillmentDto= fulfillment;
+        	if(kiranaFulfillmentDto!= null) {
+        		for (KiranaFulfillmentDto dto : kiranaFulfillmentDto) {
+        			kiranaService.addKiranaFulfillment(dto);
+        			}
+        		}
+        	return ResponseEntity.status(HttpStatus.CREATED).body(fulfillment);
+        } catch (Exception e) {
+            // TODO: handle exception
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error occurred");
+        }
+    }
+    
+    @CrossOrigin(origins = "http://localhost:4200", allowedHeaders = {"Authorization", "Content-Type"})
+    @GetMapping(path="/kiranaDefaultCategories")
+    public List<KiranaDefaultCategoriesDto> getKiranaDefaultCategories() {
+        try {
+            return kiranaService.getKiranaDefaultCategories();
+        } catch (Exception e) {
+            throw new BadCredentialsException("Invalid token");
+        }
+    }
+
+    @CrossOrigin(origins = "http://localhost:4200", allowedHeaders = {"Authorization", "Content-Type"})
+    @GetMapping("/kiranaCategories")
+    public List<KiranaCategoriesDto> getCategoriesByKiranaId(@RequestParam("kiranaId") String kiranaId) {
+    	logger.info("search product in controller  by vendorId:"+kiranaId);
+        return kiranaService.getCategoriesByKiranaId(kiranaId);
+    }
+    
+    @DeleteMapping("/kiranaProduct")
+    public void deleteKiranaProduct(@RequestParam("id") String id) {
+    	kiranaService.deleteProduct(id);
+    }
+    @DeleteMapping("/kiranaCustomGroup")
+    public void deleteKiranaCustomGroup(@RequestParam("id") String id) {
+    	kiranaService.deleteCustomGroup(id);
+    }
+    @DeleteMapping("/kiranaItem")
+    public void deleteKiranaItem(@RequestParam("id") String id) {
+    	kiranaService.deleteItem(id);
+    }
+    
 }

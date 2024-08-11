@@ -3,6 +3,7 @@ package com.bornbhukkad.merchant.dto;
 import java.time.Instant;
 import java.util.List;
 
+import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
@@ -12,6 +13,9 @@ public class RestaurantLocationDto {
 	
 	@Transient
     public static final String restLocation_sequence = "restLocation_sequence";
+	
+	@Id
+	public String _id;
 	@Field("id")
     private String id;
     private LocationTime time;
@@ -114,11 +118,11 @@ public class RestaurantLocationDto {
 		public void setLabel(String label) {
 			this.label = label;
 		}
-		public Instant getTimestamp() {
+		public String getTimestamp() {
 			return timestamp;
 		}
-		public void setTimestamp(Instant timestamp) {
-			this.timestamp = timestamp;
+		public void setTimestamp(String timestampString) {
+			this.timestamp = timestampString;
 		}
 		public Range getRange() {
 			return range;
@@ -139,7 +143,7 @@ public class RestaurantLocationDto {
 			this.schedule = schedule;
 		}
 		private String label;
-        private Instant timestamp;
+        private String timestamp;
         private Range range;
         private String days;
         private Schedule schedule;

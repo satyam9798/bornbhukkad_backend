@@ -19,6 +19,13 @@ public class KiranaUser {
     private String email;
     private Integer phone;
     private String password;
+    private String merchantId;
+    public String getMerchantId() {
+		return merchantId;
+	}
+	public void setMerchantId(String merchantId) {
+		this.merchantId = merchantId;
+	}
     public String getMerchantType() {
 		return merchantType;
 	}
@@ -74,6 +81,7 @@ public class KiranaUser {
     public void setRoles(Set<Role> roles) {
         this.roles = roles;
     }
+
 
 }
 

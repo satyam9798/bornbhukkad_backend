@@ -83,7 +83,9 @@ public class KiranaCategories {
 			this.images = images;
 		}
 		private String name;
+		@Field("long_desc")
         private String shortDesc;
+		@Field("short_desc")
         private String longDesc;
         private List<String> images;
 

@@ -17,7 +17,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 
 
-@Document (collection = "kirana")
+@Document(collection = "bb_admin_panel_kirana")
 public class KiranaDto{
 
     @Transient
@@ -32,8 +32,6 @@ public class KiranaDto{
 	private String _id;
 //    @JsonIgnore
     private String userEmail;
-	
-
     public String getUserEmail() {
 		return userEmail;
 	}
@@ -143,14 +141,14 @@ public class KiranaDto{
 		public void setLabel(String label) {
 			this.label = label;
 		}
-		public Instant getTimestamp() {
+		public String getTimestamp() {
 			return timestamp;
 		}
-		public void setTimestamp(Instant string) {
-			this.timestamp = string;
+		public void setTimestamp(String timestampString) {
+			this.timestamp = timestampString;
 		}
 		private String label;
-        private Instant timestamp;
+        private String timestamp;
 
 
     }
@@ -193,7 +191,7 @@ public class KiranaDto{
 		@Field("long_desc")
 		private String longDesc;
 		
-
+		@Field("short_desc")
         private String shortDesc;
 		
 		@JsonProperty("images")

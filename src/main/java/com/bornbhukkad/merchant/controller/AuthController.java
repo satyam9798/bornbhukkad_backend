@@ -89,7 +89,7 @@ public class AuthController {
     @GetMapping(path="/getByItemAndCity")
     public List<Object> getByItemAndCity(@RequestBody SearchBody data) {
     	return bbService.getFulfillmentChannels(data.getItem(),data.getCity());
-//    	return bbdataService.getByItemAndCity(data.getItem(),data.getCity());
+//    	return bbService.getByCity(data.getCity());
 
     }
     @CrossOrigin(origins = "http://localhost:4200", allowedHeaders = {"Authorization", "Content-Type"})
@@ -105,8 +105,9 @@ public class AuthController {
         	if ((data.getMerchantType()).equals("kirana") && this.kiranaUsers.findByEmail(email)!=null) {
         		authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, data.getPassword()));
         		String token = jwtTokenProvider.createToken(email, this.kiranaUsers.findByEmail(email).getRoles());
-        		
+        		String merchantId= this.kiranaUsers.findByEmail(email).getMerchantId();
         		model.put("email", email);
+        		model.put("merchantId",merchantId);
         		model.put("token", token);
         		model.put("merchantType", "kirana");
         		return ok(model);

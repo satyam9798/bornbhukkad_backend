@@ -3,23 +3,60 @@ package com.bornbhukkad.merchant.dto;
 import java.time.Instant;
 import java.util.List;
 
+import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
-@Document (collection = "kirana_locations")
-public class KiranaLocationDto {
-	@Field("id")
-    private String locationId;
-    private LocationTime time;
-    private String gps;
-    private Address address;
+import com.bornbhukkad.merchant.dto.RestaurantLocationDto.Address;
+import com.bornbhukkad.merchant.dto.RestaurantLocationDto.Circle;
+import com.bornbhukkad.merchant.dto.RestaurantLocationDto.Gps;
+import com.bornbhukkad.merchant.dto.RestaurantLocationDto.Item;
+import com.bornbhukkad.merchant.dto.RestaurantLocationDto.LocationTime;
+import com.bornbhukkad.merchant.dto.RestaurantLocationDto.Radius;
+import com.bornbhukkad.merchant.dto.RestaurantLocationDto.Range;
+import com.bornbhukkad.merchant.dto.RestaurantLocationDto.Schedule;
+import com.bornbhukkad.merchant.dto.RestaurantLocationDto.Tag;
 
-	public String getLocationId() {
-		return locationId;
+@Document (collection = "bb_admin_panel_kirana_locations")
+public class KiranaLocationDto {
+	
+	@Transient
+    public static final String kiranaLocation_sequence = "kiranaLocation_sequence";
+	
+	@Id
+	public String _id;
+	@Field("id")
+    private String id;
+    private LocationTime time;
+//    private String gps;
+    private Gps gps;
+    public Gps getGps() {
+		return gps;
 	}
 
-	public void setLocationId(String locationId) {
-		this.locationId = locationId;
+	public void setGps(Gps gps) {
+		this.gps = gps;
+	}
+
+
+	private Address address;
+    private String kiranaId;
+
+	public String getId() {
+		return id;
+	}
+
+	public String getKiranaId() {
+		return kiranaId;
+	}
+
+	public void setKiranaId(String kiranaId) {
+		this.kiranaId = kiranaId;
+	}
+
+	public void setId(String id) {
+		this.id = id;
 	}
 
 	public LocationTime getTime() {
@@ -30,13 +67,13 @@ public class KiranaLocationDto {
 		this.time = time;
 	}
 
-	public String getGps() {
-		return gps;
-	}
-
-	public void setGps(String gps) {
-		this.gps = gps;
-	}
+//	public String getGps() {
+//		return gps;
+//	}
+//
+//	public void setGps(String gps) {
+//		this.gps = gps;
+//	}
 
 	public Address getAddress() {
 		return address;
@@ -67,7 +104,22 @@ public class KiranaLocationDto {
     private List<Tag> tags;
 
      
-
+    public static class Gps{
+    	private String type;
+    	private double[] coordinates;
+		public String getType() {
+			return type;
+		}
+		public void setType(String type) {
+			this.type = type;
+		}
+		public double[] getCoordinates() {
+			return coordinates;
+		}
+		public void setCoordinates(double[] coordinates) {
+			this.coordinates = coordinates;
+		}
+    }
     // Inner classes for nested structures
     public static class LocationTime {
         public String getLabel() {
@@ -76,11 +128,11 @@ public class KiranaLocationDto {
 		public void setLabel(String label) {
 			this.label = label;
 		}
-		public Instant getTimestamp() {
+		public String getTimestamp() {
 			return timestamp;
 		}
-		public void setTimestamp(Instant timestamp) {
-			this.timestamp = timestamp;
+		public void setTimestamp(String timestampString) {
+			this.timestamp = timestampString;
 		}
 		public Range getRange() {
 			return range;
@@ -101,7 +153,7 @@ public class KiranaLocationDto {
 			this.schedule = schedule;
 		}
 		private String label;
-        private Instant timestamp;
+        private String timestamp;
         private Range range;
         private String days;
         private Schedule schedule;
