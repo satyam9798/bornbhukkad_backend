@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.function.Supplier;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -37,14 +38,15 @@ import com.bornbhukkad.merchant.Service.CustomUserDetailsService;
 
 
 import com.bornbhukkad.merchant.Service.bbdataService;
+import com.bornbhukkad.merchant.dto.AuthBody;
 import com.bornbhukkad.merchant.dto.KiranaUser;
 import com.bornbhukkad.merchant.dto.RestaurantUser;
+import com.bornbhukkad.merchant.dto.SearchBody;
 
 
 
 
 
-//@CrossOrigin(origins="https://localhost:4200")
 @CrossOrigin(origins = "http://localhost:4200", allowedHeaders = {"Authorization", "Content-Type"})
 @RestController
 @RequestMapping("/api/auth")
@@ -76,111 +78,101 @@ public class AuthController {
     public ResponseEntity<Object> greetings(@RequestBody SearchBody data) {
     	try {
 			
-//    		 bbService.getFulfillmentChannelsByGeoLocation(data.getLatitude(),data.getLongitude(), data.getMaxDistance());
+    		 bbService.getFulfillmentChannelsByGeoLocation(data.getLatitude(),data.getLongitude(), data.getMaxDistance());
     		return ResponseEntity.status(HttpStatus.CREATED).body(bbService.getFulfillmentChannelsByGeoLocation(data.getLatitude(),data.getLongitude(), data.getMaxDistance()));
     	} catch (Exception e) {
 			Map<Object, Object> model = new HashMap<>();
 			model.put("error", e);
         	return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(model);
-        	
-//			return null;
 		}
     }
     @GetMapping(path="/getByItemAndCity")
     public List<Object> getByItemAndCity(@RequestBody SearchBody data) {
-    	return bbService.getFulfillmentChannels(data.getItem(),data.getCity());
+//    	return bbService.getFulfillmentChannels(data.getItem(),data.getCity());
 //    	return bbService.getByCity(data.getCity());
+    	return bbService.onSelectQuery();
 
     }
+    
     @CrossOrigin(origins = "http://localhost:4200", allowedHeaders = {"Authorization", "Content-Type"})
-    @SuppressWarnings("rawtypes")
     @PostMapping("/login")
-    public ResponseEntity login(@RequestBody AuthBody data) {
+    public ResponseEntity<Map<String, String>> login(@RequestBody AuthBody data) {
         try {
-        	String email = data.getEmail();
-        	logger.info("emailKirana"+this.kiranaUsers.findByEmail(email));
-        	logger.info("emailKirana"+this.restaurantUsers.findByEmail(email));
-        	logger.info("This is an info message");
-        	Map<Object, Object> model = new HashMap<>();
-        	if ((data.getMerchantType()).equals("kirana") && this.kiranaUsers.findByEmail(email)!=null) {
-        		authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, data.getPassword()));
-        		String token = jwtTokenProvider.createToken(email, this.kiranaUsers.findByEmail(email).getRoles());
-        		String merchantId= this.kiranaUsers.findByEmail(email).getMerchantId();
-        		model.put("email", email);
-        		model.put("merchantId",merchantId);
-        		model.put("token", token);
-        		model.put("merchantType", "kirana");
-        		return ok(model);
-				
-			} else if((data.getMerchantType()).equals("restaurant")&& this.restaurantUsers.findByEmail(email)!=null){
-        		authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, data.getPassword()));
-				String token = jwtTokenProvider.createToken(email, this.restaurantUsers.findByEmail(email).getRoles());
-				String merchantId= this.restaurantUsers.findByEmail(email).getMerchantId();
-        		model.put("email", email);
-        		model.put("token", token);
-        		model.put("merchantId",merchantId);
-        		model.put("merchantType", "restaurant");
-        		return ok(model);
-			} else {
-				model.put("error", "Invalid Credentials");
-	        	return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(model);
-			}
+            String email = data.getEmail();
+            String merchantType = data.getMerchantType();
+            Map<String, String> model = new HashMap<>();
+            
+            if ("kirana".equals(merchantType) && kiranaUsers.findByEmail(email) != null) {
+                authenticateUser(email, data.getPassword());
+                String token = jwtTokenProvider.createToken(email, kiranaUsers.findByEmail(email).getRoles());
+                String merchantId = kiranaUsers.findByEmail(email).getMerchantId();
+                model.put("email", email);
+                model.put("merchantId", merchantId);
+                model.put("token", token);
+                model.put("merchantType", "kirana");
+                return ResponseEntity.ok(model);
+
+            } else if ("restaurant".equals(merchantType) && restaurantUsers.findByEmail(email) != null) {
+                authenticateUser(email, data.getPassword());
+                String token = jwtTokenProvider.createToken(email, restaurantUsers.findByEmail(email).getRoles());
+                String merchantId = restaurantUsers.findByEmail(email).getMerchantId();
+                model.put("email", email);
+                model.put("token", token);
+                model.put("merchantId", merchantId);
+                model.put("merchantType", "restaurant");
+                return ResponseEntity.ok(model);
+
+            } else {
+                model.put("error", "Invalid Credentials");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(model);
+            }
         } catch (AuthenticationException e) {
-        	Map<String,String> model = new HashMap<>();
-        	model.put("error", "Invalid Credentials");
-        	return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(model);
-//            throw new BadCredentialsException("Invalid email/password supplied");
+            Map<String, String> model = new HashMap<>();
+            model.put("error", "Invalid Credentials");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(model);
         }
     }
-  
-    @CrossOrigin(origins = "http://localhost:4200", allowedHeaders = {"Authorization", "Content-Type"})
-    @SuppressWarnings("rawtypes")
-    @PostMapping("/registerKirana")
-    public ResponseEntity register(@RequestBody KiranaUser user) {
-    	try {
-			
-    		KiranaUser userExists = userService.findKiranaUserByEmail(user.getEmail());
-    		if (userExists != null) {
-//            throw new BadCredentialsException("User with username: " + user.getEmail() + " already exists");
-    			Map<String,String> model = new HashMap<>();
-    			model.put("error", "User : " + user.getEmail() + " already exists, Please Login");
-    			return ResponseEntity.status(HttpStatus.OK).body(model);
-    		}
-    		userService.saveKiranaUser(user);
-    		Map<Object, Object> model = new HashMap<>();
-    		model.put("message", "User registered successfully");
-    		return ok(model);
-		} catch (Exception e) {
-			// TODO: handle exception
-			Map<String,String> model = new HashMap<>();
-        	model.put("error", "Error occured");
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(model);
-		}
+
+    private void authenticateUser(String email, String password) {
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, password));
     }
-    
-    
+
     @CrossOrigin(origins = "http://localhost:4200", allowedHeaders = {"Authorization", "Content-Type"})
-    @SuppressWarnings("rawtypes")
+    @PostMapping("/registerKirana")
+    public ResponseEntity<Map<String, String>> registerKirana(@RequestBody KiranaUser user) {
+        return registerUser(
+            () -> userService.findKiranaUserByEmail(user.getEmail()),
+            () -> userService.saveKiranaUser(user),
+            user.getEmail()
+        );
+    }
+
+    @CrossOrigin(origins = "http://localhost:4200", allowedHeaders = {"Authorization", "Content-Type"})
     @PostMapping("/registerRestaurant")
-    public ResponseEntity registerRestaurant(@RequestBody RestaurantUser user) {
-    	try {
-			
-    		RestaurantUser userExists = userService.findRestaurantUserByEmail(user.getEmail());
-    		if (userExists != null) {
-//            throw new BadCredentialsException("User with username: " + user.getEmail() + " already exists");
-    			Map<String,String> model = new HashMap<>();
-    			model.put("error", "User : " + user.getEmail() + " already exists, Please Login");
-    			return ResponseEntity.status(HttpStatus.OK).body(model);
-    		}
-    		userService.saveRestaurantUser(user);
-    		Map<Object, Object> model = new HashMap<>();
-    		model.put("message", "User registered successfully");
-    		return ok(model);
-		} catch (Exception e) {
-			// TODO: handle exception
-			Map<String,String> model = new HashMap<>();
-        	model.put("error", "Invalid Credentials");
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(model);
-		}
+    public ResponseEntity<Map<String, String>> registerRestaurant(@RequestBody RestaurantUser user) {
+    	return registerUser(
+    		    () -> userService.findKiranaUserByEmail(user.getEmail()),
+    		    () -> userService.saveRestaurantUser(user),
+    		    user.getEmail()
+    		);
+
+    }
+
+    private ResponseEntity<Map<String, String>> registerUser(Supplier<?> findUser, Runnable saveUser, String email) {
+        try {
+            if (findUser.get() != null) {
+                Map<String, String> model = new HashMap<>();
+                model.put("error", "User: " + email + " already exists, Please Login");
+                return ResponseEntity.status(HttpStatus.OK).body(model);
+            }
+            saveUser.run();
+            Map<String, String> model = new HashMap<>();
+            model.put("message", "User registered successfully");
+            return ResponseEntity.status(HttpStatus.OK).body(model);
+        } catch (Exception e) {
+            Map<String, String> model = new HashMap<>();
+            model.put("error", "An error occurred while processing your request.");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(model);
+        }
     }
 }

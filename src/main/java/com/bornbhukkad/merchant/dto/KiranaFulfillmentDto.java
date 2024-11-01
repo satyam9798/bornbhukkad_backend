@@ -5,6 +5,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 import com.bornbhukkad.merchant.dto.RestaurantFulfillmentDto.ContactDTO;
+import com.bornbhukkad.merchant.dto.RestaurantFulfillmentDto.DeliveryTime;
 
 @Document(collection = "bb_admin_panel_kirana_fulfillments")
 public class KiranaFulfillmentDto {
@@ -18,6 +19,69 @@ public class KiranaFulfillmentDto {
     private ContactDTO contact;
 
     private String kiranaId;
+    private DeliveryTime deliveryTime;
+    private String defaultId;
+    
+    public DeliveryTime getDeliveryTime() {
+		return deliveryTime;
+	}
+
+
+
+	public void setDeliveryTime(DeliveryTime deliveryTime) {
+		this.deliveryTime = deliveryTime;
+	}
+
+	public static class DeliveryTime {
+    	private String deliveryStartDay;
+        private String deliveryEndDay;
+        private String deliveryStartTime;
+        private String deliveryEndTime;
+        
+        public String getDeliveryStartDay() {
+    		return deliveryStartDay;
+    	}
+
+    	public void setDeliveryStartDay(String deliveryStartDay) {
+    		this.deliveryStartDay = deliveryStartDay;
+    	}
+
+    	public String getDeliveryEndDay() {
+    		return deliveryEndDay;
+    	}
+
+    	public void setDeliveryEndDay(String deliveryEndDay) {
+    		this.deliveryEndDay = deliveryEndDay;
+    	}
+
+    	public String getDeliveryStartTime() {
+    		return deliveryStartTime;
+    	}
+
+    	public void setDeliveryStartTime(String deliveryStartTime) {
+    		this.deliveryStartTime = deliveryStartTime;
+    	}
+
+    	public String getDeliveryEndTime() {
+    		return deliveryEndTime;
+    	}
+
+    	public void setDeliveryEndTime(String deliveryEndTime) {
+    		this.deliveryEndTime = deliveryEndTime;
+    	}
+
+
+    }
+	
+	public String getDefaultId() {
+		return defaultId;
+	}
+
+	
+
+	public void setDefaultId(String defaultId) {
+		this.defaultId = defaultId;
+	}
 
     public String getId() {
 		return id;

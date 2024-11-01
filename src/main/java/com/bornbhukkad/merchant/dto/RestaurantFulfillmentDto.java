@@ -14,12 +14,79 @@ public class RestaurantFulfillmentDto {
     private String id;
 
     private String type;
+    private String defaultId;
 
     private ContactDTO contact;
 
     private String vendorId;
+    private DeliveryTime deliveryTime;
+    
+    public DeliveryTime getDeliveryTime() {
+		return deliveryTime;
+	}
 
-    public String getId() {
+
+
+	public void setDeliveryTime(DeliveryTime deliveryTime) {
+		this.deliveryTime = deliveryTime;
+	}
+
+	public static class DeliveryTime {
+    	private String deliveryStartDay;
+        private String deliveryEndDay;
+        private String deliveryStartTime;
+        private String deliveryEndTime;
+        
+        public String getDeliveryStartDay() {
+    		return deliveryStartDay;
+    	}
+
+    	public void setDeliveryStartDay(String deliveryStartDay) {
+    		this.deliveryStartDay = deliveryStartDay;
+    	}
+
+    	public String getDeliveryEndDay() {
+    		return deliveryEndDay;
+    	}
+
+    	public void setDeliveryEndDay(String deliveryEndDay) {
+    		this.deliveryEndDay = deliveryEndDay;
+    	}
+
+    	public String getDeliveryStartTime() {
+    		return deliveryStartTime;
+    	}
+
+    	public void setDeliveryStartTime(String deliveryStartTime) {
+    		this.deliveryStartTime = deliveryStartTime;
+    	}
+
+    	public String getDeliveryEndTime() {
+    		return deliveryEndTime;
+    	}
+
+    	public void setDeliveryEndTime(String deliveryEndTime) {
+    		this.deliveryEndTime = deliveryEndTime;
+    	}
+
+
+    }
+    
+    
+
+    public String getDefaultId() {
+		return defaultId;
+	}
+
+	
+
+	public void setDefaultId(String defaultId) {
+		this.defaultId = defaultId;
+	}
+
+	
+
+	public String getId() {
 		return id;
 	}
 

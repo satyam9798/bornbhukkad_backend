@@ -4,13 +4,13 @@ import java.util.List;
 
 public class KiranaItemRequestDto {
 	
-	private KiranaProductDto kiranaProductDto;
+	private List<KiranaProductDto> kiranaProductDto;
     private List<KiranaCustomGroupDto> kiranaCustomGroup;
     private List<KiranaItemDto> kiranaItem;
-	public KiranaProductDto getKiranaProductDto() {
+	public List<KiranaProductDto> getKiranaProductDto() {
 		return kiranaProductDto;
 	}
-	public void setKiranaProductDto(KiranaProductDto kiranaProductDto) {
+	public void setKiranaProductDto(List<KiranaProductDto> kiranaProductDto) {
 		this.kiranaProductDto = kiranaProductDto;
 	}
 	public List<KiranaCustomGroupDto> getKiranaCustomGroup() {
@@ -25,7 +25,7 @@ public class KiranaItemRequestDto {
 	public void setKiranaItem(List<KiranaItemDto> kiranaItem) {
 		this.kiranaItem = kiranaItem;
 	}
-	public KiranaItemRequestDto(KiranaProductDto kiranaProductDto, List<KiranaCustomGroupDto> kiranaCustomGroup,
+	public KiranaItemRequestDto(List<KiranaProductDto> kiranaProductDto, List<KiranaCustomGroupDto> kiranaCustomGroup,
 			List<KiranaItemDto> kiranaItem) {
 		super();
 		this.kiranaProductDto = kiranaProductDto;

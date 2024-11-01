@@ -18,9 +18,9 @@ public interface RestaurantService {
 	public void addRestaurant(RestaurantDto merchant);
 	public void addRestaurantLocation(RestaurantLocationDto location);
 	public void addRestaurantCategories(RestaurantCategoriesDto categories);
-	public void addRestaurantProduct(RestaurantProductDto product);
-	public void addRestaurantCustomGroup(RestaurantCustomGroupDto customGroup);
-	public void addRestaurantItem(RestaurantItemDto item);
+	public RestaurantProductDto addRestaurantProduct(RestaurantProductDto product);
+	public RestaurantCustomGroupDto addRestaurantCustomGroup(RestaurantCustomGroupDto customGroup);
+	public RestaurantItemDto addRestaurantItem(RestaurantItemDto item);
 	public void addRestaurantFulfillment(RestaurantFulfillmentDto filfillment);
 	public List<RestaurantDto> getAll();
 	public List<RestaurantDefaultCategoriesDto> getRestDefaultCategories();
@@ -29,5 +29,8 @@ public interface RestaurantService {
 	public List<RestaurantLocationDto> getLocationByVendorId(String vendorId);
 	public RestaurantDto getVendorById(String vendorId);
 	RestaurantLocationDto updateRadius(String id, String radius);
+	void updateProductCustomGroupTags(String productId, List<String> customGroupIds);
+	List<RestaurantFulfillmentDto> getFulfillmentByVendorId(String id);
+	public void sendRestaurantNotification(String orderId, String merchantId, String orderDetails);
 
 }

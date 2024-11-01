@@ -9,7 +9,7 @@ import org.springframework.data.mongodb.core.mapping.Field;
 
 import com.bornbhukkad.merchant.dto.RestaurantItemDto.Available;
 import com.bornbhukkad.merchant.dto.RestaurantItemDto.Descriptor;
-import com.bornbhukkad.merchant.dto.RestaurantItemDto.ListItem;
+import com.bornbhukkad.merchant.dto.RestaurantItemDto.TagValue;
 import com.bornbhukkad.merchant.dto.RestaurantItemDto.Maximum;
 import com.bornbhukkad.merchant.dto.RestaurantItemDto.Measure;
 import com.bornbhukkad.merchant.dto.RestaurantItemDto.Price;
@@ -267,18 +267,18 @@ public class KiranaItemDto {
 		public void setCode(String code) {
 			this.code = code;
 		}
-		public List<ListItem> getList() {
+		public List<TagValue> getList() {
 			return list;
 		}
-		public void setList(List<ListItem> list) {
+		public void setList(List<TagValue> list) {
 			this.list = list;
 		}
-		private List<ListItem> list;
+		private List<TagValue> list;
 
         // Getters and setters
     }
 
-    public static class ListItem {
+    public static class TagValue {
         private String code;
         public String getCode() {
 			return code;

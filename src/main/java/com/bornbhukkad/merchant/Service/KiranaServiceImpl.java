@@ -17,6 +17,7 @@ import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import com.bornbhukkad.merchant.Repository.IKiranaCategoriesRepository;
@@ -38,6 +39,7 @@ import com.bornbhukkad.merchant.dto.KiranaLocationDto.LocationTime;
 import com.bornbhukkad.merchant.dto.KiranaProductDto;
 import com.bornbhukkad.merchant.dto.KiranaProductDto.ProductTime;
 import com.bornbhukkad.merchant.dto.KiranaUser;
+import com.bornbhukkad.merchant.dto.RestaurantFulfillmentDto;
 import com.bornbhukkad.merchant.dto.RestaurantUser;
 import com.mongodb.client.result.UpdateResult;
 import com.bornbhukkad.merchant.dto.KiranaDto.Time;
@@ -54,7 +56,7 @@ import static com.bornbhukkad.merchant.dto.KiranaFulfillmentDto.fulfillment_sequ
 
 @Service
 public class KiranaServiceImpl implements KiranaService {
-	
+
 	@Autowired
 	IKiranaRepository kiranaRepo;
 	@Autowired
@@ -73,14 +75,16 @@ public class KiranaServiceImpl implements KiranaService {
 	IKiranaDefaultCategoriesRepository kiranaDefaultCategoriesRepo;
 	@Autowired
 	IKiranaFulfillmentRepository kiranaFulfillmentRepo;
-	
+//	@Autowired
+//	private SimpMessagingTemplate messagingTemplate;
+
 	@Autowired
 	private SequenceGeneratorService sequenceGeneratorService;
-	
+
 	private static MongoTemplate mongoTemplate;
-	
+
 	private final String vendorTtl;
-	
+
 	private static final Logger logger = LoggerFactory.getLogger(KiranaServiceImpl.class);
 
 	@Autowired
@@ -125,10 +129,8 @@ public class KiranaServiceImpl implements KiranaService {
 		location.setTime(time);
 		location.setId("L" + sequenceGeneratorService.getSequenceNumber(kiranaLocation_sequence));
 
-		List<Item> locationAttributes = location.getTags().stream()
-				.flatMap(tag -> tag.getList().stream())
-				.filter(attribute -> "location".equals(attribute.getCode()))
-				.collect(Collectors.toList());
+		List<Item> locationAttributes = location.getTags().stream().flatMap(tag -> tag.getList().stream())
+				.filter(attribute -> "location".equals(attribute.getCode())).collect(Collectors.toList());
 
 		locationAttributes.forEach(attribute -> attribute.setValue(location.getId()));
 
@@ -191,181 +193,180 @@ public class KiranaServiceImpl implements KiranaService {
 	}
 
 	@Override
-	public boolean checkName(String name) {
-		List<KiranaDto> merchants = getAll();
-		return merchants.stream().anyMatch(merchant -> 
-			merchant.getDescriptor().getName().equalsIgnoreCase(name) && 
-			!merchant.getDescriptor().getName().equalsIgnoreCase("kirana")
-		);
+	public List<KiranaFulfillmentDto> getFulfillmentByVendorId(String id) {
+		// TODO Auto-generated method stub
+		logger.info("Get Fulfillment service by vendorId:" + id);
+		return kiranaFulfillmentRepo.findByKiranaId(id);
 	}
 
 	@Override
-    public List<KiranaCategoriesDto> getCategoriesByKiranaId(String kiranaId) {
-        logger.info("Get categories in service by kiranaId:" + kiranaId);
-        return kiranaCategoryRepo.findByParentCategoryId(kiranaId);
-    }
+	public boolean checkName(String name) {
+		List<KiranaDto> merchants = getAll();
+		return merchants.stream().anyMatch(merchant -> merchant.getDescriptor().getName().equalsIgnoreCase(name)
+				&& !merchant.getDescriptor().getName().equalsIgnoreCase("kirana"));
+	}
 
-    @Override
-    public List<KiranaLocationDto> getLocationByKiranaId(String kiranaId) {
-        logger.info("Get Location in service by kiranaId:" + kiranaId);
-        return kiranaLocationRepo.findByKiranaId(kiranaId);
-    }
+	@Override
+	public List<KiranaCategoriesDto> getCategoriesByKiranaId(String kiranaId) {
+		logger.info("Get categories in service by kiranaId:" + kiranaId);
+		return kiranaCategoryRepo.findByParentCategoryId(kiranaId);
+	}
 
-    @Override
-    public KiranaDto getKiranaById(String kiranaId) {
-        logger.info("Get Location in service by kiranaId:" + kiranaId);
-        Query query = new Query(Criteria.where("id").is(kiranaId));
-        return mongoTemplate.findOne(query, KiranaDto.class);
-    }
+	@Override
+	public List<KiranaLocationDto> getLocationByKiranaId(String kiranaId) {
+		logger.info("Get Location in service by kiranaId:" + kiranaId);
+		return kiranaLocationRepo.findByKiranaId(kiranaId);
+	}
 
-    @Override
-    public List<Object> getProductsByKiranaId(String kiranaId) {
-        logger.info("Search product in service by kiranaId:" + kiranaId);
-        System.out.println("enter:" + Instant.now());
+	@Override
+	public KiranaDto getKiranaById(String kiranaId) {
+		logger.info("Get Location in service by kiranaId:" + kiranaId);
+		Query query = new Query(Criteria.where("id").is(kiranaId));
+		return mongoTemplate.findOne(query, KiranaDto.class);
+	}
 
-        String query4 = "{$lookup: {from: 'bb_admin_panel_kirana_products', localField: 'id', foreignField: 'kiranaId', pipeline: [{$project: {'_id': 0,'id':1,'descriptor':1,'tags':1,'price':1,'category_id':1,'category_ids':1,'dimension':1,'packagingPrice':1,'timing':1,'weight':1}}], as: 'product'}},";
-        String query5 = "{$lookup: {from: 'bb_admin_panel_kirana_custom_groups', localField: 'product.id', foreignField: 'parentProductId', pipeline: [{$project: {'_id': 0,'id':1,'descriptor':1,'tags':1}}], as: 'customGroups'}},";
-        String query6 = "{$lookup: {from: 'bb_admin_panel_kirana_items', localField: 'product.id', foreignField: 'parentItemId', pipeline: [{$project: {'_id': 0,'id':1,'parentItemId':1,'parentCategoryId':1,'descriptor':1,'tags':1,'quantity':1,'price':1,'category_id':1,'related':1}}], as: 'items'}},";
-        
-        Aggregation aggregation = Aggregation.newAggregation(
-                new CustomProjectAggregationOperation(query4),
-                new CustomProjectAggregationOperation(query5),
-                new CustomProjectAggregationOperation(query6),
-                Aggregation.match(Criteria.where("id").is(kiranaId)),
-                Aggregation.project()
-                        .andExclude("_id")
-                        .andInclude("product", "customGroups", "items")
-        );
-        
-        AggregationResults<Object> results = mongoTemplate.aggregate(aggregation, "bb_admin_panel_kirana", Object.class);
-        List<Object> resultDtoString = results.getMappedResults();
-        System.out.println("exit:" + Instant.now());
-        return resultDtoString;
-    }
+	@Override
+	public List<Object> getProductsByKiranaId(String kiranaId) {
+		logger.info("Search product in service by kiranaId:" + kiranaId);
+		System.out.println("enter:" + Instant.now());
 
-    @Override
-    public KiranaProductDto updateProduct(String id, KiranaProductDto newProduct) {
-        Query query = new Query(Criteria.where("id").is(id));
-        KiranaProductDto product = mongoTemplate.findOne(query, KiranaProductDto.class);
-        if (product != null) {
-            logger.info("Updating product from updateProduct service with id :" + product.getId());
-            product.setDescriptor(newProduct.getDescriptor());
-            product.setPrice(newProduct.getPrice());
-            product.setCategory_id(newProduct.getCategory_id());
-            product.setCategory_ids(newProduct.getCategory_ids());
-            product.setRelated(newProduct.isRelated());
-            product.setRecommended(newProduct.isRecommended());
-            product.setWeight(newProduct.getWeight());
-            product.setTiming(newProduct.getTiming());
-            product.setPackagingPrice(newProduct.getPackagingPrice());
-            product.setDimension(newProduct.getDimension());
-            product.setOndc_org_returnable(newProduct.isOndc_org_returnable());
-            product.setOndc_org_cancellable(newProduct.isOndc_org_cancellable());
-            product.setOndc_org_seller_pickup_return(newProduct.isOndc_org_seller_pickup_return());
-            product.setOndc_org_available_on_cod(newProduct.isOndc_org_available_on_cod());
-            product.setTags(newProduct.getTags());
+		String query4 = "{$lookup: {from: 'bb_admin_panel_kirana_products', localField: 'id', foreignField: 'kiranaId', pipeline: [{$project: {'_id': 0,'id':1,'descriptor':1,'tags':1,'price':1,'category_id':1,'category_ids':1,'dimension':1,'packagingPrice':1,'timing':1,'weight':1}}], as: 'product'}},";
+		String query5 = "{$lookup: {from: 'bb_admin_panel_kirana_custom_groups', localField: 'product.id', foreignField: 'parentProductId', pipeline: [{$project: {'_id': 0,'id':1,'descriptor':1,'tags':1}}], as: 'customGroups'}},";
+		String query6 = "{$lookup: {from: 'bb_admin_panel_kirana_items', localField: 'product.id', foreignField: 'parentItemId', pipeline: [{$project: {'_id': 0,'id':1,'parentItemId':1,'parentCategoryId':1,'descriptor':1,'tags':1,'quantity':1,'price':1,'category_id':1,'related':1}}], as: 'items'}},";
 
-            return kiranaProductRepo.save(product);
-        }
-        return null; // or throw an exception indicating item not found
-    }
-	
-    @Override
-    public KiranaLocationDto updateMinOrder(String id, String minOrder) {
-        Query query = new Query(Criteria.where("id").is(id));
-        KiranaLocationDto location = mongoTemplate.findOne(query, KiranaLocationDto.class);
-        if (location != null) {
-            logger.info("Updating min order value from updateMinOrder service with id :" + location.getId());
-            List<Item> locationAttributes = location.getTags().stream()
-    				.flatMap(tag -> tag.getList().stream())
-    				.filter(attribute -> "min_value".equals(attribute.getCode()))
-    				.collect(Collectors.toList());
+		Aggregation aggregation = Aggregation.newAggregation(new CustomProjectAggregationOperation(query4),
+				new CustomProjectAggregationOperation(query5), new CustomProjectAggregationOperation(query6),
+				Aggregation.match(Criteria.where("id").is(kiranaId)),
+				Aggregation.project().andExclude("_id").andInclude("product", "customGroups", "items"));
 
-    		locationAttributes.forEach(attribute -> attribute.setValue(minOrder));
+		AggregationResults<Object> results = mongoTemplate.aggregate(aggregation, "bb_admin_panel_kirana",
+				Object.class);
+		List<Object> resultDtoString = results.getMappedResults();
+		System.out.println("exit:" + Instant.now());
+		return resultDtoString;
+	}
 
-    		kiranaLocationRepo.save(location);
-        }
-        return null; // or throw an exception indicating item not found
-    }
-    
-    @Override
-    public KiranaLocationDto updateRadius(String id, String radius) {
-        Query query = new Query(Criteria.where("id").is(id));
-        KiranaLocationDto location = mongoTemplate.findOne(query, KiranaLocationDto.class);
-        if (location != null) {
-            logger.info("Updating min order value from updateMinOrder service with id :" + location.getId());
-            List<Item> locationAttributes = location.getTags().stream()
-    				.flatMap(tag -> tag.getList().stream())
-    				.filter(attribute -> "val".equals(attribute.getCode()))
-    				.collect(Collectors.toList());
+	@Override
+	public KiranaProductDto updateProduct(String id, KiranaProductDto newProduct) {
+		Query query = new Query(Criteria.where("id").is(id));
+		KiranaProductDto product = mongoTemplate.findOne(query, KiranaProductDto.class);
+		if (product != null) {
+			logger.info("Updating product from updateProduct service with id :" + product.getId());
+			product.setDescriptor(newProduct.getDescriptor());
+			product.setPrice(newProduct.getPrice());
+			product.setCategory_id(newProduct.getCategory_id());
+			product.setCategory_ids(newProduct.getCategory_ids());
+			product.setRelated(newProduct.isRelated());
+			product.setRecommended(newProduct.isRecommended());
+			product.setWeight(newProduct.getWeight());
+			product.setTiming(newProduct.getTiming());
+			product.setPackagingPrice(newProduct.getPackagingPrice());
+			product.setDimension(newProduct.getDimension());
+			product.setOndc_org_returnable(newProduct.isOndc_org_returnable());
+			product.setOndc_org_cancellable(newProduct.isOndc_org_cancellable());
+			product.setOndc_org_seller_pickup_return(newProduct.isOndc_org_seller_pickup_return());
+			product.setOndc_org_available_on_cod(newProduct.isOndc_org_available_on_cod());
+			product.setTags(newProduct.getTags());
 
-    		locationAttributes.forEach(attribute -> attribute.setValue(radius));
-    		location.getCircle().getRadius().setValue(radius);
+			return kiranaProductRepo.save(product);
+		}
+		return null; // or throw an exception indicating item not found
+	}
 
-    		kiranaLocationRepo.save(location);
-        }
-        return null; // or throw an exception indicating item not found
-    }
+	@Override
+	public KiranaLocationDto updateMinOrder(String id, String minOrder) {
+		Query query = new Query(Criteria.where("id").is(id));
+		KiranaLocationDto location = mongoTemplate.findOne(query, KiranaLocationDto.class);
+		if (location != null) {
+			logger.info("Updating min order value from updateMinOrder service with id :" + location.getId());
+			List<Item> locationAttributes = location.getTags().stream().flatMap(tag -> tag.getList().stream())
+					.filter(attribute -> "min_value".equals(attribute.getCode())).collect(Collectors.toList());
 
-    @Override
-    public KiranaCustomGroupDto updateCustomGroup(String id, KiranaCustomGroupDto newCustomGroup) {
-        Query query = new Query(Criteria.where("id").is(id));
-        KiranaCustomGroupDto customGroup = mongoTemplate.findOne(query, KiranaCustomGroupDto.class);
-        if (customGroup != null) {
-            customGroup.setDescriptor(newCustomGroup.getDescriptor());
-            customGroup.setTags(newCustomGroup.getTags());
+			locationAttributes.forEach(attribute -> attribute.setValue(minOrder));
 
-            return kiranaCustomGroupRepo.save(customGroup);
-        }
-        return null; // or throw an exception indicating item not found
-    }
+			kiranaLocationRepo.save(location);
+		}
+		return null; // or throw an exception indicating item not found
+	}
 
-    @Override
-    public KiranaItemDto updateItem(String id, KiranaItemDto newItem) {
-        Query query = new Query(Criteria.where("id").is(id));
-        KiranaItemDto item = mongoTemplate.findOne(query, KiranaItemDto.class);
-        if (item != null) {
-            item.setParentCategoryId(newItem.getParentCategoryId());
-            item.setDescriptor(newItem.getDescriptor());
-            item.setQuantity(newItem.getQuantity());
-            item.setPrice(newItem.getPrice());
-            item.setCategoryId(newItem.getCategoryId());
-            item.setRelated(newItem.isRelated());
-            item.setTags(newItem.getTags());
-            return kiranaItemRepo.save(item);
-        }
-        return null; // or throw an exception indicating item not found
-    }
+	@Override
+	public KiranaLocationDto updateRadius(String id, String radius) {
+		Query query = new Query(Criteria.where("id").is(id));
+		KiranaLocationDto location = mongoTemplate.findOne(query, KiranaLocationDto.class);
+		if (location != null) {
+			logger.info("Updating min order value from updateMinOrder service with id :" + location.getId());
+			List<Item> locationAttributes = location.getTags().stream().flatMap(tag -> tag.getList().stream())
+					.filter(attribute -> "val".equals(attribute.getCode())).collect(Collectors.toList());
 
-    @Override
-    public void deleteProduct(String id) {
-        // Delete from product
-        Query query = new Query(Criteria.where("id").is(id));
-        mongoTemplate.remove(query, "bb_admin_panel_kirana_products");
+			locationAttributes.forEach(attribute -> attribute.setValue(radius));
+			location.getCircle().getRadius().setValue(radius);
 
-        // Delete from customGroup
-        Query query2 = new Query(Criteria.where("parentProductId").is(id));
-        mongoTemplate.remove(query2, "bb_admin_panel_kirana_custom_groups");
+			kiranaLocationRepo.save(location);
+		}
+		return null; // or throw an exception indicating item not found
+	}
 
-        // Delete from item
-        Query query3 = new Query(Criteria.where("parentItemId").is(id));
-        mongoTemplate.remove(query3, "bb_admin_panel_kirana_items");
-    }
+	@Override
+	public KiranaCustomGroupDto updateCustomGroup(String id, KiranaCustomGroupDto newCustomGroup) {
+		Query query = new Query(Criteria.where("id").is(id));
+		KiranaCustomGroupDto customGroup = mongoTemplate.findOne(query, KiranaCustomGroupDto.class);
+		if (customGroup != null) {
+			customGroup.setDescriptor(newCustomGroup.getDescriptor());
+			customGroup.setTags(newCustomGroup.getTags());
 
-    @Override
-    public void deleteCustomGroup(String id) {
-        Query query = new Query(Criteria.where("id").is(id));
-        mongoTemplate.remove(query, "bb_admin_panel_kirana_custom_groups");
-    }
+			return kiranaCustomGroupRepo.save(customGroup);
+		}
+		return null; // or throw an exception indicating item not found
+	}
 
-    @Override
-    public void deleteItem(String id) {
-        Query query = new Query(Criteria.where("id").is(id));
-        mongoTemplate.remove(query, "bb_admin_panel_kirana_items");
-    }
+	@Override
+	public KiranaItemDto updateItem(String id, KiranaItemDto newItem) {
+		Query query = new Query(Criteria.where("id").is(id));
+		KiranaItemDto item = mongoTemplate.findOne(query, KiranaItemDto.class);
+		if (item != null) {
+			item.setParentCategoryId(newItem.getParentCategoryId());
+			item.setDescriptor(newItem.getDescriptor());
+			item.setQuantity(newItem.getQuantity());
+			item.setPrice(newItem.getPrice());
+			item.setCategoryId(newItem.getCategoryId());
+			item.setRelated(newItem.isRelated());
+			item.setTags(newItem.getTags());
+			return kiranaItemRepo.save(item);
+		}
+		return null; // or throw an exception indicating item not found
+	}
 
-    
+	@Override
+	public void deleteProduct(String id) {
+		// Delete from product
+		Query query = new Query(Criteria.where("id").is(id));
+		mongoTemplate.remove(query, "bb_admin_panel_kirana_products");
 
-    
+		// Delete from customGroup
+		Query query2 = new Query(Criteria.where("parentProductId").is(id));
+		mongoTemplate.remove(query2, "bb_admin_panel_kirana_custom_groups");
+
+		// Delete from item
+		Query query3 = new Query(Criteria.where("parentItemId").is(id));
+		mongoTemplate.remove(query3, "bb_admin_panel_kirana_items");
+	}
+
+	@Override
+	public void deleteCustomGroup(String id) {
+		Query query = new Query(Criteria.where("id").is(id));
+		mongoTemplate.remove(query, "bb_admin_panel_kirana_custom_groups");
+	}
+
+	@Override
+	public void deleteItem(String id) {
+		Query query = new Query(Criteria.where("id").is(id));
+		mongoTemplate.remove(query, "bb_admin_panel_kirana_items");
+	}
+
+	// Send a WebSocket notification to a specific Kirana merchant
+	public void sendKiranaNotification(String orderId, String merchantId, String orderDetails) {
+//		String notificationMessage = "New Kirana order received! Order ID: " + orderId + " | Details: " + orderDetails;
+//		messagingTemplate.convertAndSend("/topic/kirana/" + merchantId, notificationMessage);
+	}
 
 }

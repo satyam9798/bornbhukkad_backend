@@ -63,4 +63,8 @@ public interface KiranaService {
 
 	KiranaLocationDto updateRadius(String id, String radius);
 
+	List<KiranaFulfillmentDto> getFulfillmentByVendorId(String id);
+
+	void sendKiranaNotification(String orderId, String merchantId, String orderDetails);
+
 }

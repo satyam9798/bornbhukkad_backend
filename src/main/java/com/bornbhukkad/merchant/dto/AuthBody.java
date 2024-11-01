@@ -1,7 +1,6 @@
-package com.bornbhukkad.merchant.controller;
+package com.bornbhukkad.merchant.dto;
 
 public class AuthBody {
-
     private String email;
     private String password;
     private String merchantType;
@@ -21,9 +20,7 @@ public class AuthBody {
     public String getPassword() {
         return password;
     }
-    public void setPassword(String password) {
+        public void setPassword(String password) {
         this.password = password;
     }
-
-
 }

@@ -256,18 +256,18 @@ public class RestaurantItemDto {
 		public void setCode(String code) {
 			this.code = code;
 		}
-		public List<ListItem> getList() {
+		public List<TagValue> getList() {
 			return list;
 		}
-		public void setList(List<ListItem> list) {
+		public void setList(List<TagValue> list) {
 			this.list = list;
 		}
-		private List<ListItem> list;
+		private List<TagValue> list;
 
         // Getters and setters
     }
 
-    public static class ListItem {
+    public static class TagValue {
         private String code;
         public String getCode() {
 			return code;

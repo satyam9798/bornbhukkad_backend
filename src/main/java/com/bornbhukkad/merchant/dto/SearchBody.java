@@ -1,4 +1,4 @@
-package com.bornbhukkad.merchant.controller;
+package com.bornbhukkad.merchant.dto;
 
 public class SearchBody {
 	public String id;
