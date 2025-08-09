@@ -24,6 +24,7 @@ import org.springframework.security.web.util.ThrowableCauseExtractor;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -31,6 +32,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.bornbhukkad.merchant.Service.KiranaServiceImpl;
 import com.bornbhukkad.merchant.Service.RestaurantServiceImpl;
@@ -44,6 +46,7 @@ import com.bornbhukkad.merchant.dto.KiranaItemRequestDto;
 import com.bornbhukkad.merchant.dto.KiranaLocationDto;
 import com.bornbhukkad.merchant.dto.KiranaProductDto;
 import com.bornbhukkad.merchant.dto.RestauranItemRequestDto;
+import com.bornbhukkad.merchant.dto.RestaurantAudienceDto;
 import com.bornbhukkad.merchant.dto.RestaurantCategoriesDto;
 import com.bornbhukkad.merchant.dto.RestaurantCustomGroupDto;
 import com.bornbhukkad.merchant.dto.RestaurantDefaultCategoriesDto;
@@ -51,6 +54,9 @@ import com.bornbhukkad.merchant.dto.RestaurantDto;
 import com.bornbhukkad.merchant.dto.RestaurantFulfillmentDto;
 import com.bornbhukkad.merchant.dto.RestaurantItemDto;
 import com.bornbhukkad.merchant.dto.RestaurantLocationDto;
+import com.bornbhukkad.merchant.dto.RestaurantOfferDto;
+import com.bornbhukkad.merchant.dto.RestaurantOrderDto;
+import com.bornbhukkad.merchant.dto.RestaurantOrderStatus;
 import com.bornbhukkad.merchant.dto.RestaurantProductDto;
 import com.bornbhukkad.merchant.dto.SearchBody;
 
@@ -130,6 +136,69 @@ public class Controller {
 	}
 
 	@CrossOrigin(origins = "http://localhost:4200", allowedHeaders = { "Authorization", "Content-Type" })
+	@PostMapping(path = "/restaurantOffer")
+	public ResponseEntity<Object> addRestaurantOffer(@RequestBody List<RestaurantOfferDto> offers) {
+		try {
+			List<RestaurantOfferDto> restaurantOffers= restaurantService.addRestaurantOffers(offers);
+			return ResponseEntity.status(HttpStatus.CREATED).body(restaurantOffers);
+		} catch (ResponseStatusException ex) {
+	        return ResponseEntity.status(ex.getRawStatusCode()).body(ex.getReason());
+	    } catch (Exception e) {
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error occurred: " + e.getMessage());
+	    }
+	}
+	
+	@CrossOrigin(origins = "http://localhost:4200", allowedHeaders = { "Authorization", "Content-Type" })
+	@GetMapping("/restaurantOffer")
+	public List<RestaurantOfferDto> getOfferByVendorId(@RequestParam("vendorId") String vendorId) {
+		return restaurantService.getOffersByVendorId(vendorId);
+	}
+	
+	@CrossOrigin(origins = "http://localhost:4200", allowedHeaders = { "Authorization", "Content-Type" })
+	@GetMapping("/offer")
+	public Optional<RestaurantOfferDto> getOfferByOfferId(@RequestParam("id") String id) {
+		return restaurantService.getOfferById(id);
+	}
+	
+	@CrossOrigin(origins = "http://localhost:4200", allowedHeaders = { "Authorization", "Content-Type" })
+	@PatchMapping("/offer")
+	public RestaurantOfferDto updateOfferByOfferId(@RequestParam("offerId") String id, @RequestBody RestaurantOfferDto offer) {
+		return restaurantService.updateOffer(id, offer);
+	}
+	
+	@CrossOrigin(origins = "http://localhost:4200", allowedHeaders = { "Authorization", "Content-Type" })
+	@DeleteMapping("/offer")
+	public void deleteOfferByOfferId(@RequestParam("offerId") String id) {
+		restaurantService.deleteOffer(id);
+	}
+	
+	@CrossOrigin(origins = "http://localhost:4200", allowedHeaders = { "Authorization", "Content-Type" })
+	@PostMapping(path = "/restaurantAudience")
+	public ResponseEntity<Object> addRestaurantAudienceSegment(@RequestBody RestaurantAudienceDto audience) {
+		try {
+			RestaurantAudienceDto restaurantAudience= restaurantService.addRestaurantAudienceSegment(audience);
+			return ResponseEntity.status(HttpStatus.CREATED).body(restaurantAudience);
+		} catch (ResponseStatusException ex) {
+	        return ResponseEntity.status(ex.getRawStatusCode()).body(ex.getReason());
+	    } catch (Exception e) {
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error occurred: " + e.getMessage());
+	    }
+	}
+	
+	@CrossOrigin(origins = "http://localhost:4200", allowedHeaders = { "Authorization", "Content-Type" })
+	@GetMapping("/get-audience")
+	public Optional<RestaurantAudienceDto> getRestAudienceSegmentById(@RequestParam("id") String id) {
+		return restaurantService.getAudienceSegmentById(id);
+	}
+	
+	@CrossOrigin(origins = "http://localhost:4200", allowedHeaders = { "Authorization", "Content-Type" })
+	@GetMapping("/get-restaurant-audience")
+	public List<RestaurantAudienceDto> getAudienceSegmentByVendorId(@RequestParam("vendorId") String vendorId) {
+//    	logger.info("search product in controller  by vendorId:"+vendorId);
+		return restaurantService.getAudienceSegmentByVendorId(vendorId);
+	}
+
+	@CrossOrigin(origins = "http://localhost:4200", allowedHeaders = { "Authorization", "Content-Type" })
 	@PostMapping(path = "/restaurantRadius")
 	public ResponseEntity<Object> updateRestRadius(@RequestParam("locationId") String locationId,
 			@RequestBody SearchBody data) {
@@ -170,38 +239,6 @@ public class Controller {
 		logger.info("search product in controller  by vendorId:" + vendorId);
 		return restaurantService.getCategoriesByVendorId(vendorId);
 	}
-
-//    @CrossOrigin(origins = "http://localhost:4200", allowedHeaders = {"Authorization", "Content-Type"})
-//    @PostMapping(path="/restaurantProduct")
-//    public ResponseEntity<Object> addRestaurantProduct(@RequestBody RestauranItemRequestDto RestauranItemRequestDto) {
-//    	try {
-//    		// TODO: if condition for empty data
-//    		RestaurantProductDto restaurantProductDto= RestauranItemRequestDto.getRestaurantProductDto();
-//    		List<RestaurantCustomGroupDto> restaurantCustomGroupDto = RestauranItemRequestDto.getRestaurantCustomGroup();
-//    		List<RestaurantItemDto> restaurantItemDto = RestauranItemRequestDto.getRestaurantItemDto();
-//        	restaurantService.addRestaurantProduct(restaurantProductDto);
-//        	if(restaurantCustomGroupDto!= null) {
-//        		for (RestaurantCustomGroupDto dto : restaurantCustomGroupDto) {
-//        			dto.setParentProductId(restaurantProductDto.getId());
-//        			restaurantService.addRestaurantCustomGroup(dto);
-//        		}
-////        		restaurantService.addRestaurantCustomGroup(restaurantCustomGroupDto);
-//        	}
-//        	if(restaurantItemDto!= null) {
-//        		for (RestaurantItemDto dto : restaurantItemDto) {
-//        			dto.setParentItemId(restaurantProductDto.getId());
-//        			restaurantService.addRestaurantItem(dto);
-//        		}
-//        	}
-//    		
-//    		return ResponseEntity.status(HttpStatus.CREATED).body(RestauranItemRequestDto);
-//			
-//		} catch (Exception e) {
-//			// TODO: handle exception
-//			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error occured");
-//		}
-//    }
-//    
 
 	@CrossOrigin(origins = "http://localhost:4200", allowedHeaders = { "Authorization", "Content-Type" })
 	@PostMapping(path = "/restaurantProduct")
@@ -246,6 +283,13 @@ public class Controller {
 	public List<Object> getProductByVendorId(@RequestParam("vendorId") String vendorId) {
 //    	logger.info("search product in controller  by vendorId:"+vendorId);
 		return restaurantService.getProductsByVendorId(vendorId);
+	}
+	
+	@CrossOrigin(origins = "http://localhost:4200", allowedHeaders = { "Authorization", "Content-Type" })
+	@GetMapping("/raw-products")
+	public List<RestaurantProductDto> getRawProductByVendorId(@RequestParam("vendorId") String vendorId) {
+//    	logger.info("search product in controller  by vendorId:"+vendorId);
+		return restaurantService.getRawProductsByVendorId(vendorId);
 	}
 
 	@CrossOrigin(origins = "http://localhost:4200", allowedHeaders = { "Authorization", "Content-Type" })
@@ -337,6 +381,42 @@ public class Controller {
 		}
 	}
 
+	@CrossOrigin(origins = "http://localhost:4200", allowedHeaders = { "Authorization", "Content-Type" })
+	@PostMapping(path = "/restOrder")
+	public ResponseEntity<RestaurantOrderDto> createOrder(@RequestBody RestaurantOrderDto order) {
+		return ResponseEntity.ok(restaurantService.createOrder(order));
+	}
+
+	@PutMapping("/restOrder/{orderId}/status")
+	public ResponseEntity<Object> updateOrderStatus(@PathVariable String orderId,
+			@RequestParam RestaurantOrderStatus status) {
+//        restaurantService.updateOrderStatus(orderId, status)
+//            .map(ResponseEntity::ok)
+//            .orElse(ResponseEntity.notFound().build());
+		try {
+			restaurantService.updateOrderStatus(orderId, status);
+			return ResponseEntity.status(HttpStatus.CREATED).body("Success");
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error occurred");
+		}
+	}
+
+	@PutMapping("/restOrder/{orderId}/accept")
+	public ResponseEntity<String> acceptOrder(@PathVariable String orderId) {
+		return restaurantService.updateOrderStatus(orderId, RestaurantOrderStatus.CONFIRMED)
+				.map(order -> ResponseEntity.ok("Order status updated successfully"))
+				.orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).body("Order not found"));
+	}
+
+	@PutMapping("/restOrder/{orderId}/decline")
+	public ResponseEntity<Object> declineOrder(@PathVariable String orderId) {
+		try {
+			restaurantService.updateOrderStatus(orderId, RestaurantOrderStatus.REJECTED);
+			return ResponseEntity.status(HttpStatus.CREATED).body("Success");
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error occurred");
+		}
+	}
 	// kirana apis
 
 	@CrossOrigin(origins = "http://localhost:4200", allowedHeaders = { "Authorization", "Content-Type" })
@@ -380,8 +460,6 @@ public class Controller {
 					kiranaService.addKiranaProduct(dto);
 				}
 			}
-
-			
 
 			// Return the created request DTO
 			return ResponseEntity.status(HttpStatus.CREATED).body(kiranaItemRequestDto);

@@ -56,6 +56,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 				.antMatchers("/merchants/restItem").permitAll().antMatchers("/products").permitAll()
 				.antMatchers("/merchants/products").permitAll().antMatchers("/merchants/categories").permitAll()
 				.antMatchers("/merchants/restFulfillments").permitAll()
+				.antMatchers("/merchants/offer").permitAll().antMatchers("/merchants/restaurantOffer").permitAll()
 				// kirana
 				.antMatchers("/merchants/kirana").permitAll().antMatchers("/merchants/kiranaLocation").permitAll()
 				.antMatchers("/merchants/kiranaFulfillment").permitAll().antMatchers("/merchants/kiranaProductTest")

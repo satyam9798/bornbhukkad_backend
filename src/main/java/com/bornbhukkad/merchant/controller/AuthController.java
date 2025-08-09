@@ -31,6 +31,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 
 import com.bornbhukkad.merchant.Configuration.JwtTokenProvider;
+import com.bornbhukkad.merchant.Configuration.UserAlreadyExistsException;
 import com.bornbhukkad.merchant.Repository.IKiranaUserRepository;
 
 import com.bornbhukkad.merchant.Repository.IUserRepository;
@@ -90,8 +91,9 @@ public class AuthController {
     public List<Object> getByItemAndCity(@RequestBody SearchBody data) {
 //    	return bbService.getFulfillmentChannels(data.getItem(),data.getCity());
 //    	return bbService.getByCity(data.getCity());
-    	return bbService.onSelectQuery();
-
+//    	return bbService.onSelectQuery();
+    	return bbdataService.getByItemAndCity(data.getItem(),data.getCity());
+//
     }
     
     @CrossOrigin(origins = "http://localhost:4200", allowedHeaders = {"Authorization", "Content-Type"})
@@ -150,29 +152,41 @@ public class AuthController {
     @CrossOrigin(origins = "http://localhost:4200", allowedHeaders = {"Authorization", "Content-Type"})
     @PostMapping("/registerRestaurant")
     public ResponseEntity<Map<String, String>> registerRestaurant(@RequestBody RestaurantUser user) {
+    	try {
     	return registerUser(
-    		    () -> userService.findKiranaUserByEmail(user.getEmail()),
+    		    () -> userService.findRestaurantUserByEmail(user.getEmail()),
     		    () -> userService.saveRestaurantUser(user),
     		    user.getEmail()
     		);
+    	}catch (UserAlreadyExistsException e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("error", "User with this email already exists.");
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+        } catch (Exception e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("error", "Internal Server Error: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        }
 
     }
 
     private ResponseEntity<Map<String, String>> registerUser(Supplier<?> findUser, Runnable saveUser, String email) {
-        try {
+//        try {
             if (findUser.get() != null) {
-                Map<String, String> model = new HashMap<>();
-                model.put("error", "User: " + email + " already exists, Please Login");
-                return ResponseEntity.status(HttpStatus.OK).body(model);
+//                Map<String, String> model = new HashMap<>();
+//                model.put("error", "User: " + email + " already exists, Please Login");
+//                return ResponseEntity.status(HttpStatus.OK).body(model);
+                throw new UserAlreadyExistsException("User already exists with email: " + email);
+
             }
             saveUser.run();
             Map<String, String> model = new HashMap<>();
             model.put("message", "User registered successfully");
             return ResponseEntity.status(HttpStatus.OK).body(model);
-        } catch (Exception e) {
-            Map<String, String> model = new HashMap<>();
-            model.put("error", "An error occurred while processing your request.");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(model);
-        }
+//        } catch (Exception e) {
+//            Map<String, String> model = new HashMap<>();
+//            model.put("error", "An error occurred while processing your request.");
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(model);
+//        }
     }
 }

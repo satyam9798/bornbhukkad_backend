@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.data.mongodb.core.query.Query;
 
+import com.bornbhukkad.merchant.dto.RestaurantAudienceDto;
 import com.bornbhukkad.merchant.dto.RestaurantCategoriesDto;
 import com.bornbhukkad.merchant.dto.RestaurantCustomGroupDto;
 import com.bornbhukkad.merchant.dto.RestaurantDefaultCategoriesDto;
@@ -12,6 +13,7 @@ import com.bornbhukkad.merchant.dto.RestaurantDto;
 import com.bornbhukkad.merchant.dto.RestaurantFulfillmentDto;
 import com.bornbhukkad.merchant.dto.RestaurantItemDto;
 import com.bornbhukkad.merchant.dto.RestaurantLocationDto;
+import com.bornbhukkad.merchant.dto.RestaurantOfferDto;
 import com.bornbhukkad.merchant.dto.RestaurantProductDto;
 
 public interface RestaurantService {
@@ -32,5 +34,12 @@ public interface RestaurantService {
 	void updateProductCustomGroupTags(String productId, List<String> customGroupIds);
 	List<RestaurantFulfillmentDto> getFulfillmentByVendorId(String id);
 	public void sendRestaurantNotification(String orderId, String merchantId, String orderDetails);
+	List<RestaurantOfferDto> addRestaurantOffers(List<RestaurantOfferDto> offers);
+	List<RestaurantOfferDto> getOffersByVendorId(String vendorId);
+	Optional<RestaurantOfferDto> getOfferById(String id);
+	RestaurantAudienceDto addRestaurantAudienceSegment(RestaurantAudienceDto audience);
+	Optional<RestaurantAudienceDto> getAudienceSegmentById(String id);
+	List<RestaurantAudienceDto> getAudienceSegmentByVendorId(String vendorId);
+	List<RestaurantProductDto> getRawProductsByVendorId(String vendorId);
 
 }

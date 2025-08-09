@@ -39,6 +39,8 @@ public class RestaurantProductDto {
     private String ondc_org_return_window;
     @Field("@ondc/org/seller_pickup_return")
     private boolean ondc_org_seller_pickup_return;
+    @Field("@ondc_org_contact_details_consumer_care")
+    private String ondc_org_contact_details_consumer_care;
     private DimensionDTO dimension;
     private int packagingPrice;
     private String timing;
@@ -335,8 +337,6 @@ public class RestaurantProductDto {
 	@Field("@ondc/org/available_on_cod")
     private boolean ondc_org_available_on_cod;
 	
-	@Field("@ondc/org/contact_details_consumer_care\"")
-    private String ondc_org_contact_details_consumer_care;
     private List<Tag> tags;
     private String vendorId;
 

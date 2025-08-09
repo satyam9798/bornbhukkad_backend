@@ -19,8 +19,17 @@ public class RestaurantLocationDto {
 	@Field("id")
     private String id;
     private LocationTime time;
-//    private String gps;
-    private Gps gps;
+    private String stdCode;
+    public String getStd_code() {
+		return stdCode;
+	}
+
+	public void setStdCode(String stdCode) {
+		this.stdCode = stdCode;
+	}
+
+
+	private Gps gps;
     public Gps getGps() {
 		return gps;
 	}

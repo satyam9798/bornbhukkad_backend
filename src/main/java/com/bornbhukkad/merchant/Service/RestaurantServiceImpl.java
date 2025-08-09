@@ -2,10 +2,14 @@ package com.bornbhukkad.merchant.Service;
 
 //import java.security.KeyStore.Entry.Attribute;
 import java.time.Instant;
+import java.time.LocalDateTime;
+
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
+import org.springframework.http.HttpStatus;
 //import org.springframework.data.mongodb.core.query.UpdateDefinition;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.data.mongodb.core.query.Criteria;
 //import org.springframework.data.mongodb.core.query.CriteriaDefinition;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -15,6 +19,7 @@ import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import java.util.ArrayList;
 //import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 //import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -23,35 +28,39 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
+import com.bornbhukkad.merchant.Repository.IRestaurantAudienceSegmentRepository;
 import com.bornbhukkad.merchant.Repository.IRestaurantCategoriesRepository;
 import com.bornbhukkad.merchant.Repository.IRestaurantCustomGroupRepository;
 import com.bornbhukkad.merchant.Repository.IRestaurantDefaultCategoriesRepository;
 import com.bornbhukkad.merchant.Repository.IRestaurantFulfillmentRepository;
 import com.bornbhukkad.merchant.Repository.IRestaurantItemRepository;
 import com.bornbhukkad.merchant.Repository.IRestaurantLocationRepository;
+import com.bornbhukkad.merchant.Repository.IRestaurantOfferRepository;
+import com.bornbhukkad.merchant.Repository.IRestaurantOrderRepository;
 import com.bornbhukkad.merchant.Repository.IRestaurantProductRepository;
 import com.bornbhukkad.merchant.Repository.IRestaurantRepository;
 import com.bornbhukkad.merchant.Repository.IUserRepository;
-//import com.bornbhukkad.merchant.controller.AuthController;
-//import com.bornbhukkad.merchant.dto.KiranaLocationDto;
-//import com.bornbhukkad.merchant.dto.KiranaProductDto;
+import com.bornbhukkad.merchant.dto.RestaurantAudienceDto;
 import com.bornbhukkad.merchant.dto.RestaurantCategoriesDto;
 import com.bornbhukkad.merchant.dto.RestaurantCustomGroupDto;
 import com.bornbhukkad.merchant.dto.RestaurantDefaultCategoriesDto;
 import com.bornbhukkad.merchant.dto.RestaurantDto;
+import com.bornbhukkad.merchant.dto.RestaurantDto.Time;
 import com.bornbhukkad.merchant.dto.RestaurantLocationDto;
 import com.bornbhukkad.merchant.dto.RestaurantLocationDto.Item;
 import com.bornbhukkad.merchant.dto.RestaurantLocationDto.LocationTime;
+import com.bornbhukkad.merchant.dto.RestaurantOfferDto;
+import com.bornbhukkad.merchant.dto.RestaurantOrderDto;
+import com.bornbhukkad.merchant.dto.RestaurantOrderStatus;
 import com.bornbhukkad.merchant.dto.RestaurantProductDto;
 import com.bornbhukkad.merchant.dto.RestaurantProductDto.ProductTime;
 import com.bornbhukkad.merchant.dto.RestaurantProductDto.Tag;
 import com.bornbhukkad.merchant.dto.RestaurantUser;
 import com.mongodb.client.result.UpdateResult;
-import com.bornbhukkad.merchant.dto.RestaurantDto.Time;
 import com.bornbhukkad.merchant.dto.RestaurantFulfillmentDto;
 import com.bornbhukkad.merchant.dto.RestaurantItemDto;
-//import com.bornbhukkad.merchant.dto.RestaurantItemDto.TagValue;
 
 import static com.bornbhukkad.merchant.dto.RestaurantDto.restaurant_sequence;
 import static com.bornbhukkad.merchant.dto.RestaurantLocationDto.restLocation_sequence;
@@ -60,6 +69,9 @@ import static com.bornbhukkad.merchant.dto.RestaurantCustomGroupDto.restCG_seque
 import static com.bornbhukkad.merchant.dto.RestaurantItemDto.restItem_sequence;
 import static com.bornbhukkad.merchant.dto.RestaurantCategoriesDto.restCategories_sequence;
 import static com.bornbhukkad.merchant.dto.RestaurantFulfillmentDto.fulfillment_sequence;
+import static com.bornbhukkad.merchant.dto.RestaurantOrderDto.restOrder_sequence;
+import static com.bornbhukkad.merchant.dto.RestaurantOfferDto.restOffer_sequence;
+import static com.bornbhukkad.merchant.dto.RestaurantAudienceDto.restaurant_audience_segments_sequence;
 
 @Service
 public class RestaurantServiceImpl implements RestaurantService {
@@ -69,6 +81,10 @@ public class RestaurantServiceImpl implements RestaurantService {
 	public RestaurantServiceImpl(MongoTemplate mongoTemplate, @Value("${app.service.vendorTTL}") String vendorTtl) {
 		this.vendorTtl = vendorTtl;
 		this.mongoTemplate = mongoTemplate;
+	}
+
+	enum OrderStatus {
+		NEW, CONFIRMED, COOKING, DELIVERY_PARTNER_ASSIGNED, PICKED_UP, DELIVERED, REJECTED
 	}
 
 	private static final Logger logger = LoggerFactory.getLogger(RestaurantServiceImpl.class);
@@ -90,19 +106,17 @@ public class RestaurantServiceImpl implements RestaurantService {
 	IRestaurantDefaultCategoriesRepository restDefCategoriesRepo;
 	@Autowired
 	IRestaurantFulfillmentRepository restaurantFulfillmentRepo;
+	@Autowired
+	IRestaurantOrderRepository restaurantOrderRepository;
+	@Autowired
+	IRestaurantOfferRepository restaurantOfferRepository;
+	@Autowired
+	IRestaurantAudienceSegmentRepository restaurantAudienceSegmentRepo;
 
 	@Autowired
 	private SequenceGeneratorService sequenceGeneratorService;
 
-//	@Autowired
-//	private SimpMessagingTemplate messagingTemplate;
-
 	private final String vendorTtl;
-
-//	@Autowired
-//	public RestaurantServiceImpl(@Value("${app.service.vendorTTL}") String vendorTtl) {
-//		this.vendorTtl = vendorTtl;
-//	}
 
 	@Override
 	public void addRestaurant(RestaurantDto merchant) {
@@ -192,6 +206,88 @@ public class RestaurantServiceImpl implements RestaurantService {
 	}
 
 	@Override
+	public List<RestaurantOfferDto> addRestaurantOffers(List<RestaurantOfferDto> offers) {
+		for (RestaurantOfferDto offer : offers) {
+			final String vendorId = offer.getVendorId();
+
+			offer.setId("O" + sequenceGeneratorService.getSequenceNumber(restOffer_sequence));
+			String offerNameUpper = offer.getName().toUpperCase();
+
+			boolean exists = restaurantOfferRepository.existsByName(offerNameUpper);
+			if (exists) {
+				throw new ResponseStatusException(HttpStatus.CONFLICT,
+						String.format("Offer '%s' already exists for merchant '%s'", offerNameUpper, vendorId));
+			}
+
+			// Set name to uppercase before mapping/saving
+			offer.setName(offerNameUpper);
+			offer.setActive(true);
+		}
+
+		restaurantOfferRepository.saveAll(offers);
+
+		return offers;
+	}
+
+	@Override
+	public List<RestaurantOfferDto> getOffersByVendorId(String vendorId) {
+		logger.info("Get Location in service by vendorId:" + vendorId);
+		return restaurantOfferRepository.findByVendorId(vendorId);
+	}
+
+	@Override
+	public Optional<RestaurantOfferDto> getOfferById(String id) {
+		logger.info("Get Location in service by vendorId:" + id);
+
+		return restaurantOfferRepository.findById(id);
+	}
+	
+	public RestaurantOfferDto updateOffer(String id, RestaurantOfferDto data) {
+		Query query = new Query();
+		query.addCriteria(Criteria.where("id").is(id));
+		RestaurantOfferDto offer = mongoTemplate.findOne(query, RestaurantOfferDto.class);
+		if (offer != null) {
+			offer.setDescriptor(data.getDescriptor());
+			offer.setTags(data.getTags());
+			offer.setName(data.getName());
+			offer.setItem_ids(data.getItem_ids());
+			offer.setLocation_ids(data.getLocation_ids());
+			offer.setActive(data.getActive());
+			
+			return restaurantOfferRepository.save(offer);
+		}
+		return null; // or throw an exception indicating item not found
+	}
+	
+	public void deleteOffer(String id) {
+		Query query = new Query();
+		query.addCriteria(Criteria.where("id").is(id));
+		mongoTemplate.remove(query, "bb_admin_panel_vendors_offers");
+	}
+
+	@Override
+	public RestaurantAudienceDto addRestaurantAudienceSegment(RestaurantAudienceDto audience) {
+
+		audience.setId("A" + sequenceGeneratorService.getSequenceNumber(restaurant_audience_segments_sequence));
+		 restaurantAudienceSegmentRepo.save(audience);
+		 return audience;
+
+	}
+	
+	@Override
+	public List<RestaurantAudienceDto> getAudienceSegmentByVendorId(String vendorId) {
+		logger.info("getAudienceSegmentByVendorId in service by vendorId:" + vendorId);
+		return restaurantAudienceSegmentRepo.findByVendorId(vendorId);
+	}
+
+	@Override
+	public Optional<RestaurantAudienceDto> getAudienceSegmentById(String id) {
+		logger.info("getAudienceSegmentById in service by vendorId:" + id);
+
+		return restaurantAudienceSegmentRepo.findById(id);
+	}
+
+	@Override
 	public void updateProductCustomGroupTags(String productId, List<String> customGroupIds) {
 		Query query = new Query(Criteria.where("id").is(productId));
 		RestaurantProductDto product = mongoTemplate.findOne(query, RestaurantProductDto.class);
@@ -217,53 +313,6 @@ public class RestaurantServiceImpl implements RestaurantService {
 
 		restaurantProductRepo.save(product);
 	}
-
-//    private void updateItemParentTag(RestaurantItemDto item) {
-//        List<RestaurantItemDto.Tag> tags = item.getTags();
-//        
-//        RestaurantItemDto.Tag parentTag = tags.stream()
-//                .filter(tag -> "parent".equals(tag.getCode()))
-//                .findFirst()
-//                .orElseThrow(() -> new RuntimeException("Parent tag not found in item"));
-//        
-//        RestaurantItemDto.Tag childTag = tags.stream()
-//                .filter(tag -> "child".equals(tag.getCode()))
-//                .findFirst()
-//                .orElseThrow(() -> new RuntimeException("Child tag not found in item"));
-//        
-//        String parentIdValue = parentTag.getList().stream()
-//                .filter(listItem -> "id".equals(listItem.getCode()))
-//                .map(tagItem -> tagItem.getValue())
-//                .findFirst()
-//                .orElseThrow(() -> new RuntimeException("'id' not found in parent tag list"));
-//        
-//        String childIdValue = childTag.getList().stream()
-//                .filter(listItem -> "id".equals(listItem.getCode()))
-//                .map(tagItem -> tagItem.getValue())
-//                .findFirst()
-//                .orElseThrow(() -> new RuntimeException("'id' not found in parent tag list"));
-//        
-//        System.out.println("The value of 'id' under 'parent' tag is: " + parentIdValue);
-//        System.out.println("The value of 'id' under 'child' tag is: " + childIdValue);
-//
-//        Query parentCustomGroupQuery = new Query(Criteria.where("defaultId").is(parentIdValue));
-//        RestaurantCustomGroupDto parentCustomGroup = mongoTemplate.findOne(parentCustomGroupQuery, RestaurantCustomGroupDto.class);
-//        
-//        Query childCustomGroupQuery = new Query(Criteria.where("defaultId").is(childIdValue));
-//        RestaurantCustomGroupDto childCustomGroup = mongoTemplate.findOne(childCustomGroupQuery, RestaurantCustomGroupDto.class);
-//
-//
-//
-//        parentTag.getList().stream()
-//                .filter(tagValue -> "id".equals(tagValue.getCode()))
-//                .findFirst()
-//                .ifPresent(tagValue -> tagValue.setValue(parentCustomGroup.getId()));
-//        
-//        childTag.getList().stream()
-//        .filter(tagValue -> "id".equals(tagValue.getCode()))
-//        .findFirst()
-//        .ifPresent(tagValue -> tagValue.setValue(childCustomGroup.getId()));
-//    }
 
 	private void updateItemParentTag(RestaurantItemDto item) {
 		List<RestaurantItemDto.Tag> tags = item.getTags();
@@ -356,35 +405,39 @@ public class RestaurantServiceImpl implements RestaurantService {
 
 	@Override
 	public List<Object> getProductsByVendorId(String vendorId) {
-		// TODO Auto-generated method stub
-//		logger.info("search product in service by vendorId:"+vendorId);
-//		return restaurantProductRepo.findByVendorId(vendorId);
-		// return after lookup
-		System.out.println("enter:" + Instant.now());
 
-		String query4 = "{$lookup: {from: 'bb_admin_panel_vendors_products',localField: 'id',foreignField: 'vendorId',pipeline: [{$project: {'_id': 0,'id':1,'descriptor':1,'tags':1,'price':1,'category_id':1,'category_ids':1,'dimension':1,'packagingPrice':1,'timing':1,'weight':1  } }], as: 'product'}},";
+		// return after lookup
+		System.out.println("Search started for Product at :" + Instant.now());
+
+		String query4 = "{$lookup: {from: 'bb_admin_panel_vendors_products',localField: 'id',foreignField: 'vendorId',pipeline: [{$project: {'_id': 0,'id':1,'descriptor':1,'tags':1,'price':1,'category_id':1,'category_ids':1, 'parent_category_id':1, 'dimension':1,'packagingPrice':1,'timing':1,'weight':1,'@ondc/org/returnable':1, '@ondc/org/cancellable':1,'@ondc/org/return_window':1,'@ondc/org/seller_pickup_return':1,'@ondc/org/time_to_ship':1,'@ondc/org/available_on_cod':1,'@ondc/org/contact_details_consumer_care':1  } }], as: 'product'}},";
 		String query5 = "{$lookup: {from: 'bb_admin_panel_vendors_custom_groups',localField: 'product.id',foreignField: 'parentProductId',pipeline: [{$project: {'_id': 0,'id':1,'descriptor':1,'tags':1} }], as: 'customGroups'}},";
 		String query6 = "{$lookup: {from: 'bb_admin_panel_vendors_items',localField: 'product.id',foreignField: 'parentItemId',pipeline: [{$project: {'_id': 0,'id':1,'parentItemId':1, 'parentCategoryId':1, 'descriptor':1,'tags':1,'quantity': 1,'price':1,'catgory_id':1,'related':1 } }], as: 'items'}},";
 
 		Aggregation aggregation = Aggregation.newAggregation(
 
 				new CustomProjectAggregationOperation(query4), new CustomProjectAggregationOperation(query5),
-				new CustomProjectAggregationOperation(query6),
-//    	            Aggregation.unwind("vendorTags"),
-				Aggregation.match(Criteria.where("id").is(vendorId)),
+				new CustomProjectAggregationOperation(query6), Aggregation.match(Criteria.where("id").is(vendorId)),
 				Aggregation.project().andExclude("_id").andInclude("product", "customGroups", "items"));
 		AggregationResults<Object> results = mongoTemplate.aggregate(aggregation, "bb_admin_panel_vendors",
 				Object.class);
 		List<Object> resultDtoString = results.getMappedResults();
-		System.out.println("exit:" + Instant.now());
+		System.out.println("search ended at :" + Instant.now());
 		return resultDtoString;
+	}
+	
+	@Override
+	public List<RestaurantProductDto> getRawProductsByVendorId(String vendorId) {
+
+		// return after lookup
+		return restaurantProductRepo.findByVendorId(vendorId);
+
 	}
 
 	@Override
 	public List<RestaurantCategoriesDto> getCategoriesByVendorId(String vendorId) {
 		// TODO Auto-generated method stub
 		logger.info("Get categories in service by vendorId:" + vendorId);
-		return restaurantCatgoryRepo.findByParentCategoryId(vendorId);
+		return restaurantCatgoryRepo.findByVendorId(vendorId);
 	}
 
 	@Override
@@ -403,9 +456,7 @@ public class RestaurantServiceImpl implements RestaurantService {
 
 	@Override
 	public RestaurantDto getVendorById(String vendorId) {
-		// TODO Auto-generated method stub
 		logger.info("Get Location in service by vendorId:" + vendorId);
-//		return restaurantRepo.findById(vendorId);
 		Query query = new Query();
 		query.addCriteria(Criteria.where("id").is(vendorId));
 		RestaurantDto vendor = mongoTemplate.findOne(query, RestaurantDto.class);
@@ -538,6 +589,36 @@ public class RestaurantServiceImpl implements RestaurantService {
 //		String notificationMessage = "New Restaurant order received! Order ID: " + orderId + " | Details: "
 //				+ orderDetails;
 //		messagingTemplate.convertAndSend("/topic/restaurant/" + merchantId, notificationMessage);
+	}
+
+	public RestaurantOrderDto createOrder(RestaurantOrderDto order) {
+		order.setId("O" + sequenceGeneratorService.getSequenceNumber(restOrder_sequence));
+		order.setStatus(RestaurantOrderStatus.NEW);
+		order.setTimestamp(LocalDateTime.now());
+		order.setAcceptanceDeadline(LocalDateTime.now().plusSeconds(30));
+		return restaurantOrderRepository.save(order);
+	}
+
+	public Optional<RestaurantOrderDto> updateOrderStatus(String orderId, RestaurantOrderStatus status) {
+		Query query = new Query(Criteria.where("id").is(orderId));
+		RestaurantOrderDto order = mongoTemplate.findOne(query, RestaurantOrderDto.class);
+		if (order != null) {
+
+			order.setStatus(status);
+			return Optional.of(restaurantOrderRepository.save(order));
+		}
+		return Optional.empty();
+	}
+
+	// Automatically reject orders not accepted within 30 seconds
+	@Scheduled(fixedRate = 10000) // Runs every 10 seconds
+	public void autoRejectOrders() {
+		List<RestaurantOrderDto> newOrders = restaurantOrderRepository.findByStatus(RestaurantOrderStatus.NEW);
+		newOrders.stream().filter(order -> LocalDateTime.now().isAfter(order.getAcceptanceDeadline()))
+				.forEach(order -> {
+					order.setStatus(RestaurantOrderStatus.REJECTED);
+					restaurantOrderRepository.save(order);
+				});
 	}
 
 }
