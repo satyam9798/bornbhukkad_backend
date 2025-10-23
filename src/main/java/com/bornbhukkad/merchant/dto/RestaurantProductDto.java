@@ -9,6 +9,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 import com.bornbhukkad.merchant.dto.KiranaProductDto.DimensionDTO.Measurement;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Document (collection = "bb_admin_panel_vendors_products")
 public class RestaurantProductDto {
@@ -32,14 +33,19 @@ public class RestaurantProductDto {
     private boolean related;
     private boolean recommended;
     @Field("@ondc/org/returnable")
+    @JsonProperty("ondc_org_returnable")
     private boolean ondc_org_returnable;
     @Field("@ondc/org/cancellable")
+    @JsonProperty("ondc_org_cancellable")
     private boolean ondc_org_cancellable;
     @Field("@ondc/org/return_window")
+    @JsonProperty("ondc_org_return_window")
     private String ondc_org_return_window;
     @Field("@ondc/org/seller_pickup_return")
+    @JsonProperty("ondc_org_seller_pickup_return")
     private boolean ondc_org_seller_pickup_return;
     @Field("@ondc_org_contact_details_consumer_care")
+    @JsonProperty("ondc_org_contact_details_consumer_care")
     private String ondc_org_contact_details_consumer_care;
     private DimensionDTO dimension;
     private int packagingPrice;

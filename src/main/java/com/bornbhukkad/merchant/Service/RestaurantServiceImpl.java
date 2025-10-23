@@ -237,9 +237,11 @@ public class RestaurantServiceImpl implements RestaurantService {
 
 	@Override
 	public Optional<RestaurantOfferDto> getOfferById(String id) {
-		logger.info("Get Location in service by vendorId:" + id);
+		logger.info("Get Offers in service by vendorId:" + id);
 
-		return restaurantOfferRepository.findById(id);
+		Query query = new Query(Criteria.where("id").is(id));
+		RestaurantOfferDto offer = mongoTemplate.findOne(query, RestaurantOfferDto.class);
+		return Optional.of(offer);
 	}
 	
 	public RestaurantOfferDto updateOffer(String id, RestaurantOfferDto data) {
@@ -409,7 +411,7 @@ public class RestaurantServiceImpl implements RestaurantService {
 		// return after lookup
 		System.out.println("Search started for Product at :" + Instant.now());
 
-		String query4 = "{$lookup: {from: 'bb_admin_panel_vendors_products',localField: 'id',foreignField: 'vendorId',pipeline: [{$project: {'_id': 0,'id':1,'descriptor':1,'tags':1,'price':1,'category_id':1,'category_ids':1, 'parent_category_id':1, 'dimension':1,'packagingPrice':1,'timing':1,'weight':1,'@ondc/org/returnable':1, '@ondc/org/cancellable':1,'@ondc/org/return_window':1,'@ondc/org/seller_pickup_return':1,'@ondc/org/time_to_ship':1,'@ondc/org/available_on_cod':1,'@ondc/org/contact_details_consumer_care':1  } }], as: 'product'}},";
+		String query4 = "{$lookup: {from: 'bb_admin_panel_vendors_products',localField: 'id',foreignField: 'vendorId',pipeline: [{$project: {'_id': 0,'id':1,'descriptor':1,'tags':1,'price':1,'category_id':1,'category_ids':1, 'parent_category_id':1, 'dimension':1,'packagingPrice':1,'timing':1,'weight':1, '@ondc/org/time_to_ship':1,'@ondc/org/available_on_cod':1, 'ondc_org_returnable': '$@ondc/org/returnable', 'ondc_org_cancellable': '$@ondc/org/cancellable', 'ondc_org_return_window': '$@ondc/org/return_window', 'ondc_org_seller_pickup_return': '$@ondc/org/seller_pickup_return', 'ondc_org_contact_details_consumer_care': '$@ondc/org/contact_details_consumer_care'  } }], as: 'product'}},";
 		String query5 = "{$lookup: {from: 'bb_admin_panel_vendors_custom_groups',localField: 'product.id',foreignField: 'parentProductId',pipeline: [{$project: {'_id': 0,'id':1,'descriptor':1,'tags':1} }], as: 'customGroups'}},";
 		String query6 = "{$lookup: {from: 'bb_admin_panel_vendors_items',localField: 'product.id',foreignField: 'parentItemId',pipeline: [{$project: {'_id': 0,'id':1,'parentItemId':1, 'parentCategoryId':1, 'descriptor':1,'tags':1,'quantity': 1,'price':1,'catgory_id':1,'related':1 } }], as: 'items'}},";
 

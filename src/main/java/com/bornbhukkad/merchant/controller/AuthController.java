@@ -87,13 +87,23 @@ public class AuthController {
         	return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(model);
 		}
     }
+    
     @GetMapping(path="/getByItemAndCity")
     public List<Object> getByItemAndCity(@RequestBody SearchBody data) {
 //    	return bbService.getFulfillmentChannels(data.getItem(),data.getCity());
-//    	return bbService.getByCity(data.getCity());
+//    	return bbService.getByCity(data.getCity(), data.getCategory());
 //    	return bbService.onSelectQuery();
     	return bbdataService.getByItemAndCity(data.getItem(),data.getCity());
-//
+    }
+    
+    @GetMapping(path="/getByItem")
+    public List<Object> getByItem(@RequestBody SearchBody data) {
+    	return bbService.getByItem(data.getItem(),data.getCity(),data.getLatitude(),data.getLongitude(), data.getMaxDistance(), data.getType(), data.getAreaCode());
+    }
+    
+    @GetMapping(path="/getByCity")
+    public List<Object> getByCity(@RequestBody SearchBody data) {
+    	return bbService.getByCity(data.getCity(), data.getCategory(), data.getType());
     }
     
     @CrossOrigin(origins = "http://localhost:4200", allowedHeaders = {"Authorization", "Content-Type"})
@@ -142,11 +152,22 @@ public class AuthController {
     @CrossOrigin(origins = "http://localhost:4200", allowedHeaders = {"Authorization", "Content-Type"})
     @PostMapping("/registerKirana")
     public ResponseEntity<Map<String, String>> registerKirana(@RequestBody KiranaUser user) {
+    	try {
         return registerUser(
             () -> userService.findKiranaUserByEmail(user.getEmail()),
             () -> userService.saveKiranaUser(user),
             user.getEmail()
         );
+    	}
+        catch (UserAlreadyExistsException e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("error", "User with this email already exists.");
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+        } catch (Exception e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("error", "Internal Server Error: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        }
     }
 
     @CrossOrigin(origins = "http://localhost:4200", allowedHeaders = {"Authorization", "Content-Type"})

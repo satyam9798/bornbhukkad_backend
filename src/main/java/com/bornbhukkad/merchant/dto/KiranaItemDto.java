@@ -7,30 +7,20 @@ import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
-import com.bornbhukkad.merchant.dto.RestaurantItemDto.Available;
-import com.bornbhukkad.merchant.dto.RestaurantItemDto.Descriptor;
-import com.bornbhukkad.merchant.dto.RestaurantItemDto.TagValue;
-import com.bornbhukkad.merchant.dto.RestaurantItemDto.Maximum;
-import com.bornbhukkad.merchant.dto.RestaurantItemDto.Measure;
-import com.bornbhukkad.merchant.dto.RestaurantItemDto.Price;
-import com.bornbhukkad.merchant.dto.RestaurantItemDto.Quantity;
-import com.bornbhukkad.merchant.dto.RestaurantItemDto.Tag;
-import com.bornbhukkad.merchant.dto.RestaurantItemDto.Unitized;
-
-@Document (collection = "bb_admin_panel_kirana_items")
+@Document(collection = "bb_admin_panel_kirana_items")
 public class KiranaItemDto {
-	
+
 	@Transient
-    public static final String kiranaItem_sequence = "kiranaItem_sequence";
+	public static final String kiranaItem_sequence = "kiranaItem_sequence";
 	@Id
 	public String _id;
 	@Field("id")
-    private String id;
+	private String id;
 
-    private String parentCategoryId;
-    private String parentItemId;
+	private String parentCategoryId;
+	private String parentItemId;
 
-    public String getParentItemId() {
+	public String getParentItemId() {
 		return parentItemId;
 	}
 
@@ -40,9 +30,9 @@ public class KiranaItemDto {
 
 	private Descriptor descriptor;
 
-    private Quantity quantity;
+	private Quantity quantity;
 
-    private Price price;
+	private Price price;
 
 	public String getId() {
 		return id;
@@ -109,23 +99,14 @@ public class KiranaItemDto {
 	}
 
 	@Field("category_id")
-    private String categoryId;
+	private String categoryId;
 
-    private boolean related;
+	private boolean related;
 
-    private List<Tag> tags;
+	private List<Tag> tags;
 
-    // Getters and setters
-
-//    public static class Id {
-//        @Field("$oid")
-//        private String oid;
-//
-//        // Getters and setters
-//    }
-
-    public static class Descriptor {
-        private String name;
+	public static class Descriptor {
+		private String name;
 
 		public String getName() {
 			return name;
@@ -135,37 +116,43 @@ public class KiranaItemDto {
 			this.name = name;
 		}
 
-        // Getters and setters
-    }
+	}
 
-    public static class Quantity {
-        private Unitized unitized;
-        public Unitized getUnitized() {
+	public static class Quantity {
+		private Unitized unitized;
+
+		public Unitized getUnitized() {
 			return unitized;
 		}
+
 		public void setUnitized(Unitized unitized) {
 			this.unitized = unitized;
 		}
+
 		public Available getAvailable() {
 			return available;
 		}
+
 		public void setAvailable(Available available) {
 			this.available = available;
 		}
+
 		public Maximum getMaximum() {
 			return maximum;
 		}
+
 		public void setMaximum(Maximum maximum) {
 			this.maximum = maximum;
 		}
+
 		private Available available;
-        private Maximum maximum;
+		private Maximum maximum;
 
-        // Getters and setters
-    }
+		// Getters and setters
+	}
 
-    public static class Unitized {
-        private Measure measure;
+	public static class Unitized {
+		private Measure measure;
 
 		public Measure getMeasure() {
 			return measure;
@@ -175,25 +162,11 @@ public class KiranaItemDto {
 			this.measure = measure;
 		}
 
-        // Getters and setters
-    }
+		// Getters and setters
+	}
 
-    public static class Available {
-        private String count;
-
-		public String getCount() {
-			return count;
-		}
-
-		public void setCount(String count) {
-			this.count = count;
-		}
-
-        // Getters and setters
-    }
-
-    public static class Maximum {
-        private String count;
+	public static class Available {
+		private String count;
 
 		public String getCount() {
 			return count;
@@ -203,33 +176,52 @@ public class KiranaItemDto {
 			this.count = count;
 		}
 
-        // Getters and setters
-    }
+		// Getters and setters
+	}
 
-    public static class Measure {
-        private String unit;
-        public String getUnit() {
+	public static class Maximum {
+		private String count;
+
+		public String getCount() {
+			return count;
+		}
+
+		public void setCount(String count) {
+			this.count = count;
+		}
+
+		// Getters and setters
+	}
+
+	public static class Measure {
+		private String unit;
+
+		public String getUnit() {
 			return unit;
 		}
+
 		public void setUnit(String unit) {
 			this.unit = unit;
 		}
+
 		public String getValue() {
 			return value;
 		}
+
 		public void setValue(String value) {
 			this.value = value;
 		}
+
 		private String value;
 
-        // Getters and setters
-    }
+		// Getters and setters
+	}
 
-    public static class Price {
-        private String currency;
-        private String value;
+	public static class Price {
+		private String currency;
+		private String value;
 
-        public String getCurrency() {
+		public String getCurrency() {
 			return currency;
 		}
 
@@ -254,47 +246,57 @@ public class KiranaItemDto {
 		}
 
 		@Field("maximum_value")
-        private String maximumValue;
+		private String maximumValue;
 
-        // Getters and setters
-    }
+		// Getters and setters
+	}
 
-    public static class Tag {
-        private String code;
-        public String getCode() {
+	public static class Tag {
+		private String code;
+
+		public String getCode() {
 			return code;
 		}
+
 		public void setCode(String code) {
 			this.code = code;
 		}
+
 		public List<TagValue> getList() {
 			return list;
 		}
+
 		public void setList(List<TagValue> list) {
 			this.list = list;
 		}
+
 		private List<TagValue> list;
 
-        // Getters and setters
-    }
+		// Getters and setters
+	}
 
-    public static class TagValue {
-        private String code;
-        public String getCode() {
+	public static class TagValue {
+		private String code;
+
+		public String getCode() {
 			return code;
 		}
+
 		public void setCode(String code) {
 			this.code = code;
 		}
+
 		public String getValue() {
 			return value;
 		}
+
 		public void setValue(String value) {
 			this.value = value;
 		}
+
 		private String value;
 
-        // Getters and setters
-    }
+		// Getters and setters
+	}
 
 }

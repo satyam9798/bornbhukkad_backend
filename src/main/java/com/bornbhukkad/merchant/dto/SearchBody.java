@@ -3,6 +3,29 @@ package com.bornbhukkad.merchant.dto;
 public class SearchBody {
 	public String id;
 	public String city;
+	public String category;
+	
+	public String type;
+	public String areaCode;
+	
+	public String getAreaCode() {
+		return areaCode;
+	}
+	public void setAreaCode(String areaCode) {
+		this.areaCode = areaCode;
+	}
+	public String getType() {
+		return type;
+	}
+	public void setType(String type) {
+		this.type = type;
+	}
+	public String getCategory() {
+		return category;
+	}
+	public void setCategory(String category) {
+		this.category = category;
+	}
 	public String vendorId;
 	public String Latitude;
 	public String longitude;

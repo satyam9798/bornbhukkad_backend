@@ -1,25 +1,11 @@
 package com.bornbhukkad.merchant.dto;
 
-import java.time.Instant;
 import java.util.List;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
-
-import com.bornbhukkad.merchant.dto.RestaurantProductDto.Available;
-import com.bornbhukkad.merchant.dto.RestaurantProductDto.Descriptor;
-import com.bornbhukkad.merchant.dto.RestaurantProductDto.DimensionDTO;
-import com.bornbhukkad.merchant.dto.RestaurantProductDto.Maximum;
-import com.bornbhukkad.merchant.dto.RestaurantProductDto.Measure;
-import com.bornbhukkad.merchant.dto.RestaurantProductDto.Price;
-import com.bornbhukkad.merchant.dto.RestaurantProductDto.ProductTime;
-import com.bornbhukkad.merchant.dto.RestaurantProductDto.Quantity;
-import com.bornbhukkad.merchant.dto.RestaurantProductDto.Tag;
-import com.bornbhukkad.merchant.dto.RestaurantProductDto.TagValue;
-import com.bornbhukkad.merchant.dto.RestaurantProductDto.Unitized;
-import com.bornbhukkad.merchant.dto.RestaurantProductDto.WeightDTO;
 
 @Document(collection = "bb_admin_panel_kirana_products")
 public class KiranaProductDto {
@@ -54,8 +40,92 @@ public class KiranaProductDto {
     private int packagingPrice;
     private String timing;
     private WeightDTO weight;
+    @Field("@ondc/org/statutory_reqs_packaged_commodities")
+    private StatutoryReqsPackagedCommoditiesDTO ondc_org_statutory_reqs_packaged_commodities;
+
+    @Field("@ondc/org/statutory_reqs_prepackaged_food")
+    private StatutoryReqsPrepackagedFoodDTO ondc_org_statutory_reqs_prepackaged_food;
+
+    @Field("@ondc/org/mandatory_reqs_veggies_fruits")
+    private MandatoryReqsVeggiesFruitsDTO ondc_org_mandatory_reqs_veggies_fruits;
+
+    public StatutoryReqsPackagedCommoditiesDTO getOndc_org_statutory_reqs_packaged_commodities() { return ondc_org_statutory_reqs_packaged_commodities; }
+    public void setOndc_org_statutory_reqs_packaged_commodities(StatutoryReqsPackagedCommoditiesDTO value) { this.ondc_org_statutory_reqs_packaged_commodities = value; }
+
+    public StatutoryReqsPrepackagedFoodDTO getOndc_org_statutory_reqs_prepackaged_food() { return ondc_org_statutory_reqs_prepackaged_food; }
+    public void setOndc_org_statutory_reqs_prepackaged_food(StatutoryReqsPrepackagedFoodDTO value) { this.ondc_org_statutory_reqs_prepackaged_food = value; }
+
+    public MandatoryReqsVeggiesFruitsDTO getOndc_org_mandatory_reqs_veggies_fruits() { return ondc_org_mandatory_reqs_veggies_fruits; }
+    public void setOndc_org_mandatory_reqs_veggies_fruits(MandatoryReqsVeggiesFruitsDTO value) { this.ondc_org_mandatory_reqs_veggies_fruits = value; }
+
+    
+    
+    public class MandatoryReqsVeggiesFruitsDTO {
+        private String net_quantity;
+
+        // Getters and Setters
+        public String getNet_quantity() { return net_quantity; }
+        public void setNet_quantity(String net_quantity) { this.net_quantity = net_quantity; }
+    }
+    
     public DimensionDTO getDimension() {
         return dimension;
+    }
+    
+    public class StatutoryReqsPrepackagedFoodDTO {
+        private String nutritional_info;
+        private String additives_info;
+        private String brand_owner_FSSAI_license_no;
+        private String other_FSSAI_license_no;
+        private String importer_FSSAI_license_no;
+        private String imported_product_country_of_origin;
+
+        // Getters and Setters
+        public String getNutritional_info() { return nutritional_info; }
+        public void setNutritional_info(String nutritional_info) { this.nutritional_info = nutritional_info; }
+
+        public String getAdditives_info() { return additives_info; }
+        public void setAdditives_info(String additives_info) { this.additives_info = additives_info; }
+
+        public String getBrand_owner_FSSAI_license_no() { return brand_owner_FSSAI_license_no; }
+        public void setBrand_owner_FSSAI_license_no(String brand_owner_FSSAI_license_no) { this.brand_owner_FSSAI_license_no = brand_owner_FSSAI_license_no; }
+
+        public String getOther_FSSAI_license_no() { return other_FSSAI_license_no; }
+        public void setOther_FSSAI_license_no(String other_FSSAI_license_no) { this.other_FSSAI_license_no = other_FSSAI_license_no; }
+
+        public String getImporter_FSSAI_license_no() { return importer_FSSAI_license_no; }
+        public void setImporter_FSSAI_license_no(String importer_FSSAI_license_no) { this.importer_FSSAI_license_no = importer_FSSAI_license_no; }
+
+        public String getImported_product_country_of_origin() { return imported_product_country_of_origin; }
+        public void setImported_product_country_of_origin(String imported_product_country_of_origin) { this.imported_product_country_of_origin = imported_product_country_of_origin; }
+    }
+    
+    public class StatutoryReqsPackagedCommoditiesDTO {
+        private String manufacturer_or_packer_name;
+        private String manufacturer_or_packer_address;
+        private String common_or_generic_name_of_commodity;
+        private String net_quantity_or_measure_of_commodity_in_pkg;
+        private String month_year_of_manufacture_packing_import;
+        private String imported_product_country_of_origin;
+
+        // Getters and Setters
+        public String getManufacturer_or_packer_name() { return manufacturer_or_packer_name; }
+        public void setManufacturer_or_packer_name(String manufacturer_or_packer_name) { this.manufacturer_or_packer_name = manufacturer_or_packer_name; }
+
+        public String getManufacturer_or_packer_address() { return manufacturer_or_packer_address; }
+        public void setManufacturer_or_packer_address(String manufacturer_or_packer_address) { this.manufacturer_or_packer_address = manufacturer_or_packer_address; }
+
+        public String getCommon_or_generic_name_of_commodity() { return common_or_generic_name_of_commodity; }
+        public void setCommon_or_generic_name_of_commodity(String common_or_generic_name_of_commodity) { this.common_or_generic_name_of_commodity = common_or_generic_name_of_commodity; }
+
+        public String getNet_quantity_or_measure_of_commodity_in_pkg() { return net_quantity_or_measure_of_commodity_in_pkg; }
+        public void setNet_quantity_or_measure_of_commodity_in_pkg(String net_quantity_or_measure_of_commodity_in_pkg) { this.net_quantity_or_measure_of_commodity_in_pkg = net_quantity_or_measure_of_commodity_in_pkg; }
+
+        public String getMonth_year_of_manufacture_packing_import() { return month_year_of_manufacture_packing_import; }
+        public void setMonth_year_of_manufacture_packing_import(String month_year_of_manufacture_packing_import) { this.month_year_of_manufacture_packing_import = month_year_of_manufacture_packing_import; }
+
+        public String getImported_product_country_of_origin() { return imported_product_country_of_origin; }
+        public void setImported_product_country_of_origin(String imported_product_country_of_origin) { this.imported_product_country_of_origin = imported_product_country_of_origin; }
     }
 
     public void setDimension(DimensionDTO dimension) {
@@ -373,7 +443,14 @@ public class KiranaProductDto {
 
     public static class Descriptor {
         private String name;
-        private String symbol;
+        private String code;
+        public String getCode() {
+			return code;
+		}
+		public void setCode(String code) {
+			this.code = code;
+		}
+		private String symbol;
         public String getName() {
 			return name;
 		}

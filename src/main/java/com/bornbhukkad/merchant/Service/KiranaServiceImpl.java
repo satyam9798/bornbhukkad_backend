@@ -2,9 +2,8 @@ package com.bornbhukkad.merchant.Service;
 
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -17,8 +16,9 @@ import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.bornbhukkad.merchant.Repository.IKiranaCategoriesRepository;
 import com.bornbhukkad.merchant.Repository.IKiranaCustomGroupRepository;
@@ -26,21 +26,23 @@ import com.bornbhukkad.merchant.Repository.IKiranaDefaultCategoriesRepository;
 import com.bornbhukkad.merchant.Repository.IKiranaFulfillmentRepository;
 import com.bornbhukkad.merchant.Repository.IKiranaItemRepository;
 import com.bornbhukkad.merchant.Repository.IKiranaLocationRepository;
+import com.bornbhukkad.merchant.Repository.IKiranaOfferRepository;
 import com.bornbhukkad.merchant.Repository.IKiranaProductRepository;
 import com.bornbhukkad.merchant.Repository.IKiranaRepository;
 import com.bornbhukkad.merchant.Repository.IUserRepository;
+import com.bornbhukkad.merchant.Repository.IkiranaCredsRepository;
 import com.bornbhukkad.merchant.dto.KiranaCategoriesDto;
+import com.bornbhukkad.merchant.dto.KiranaCredDto;
 import com.bornbhukkad.merchant.dto.KiranaCustomGroupDto;
 import com.bornbhukkad.merchant.dto.KiranaDefaultCategoriesDto;
 import com.bornbhukkad.merchant.dto.KiranaDto;
 import com.bornbhukkad.merchant.dto.KiranaLocationDto;
 import com.bornbhukkad.merchant.dto.KiranaLocationDto.Item;
 import com.bornbhukkad.merchant.dto.KiranaLocationDto.LocationTime;
+import com.bornbhukkad.merchant.dto.KiranaOfferDto;
 import com.bornbhukkad.merchant.dto.KiranaProductDto;
 import com.bornbhukkad.merchant.dto.KiranaProductDto.ProductTime;
 import com.bornbhukkad.merchant.dto.KiranaUser;
-import com.bornbhukkad.merchant.dto.RestaurantFulfillmentDto;
-import com.bornbhukkad.merchant.dto.RestaurantUser;
 import com.mongodb.client.result.UpdateResult;
 import com.bornbhukkad.merchant.dto.KiranaDto.Time;
 import com.bornbhukkad.merchant.dto.KiranaFulfillmentDto;
@@ -53,6 +55,8 @@ import static com.bornbhukkad.merchant.dto.KiranaCustomGroupDto.kiranaCG_sequenc
 import static com.bornbhukkad.merchant.dto.KiranaItemDto.kiranaItem_sequence;
 import static com.bornbhukkad.merchant.dto.KiranaCategoriesDto.kiranaCategories_sequence;
 import static com.bornbhukkad.merchant.dto.KiranaFulfillmentDto.fulfillment_sequence;
+import static com.bornbhukkad.merchant.dto.KiranaOfferDto.kiranaOffer_sequence;
+import static com.bornbhukkad.merchant.dto.KiranaCredDto.kiranaCred_sequence;
 
 @Service
 public class KiranaServiceImpl implements KiranaService {
@@ -75,6 +79,10 @@ public class KiranaServiceImpl implements KiranaService {
 	IKiranaDefaultCategoriesRepository kiranaDefaultCategoriesRepo;
 	@Autowired
 	IKiranaFulfillmentRepository kiranaFulfillmentRepo;
+	@Autowired
+	IKiranaOfferRepository kiranaOfferRepo;
+	@Autowired
+	IkiranaCredsRepository kiranaCredsRepo;
 //	@Autowired
 //	private SimpMessagingTemplate messagingTemplate;
 
@@ -90,7 +98,7 @@ public class KiranaServiceImpl implements KiranaService {
 	@Autowired
 	public KiranaServiceImpl(MongoTemplate mongoTemplate, @Value("${app.service.vendorTTL}") String vendorTtl) {
 		this.vendorTtl = vendorTtl;
-		this.mongoTemplate = mongoTemplate;
+//		this.mongoTemplate = mongoTemplate;
 	}
 
 	@Override
@@ -142,7 +150,7 @@ public class KiranaServiceImpl implements KiranaService {
 
 	@Override
 	public void addKiranaCategories(KiranaCategoriesDto categories) {
-		categories.setId("" + sequenceGeneratorService.getSequenceNumber(kiranaCategories_sequence));
+		categories.setId("V" + sequenceGeneratorService.getSequenceNumber(kiranaCategories_sequence));
 		kiranaCategoryRepo.save(categories);
 	}
 
@@ -155,6 +163,13 @@ public class KiranaServiceImpl implements KiranaService {
 		product.setTime(time);
 		product.setId("I" + sequenceGeneratorService.getSequenceNumber(kiranaProduct_sequence));
 		kiranaProductRepo.save(product);
+	}
+	@Override
+	public void addKiranaCred(KiranaCredDto cred) {
+		String id = "ESG-" + sequenceGeneratorService.getSequenceNumber(kiranaCred_sequence);
+		cred.getDescriptor().setCode(id);
+		cred.setId(id);
+		kiranaCredsRepo.save(cred);
 	}
 
 	@Override
@@ -361,6 +376,68 @@ public class KiranaServiceImpl implements KiranaService {
 	public void deleteItem(String id) {
 		Query query = new Query(Criteria.where("id").is(id));
 		mongoTemplate.remove(query, "bb_admin_panel_kirana_items");
+	}
+	
+	@Override
+	public List<KiranaOfferDto> addKiranaOffers(List<KiranaOfferDto> offers) {
+		for (KiranaOfferDto offer : offers) {
+			final String kiranaId = offer.getKiranaId();
+
+			offer.setId("O" + sequenceGeneratorService.getSequenceNumber(kiranaOffer_sequence));
+			String offerNameUpper = offer.getName().toUpperCase();
+
+			boolean exists = kiranaOfferRepo.existsByName(offerNameUpper);
+			if (exists) {
+				throw new ResponseStatusException(HttpStatus.CONFLICT,
+						String.format("Offer '%s' already exists for merchant '%s'", offerNameUpper, kiranaId));
+			}
+
+			// Set name to uppercase before mapping/saving
+			offer.setName(offerNameUpper);
+			offer.setActive(true);
+		}
+
+		kiranaOfferRepo.saveAll(offers);
+
+		return offers;
+	}
+
+	@Override
+	public List<KiranaOfferDto> getOffersByKiranaId(String kiranaId) {
+		logger.info("Get Location in service by vendorId:" + kiranaId);
+		return kiranaOfferRepo.findByKiranaId(kiranaId);
+	}
+
+	@Override
+	public Optional<KiranaOfferDto> getOfferById(String id) {
+		logger.info("Get Offers in service by vendorId:" + id);
+
+		Query query = new Query(Criteria.where("id").is(id));
+		KiranaOfferDto offer = mongoTemplate.findOne(query, KiranaOfferDto.class);
+		return Optional.of(offer);
+	}
+	
+	public KiranaOfferDto updateOffer(String id, KiranaOfferDto data) {
+		Query query = new Query();
+		query.addCriteria(Criteria.where("id").is(id));
+		KiranaOfferDto offer = mongoTemplate.findOne(query, KiranaOfferDto.class);
+		if (offer != null) {
+			offer.setDescriptor(data.getDescriptor());
+			offer.setTags(data.getTags());
+			offer.setName(data.getName());
+			offer.setItem_ids(data.getItem_ids());
+			offer.setLocation_ids(data.getLocation_ids());
+			offer.setActive(data.getActive());
+			
+			return kiranaOfferRepo.save(offer);
+		}
+		return null; // or throw an exception indicating item not found
+	}
+	
+	public void deleteOffer(String id) {
+		Query query = new Query();
+		query.addCriteria(Criteria.where("id").is(id));
+		mongoTemplate.remove(query, "bb_admin_panel_kirana_offers");
 	}
 
 	// Send a WebSocket notification to a specific Kirana merchant

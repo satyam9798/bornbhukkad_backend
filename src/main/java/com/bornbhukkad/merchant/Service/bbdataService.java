@@ -14,10 +14,10 @@ import org.springframework.data.mongodb.core.aggregation.ArrayOperators;
 import org.springframework.data.mongodb.core.aggregation.TypedAggregation;
 //import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Service;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.aggregation.AggregationOperation;
 import org.springframework.data.mongodb.core.aggregation.LookupOperation;
 import org.springframework.data.mongodb.core.query.Criteria;
 
@@ -30,122 +30,332 @@ import java.util.List;
 
 @Service
 public class bbdataService {
-    private static MongoTemplate mongoTemplate;
+	private static MongoTemplate mongoTemplate;
 
-    @Autowired
-    public bbdataService(MongoTemplate mongoTemplate) {
-        this.mongoTemplate = mongoTemplate;
-    }
-  
+	@Autowired
+	public bbdataService(MongoTemplate mongoTemplate) {
+		this.mongoTemplate = mongoTemplate;
+	}
 
-    
-    public List<Object> getFulfillmentChannels(
-    	    String item, 
-    	    String city) {
-    	System.out.println("enter:"+Instant.now());
-    	String query1 ="{$lookup: {from: 'bb_admin_panel_vendors_locations',localField: 'locationsId',foreignField: 'id',pipeline: [{$project: {'_id':0,'id': 1, 'address': 1,'time':1,'gps':'$circle.gps','circle':1} }], as: 'locations'}},";
-    	    String query2 ="{$lookup: {from: 'bb_admin_panel_vendors_locations',localField: 'locationsId',foreignField: 'id',pipeline: [{$project: {'_id':0,'tags': 1 } }], as: 'vendorTags'}},";
-    	    String query4 = "{$lookup: {from: 'bb_admin_panel_vendors_products', localField: 'id', foreignField: 'vendorId', pipeline: [{$match: {'descriptor.name': {$regex: '.*"+item+".*', $options: 'i'}}}, {$project: {'_id': 0, 'id': 1, 'descriptor': 1, 'tags': 1, 'quantity': 1, 'price': 1, 'time': 1, 'category_id': 1, 'category_ids': 1, 'parent_category_id':1,'fulfillment_id': 1, 'location_id': 1, 'related': 1, 'recommended': 1, '@ondc/org/returnable': 1, '@ondc/org/cancellable': 1, '@ondc/org/return_window': 1, '@ondc/org/seller_pickup_return': 1, '@ondc/org/time_to_ship': 1, '@ondc/org/available_on_cod': 1, '@ondc/org/contact_details_consumer_care': 1}}], as: 'itemsMain'}}";
-    	    String query3 ="{$lookup: {from: 'bb_admin_panel_vendors_fulfillments',localField: 'fulfillmentsId',foreignField: 'id',pipeline: [{$project: {'_id': 0,'id':'$defaultId','type':1,'contact':1} }], as: 'fulfillments'}},";
-    	    String query8 ="{$lookup: {from: 'bb_admin_panel_vendors_categories',localField: 'itemsMain.parent_category_id',foreignField: 'id',pipeline: [{$project: {'_id': 0,'id':1,'parent_category_id':1,'descriptor':1,'tags':1} }],as: 'categoriesMain'}},";
-    	    String query5 ="{$lookup: {from: 'bb_admin_panel_vendors_custom_groups',localField: 'itemsMain.id',foreignField: 'parentProductId',pipeline: [{$project: {'_id': 0,'id':1,'descriptor':1,'tags':1} }], as: 'customGroups'}},";
-    	    String query6 ="{$lookup: {from: 'bb_admin_panel_vendors_items',localField: 'itemsMain.id',foreignField: 'parentItemId',pipeline: [{$project: {'_id': 0,'id':1,'descriptor':1,'tags':1,'quantity': 1,'price':1,'catgory_id':1,'related':1 } }], as: 'itemCollection'}},";
-    	 
-    	    Aggregation aggregation = Aggregation.newAggregation(
- 	    		new CustomProjectAggregationOperation(query1),
- 	    		new CustomProjectAggregationOperation(query2),
- 	    		new CustomProjectAggregationOperation(query3),
- 	    		new CustomProjectAggregationOperation(query4),
- 	    		Aggregation.match(Criteria.where("itemsMain.descriptor.name").is(item)),
- 	    		new CustomProjectAggregationOperation(query5),
- 	    		new CustomProjectAggregationOperation(query6),
- 	            new CustomProjectAggregationOperation(query8),
- 	            Aggregation.unwind("vendorTags"),
- 	            Aggregation.match(Criteria.where("locations.address.city").is(city)),
- 	            Aggregation.project()
-	                .andExclude("_id")
-	                .andInclude("id","time", "fulfillments", "descriptor", "@ondc/org/fssai_license_no", "ttl", "offers", "locations","categories","items", "tags:$vendorTags.tags","fulfillments.id:$fulfillments.defaultId")
-	                .and(ArrayOperators.ConcatArrays.arrayOf("categoriesMain").concat("customGroups")).as("categories")
-	                .and(ArrayOperators.ConcatArrays.arrayOf("itemsMain").concat("itemCollection")).as("items")
- 	    		);
-    	
-    	    AggregationResults<Object> results = 
-        	        mongoTemplate.aggregate(aggregation, "bb_admin_panel_vendors", Object.class);
-        	    List<Object> resultDtoString=results.getMappedResults();
-        	    System.out.println("exit:"+Instant.now());
-        	    return resultDtoString;            
-    	}
-    
-    public List<Object> getByCity( 
-    	    String city) {
-    	System.out.println("enter:"+Instant.now());
-    	String query1 ="{$lookup: {from: 'bb_admin_panel_vendors_locations',localField: 'locationsId',foreignField: 'id',pipeline: [{$project: {'_id':0,'id': 1, 'address': 1,'time':1,'gps':'$circle.gps','circle':1} }], as: 'locations'}},";
-    	    String query2 ="{$lookup: {from: 'bb_admin_panel_vendors_locations',localField: 'locationsId',foreignField: 'id',pipeline: [{$project: {'_id':0,'tags': 1 } }], as: 'vendorTags'}},";
-    	    String query4 ="{$lookup: {from: 'bb_admin_panel_vendors_products',localField: 'id',foreignField: 'vendorId',pipeline: [{$project: {'_id': 0,'id':1,'descriptor':1,'tags':1,'quantity': 1,'price':1,'time':1,'category_id':1,'category_ids':1,'fulfillment_id':1,'location_id':1,'related':1,'recommended':1,'@ondc/org/returnable':1,'@ondc/org/cancellable':1,'@ondc/org/return_window':1 ,'@ondc/org/seller_pickup_return':1,'@ondc/org/time_to_ship':1,'@ondc/org/available_on_cod':1,'@ondc/org/contact_details_consumer_care\':1  } }], as: 'itemsMain'}},";
-    	    String query3 ="{$lookup: {from: 'bb_admin_panel_vendors_fulfillments',localField: 'fulfillmentsId',foreignField: 'id',pipeline: [{$project: {'_id': 0,'id':1,'type':1,'contact':1} }], as: 'fulfillments'}},";
-    	    String query8 ="{$lookup: {from: 'bb_admin_panel_vendors_categories',localField: 'itemsMain.parent_category_id',foreignField: 'id',pipeline: [{$project: {'_id': 0,'id':1,'parent_category_id':1,'descriptor':1,'tags':1} }],as: 'categoriesMain'}},";
-    	    String query5 ="{$lookup: {from: 'bb_admin_panel_vendors_custom_groups',localField: 'itemsMain.id',foreignField: 'parentProductId',pipeline: [{$project: {'_id': 0,'id':1,'descriptor':1,'tags':1} }], as: 'customGroups'}},";
-    	    String query6 ="{$lookup: {from: 'bb_admin_panel_vendors_items',localField: 'itemsMain.id',foreignField: 'parentItemId',pipeline: [{$project: {'_id': 0,'id':1,'descriptor':1,'tags':1,'quantity': 1,'price':1,'catgory_id':1,'related':1 } }], as: 'itemCollection'}},";
-    	 
-    	    Aggregation aggregation = Aggregation.newAggregation(
- 	    		new CustomProjectAggregationOperation(query1),
- 	    		new CustomProjectAggregationOperation(query2),
- 	    		new CustomProjectAggregationOperation(query3),
- 	    		new CustomProjectAggregationOperation(query4),
- 	    		new CustomProjectAggregationOperation(query5),
- 	    		new CustomProjectAggregationOperation(query6),
- 	            new CustomProjectAggregationOperation(query8),
- 	            Aggregation.unwind("vendorTags"),
- 	            Aggregation.match(Criteria.where("locations.address.city").is(city)),
- 	            Aggregation.project()
-	                .andExclude("_id")
-	                .andInclude("id","time", "fulfillments", "descriptor", "@ondc/org/fssai_license_no", "ttl", "offers", "locations","categories","items", "tags:$vendorTags.tags")
-	                .and(ArrayOperators.ConcatArrays.arrayOf("categoriesMain").concat("customGroups")).as("categories")
-	                .and(ArrayOperators.ConcatArrays.arrayOf("itemsMain").concat("itemCollection")).as("items")
- 	    		);
-    	
-    	    AggregationResults<Object> results = 
-        	        mongoTemplate.aggregate(aggregation, "bb_admin_panel_vendors", Object.class);
-        	    List<Object> resultDtoString=results.getMappedResults();
-        	    System.out.println("exit:"+Instant.now());
-        	    return resultDtoString;            
-    	}
-    
-    public List<Object> getFulfillmentChannelsByGeoLocation(String Latitude, String Longitude, String maxDistance) {
-    	String geoNearQuery = "{$geoNear: {near: { type: 'Point', coordinates: ["+Latitude+","+ Longitude+"] }, distanceField: 'dist.calculated', maxDistance:"+maxDistance+", spherical: true }}";
-    	String query1 = "{$lookup: {from: 'bb_admin_panel_vendors_locations', let: { locationId: '$locationsId' }, pipeline: [" + geoNearQuery + ",{$match: {$expr: {$eq: ['$id', '$$locationId']}}},{$project: {'_id':0,'id': 1, 'address': 1,'time':1,'gps':'$circle.gps','circle':1} }], as: 'locations'}}";
-    	String query2 = "{$lookup: {from: 'bb_admin_panel_vendors_locations',localField: 'locationsId',foreignField: 'id',pipeline: [{$project: {'_id':0,'tags': 1 } }], as: 'vendorTags'}}";
-    	String query3 = "{$lookup: {from: 'bb_admin_panel_vendors_fulfillments',localField: 'fulfillmentsId',foreignField: 'id',pipeline: [{$project: {'_id': 0,'id':1,'type':1,'contact':1} }], as: 'fulfillments'}}";
-    	String query4 = "{$lookup: {from: 'bb_admin_panel_vendors_products',localField: 'id',foreignField: 'vendorId',pipeline: [{$project: {'_id': 0,'id':1,'descriptor':1,'tags':1,'quantity': 1,'price':1,'time':1,'category_id':1,'category_ids':1,'fulfillment_id':1,'location_id':1,'related':1,'recommended':1,'@ondc/org/returnable':1,'@ondc/org/cancellable':1,'@ondc/org/return_window':1 ,'@ondc/org/seller_pickup_return':1,'@ondc/org/time_to_ship':1,'@ondc/org/available_on_cod':1,'@ondc/org/contact_details_consumer_care\':1  } }], as: 'itemsMain'}}";
-    	String query8 = "{$lookup: {from: 'bb_admin_panel_vendors_categories',localField: 'id',foreignField: 'parent_category_id',pipeline: [{$project: {'_id': 0,'id':1,'parent_category_id':1,'descriptor':1,'tags':1} }],as: 'categoriesMain'}}";
-    	String query5 = "{$lookup: {from: 'bb_admin_panel_vendors_custom_groups',localField: 'itemsMain.id',foreignField: 'parentProductId',pipeline: [{$project: {'_id': 0,'id':1,'descriptor':1,'tags':1} }], as: 'customGroups'}}";
-    	String query6 = "{$lookup: {from: 'bb_admin_panel_vendors_items',localField: 'itemsMain.id',foreignField: 'parentItemId',pipeline: [{$project: {'_id': 0,'id':1,'descriptor':1,'tags':1,'quantity': 1,'price':1,'catgory_id':1,'related':1 } }], as: 'itemCollection'}}";
+	public List<Object> getFulfillmentChannels(String item, String city) {
+		System.out.println("enter:" + Instant.now());
+		String query1 = "{$lookup: {from: 'bb_admin_panel_vendors_locations',localField: 'locationsId',foreignField: 'id',pipeline: [{$project: {'_id':0,'id': 1, 'address': 1,'time':1,'gps':'$circle.gps','circle':1} }], as: 'locations'}},";
+		String query2 = "{$lookup: {from: 'bb_admin_panel_vendors_locations',localField: 'locationsId',foreignField: 'id',pipeline: [{$project: {'_id':0,'tags': 1 } }], as: 'vendorTags'}},";
+		String query4 = "{$lookup: {from: 'bb_admin_panel_vendors_products', localField: 'id', foreignField: 'vendorId', pipeline: [{$match: {'descriptor.name': {$regex: '.*"
+				+ item
+				+ ".*', $options: 'i'}}}, {$project: {'_id': 0, 'id': 1, 'descriptor': 1, 'tags': 1, 'quantity': 1, 'price': 1, 'time': 1, 'category_id': 1, 'category_ids': 1, 'parent_category_id':1,'fulfillment_id': 1, 'location_id': 1, 'related': 1, 'recommended': 1, '@ondc/org/returnable': 1, '@ondc/org/cancellable': 1, '@ondc/org/return_window': 1, '@ondc/org/seller_pickup_return': 1, '@ondc/org/time_to_ship': 1, '@ondc/org/available_on_cod': 1, '@ondc/org/contact_details_consumer_care': 1}}], as: 'itemsMain'}}";
+		String query3 = "{$lookup: {from: 'bb_admin_panel_vendors_fulfillments',localField: 'fulfillmentsId',foreignField: 'id',pipeline: [{$project: {'_id': 0,'id':'$defaultId','type':1,'contact':1} }], as: 'fulfillments'}},";
+		String query8 = "{$lookup: {from: 'bb_admin_panel_vendors_categories',localField: 'itemsMain.parent_category_id',foreignField: 'id',pipeline: [{$project: {'_id': 0,'id':1,'parent_category_id':1,'descriptor':1,'tags':1} }],as: 'categoriesMain'}},";
+		String query5 = "{$lookup: {from: 'bb_admin_panel_vendors_custom_groups',localField: 'itemsMain.id',foreignField: 'parentProductId',pipeline: [{$project: {'_id': 0,'id':1,'descriptor':1,'tags':1} }], as: 'customGroups'}},";
+		String query6 = "{$lookup: {from: 'bb_admin_panel_vendors_items',localField: 'itemsMain.id',foreignField: 'parentItemId',pipeline: [{$project: {'_id': 0,'id':1,'descriptor':1,'tags':1,'quantity': 1,'price':1,'catgory_id':1,'related':1 } }], as: 'itemCollection'}},";
 
-    	Aggregation aggregation = Aggregation.newAggregation(
-    	    new CustomProjectAggregationOperation(query1),
-    	    new CustomProjectAggregationOperation(query2),
-    	    new CustomProjectAggregationOperation(query3),
-    	    new CustomProjectAggregationOperation(query4),
-    	    new CustomProjectAggregationOperation(query5),
-    	    new CustomProjectAggregationOperation(query6),
-    	    new CustomProjectAggregationOperation(query8),
-    	    Aggregation.unwind("vendorTags"),
-    	    Aggregation.match(Criteria.where("locations").exists(true).not().size(0)),
+		Aggregation aggregation = Aggregation.newAggregation(new CustomProjectAggregationOperation(query1),
+				new CustomProjectAggregationOperation(query2), new CustomProjectAggregationOperation(query3),
+				new CustomProjectAggregationOperation(query4),
+				Aggregation.match(Criteria.where("itemsMain.descriptor.name").is(item)),
+				new CustomProjectAggregationOperation(query5), new CustomProjectAggregationOperation(query6),
+				new CustomProjectAggregationOperation(query8), Aggregation.unwind("vendorTags"),
+				Aggregation.match(Criteria.where("locations.address.city").is(city)),
+				Aggregation.project().andExclude("_id")
+						.andInclude("id", "time", "fulfillments", "descriptor", "@ondc/org/fssai_license_no", "ttl",
+								"offers", "locations", "categories", "items", "tags:$vendorTags.tags",
+								"fulfillments.id:$fulfillments.defaultId")
+						.and(ArrayOperators.ConcatArrays.arrayOf("categoriesMain").concat("customGroups"))
+						.as("categories").and(ArrayOperators.ConcatArrays.arrayOf("itemsMain").concat("itemCollection"))
+						.as("items"));
 
-    	    Aggregation.project()
-    	        .andExclude("_id")
-    	        .andInclude("id","time", "fulfillments", "descriptor", "@ondc/org/fssai_license_no", "ttl", "offers", "locations","categories","items", "tags:$vendorTags.tags")
-    	        .and(ArrayOperators.ConcatArrays.arrayOf("categoriesMain").concat("customGroups")).as("categories")
-    	        .and(ArrayOperators.ConcatArrays.arrayOf("itemsMain").concat("itemCollection")).as("items")
-    	);
+		AggregationResults<Object> results = mongoTemplate.aggregate(aggregation, "bb_admin_panel_vendors",
+				Object.class);
+		List<Object> resultDtoString = results.getMappedResults();
+		System.out.println("exit:" + Instant.now());
+		return resultDtoString;
+	}
 
-    	AggregationResults<Object> results = mongoTemplate.aggregate(aggregation, "bb_admin_panel_vendors", Object.class);
-    	List<Object> resultDtoString = results.getMappedResults();
-    	System.out.println("exit:"+Instant.now());
-    	return resultDtoString;
+	// commenting to introduce category and fulfillment filtering, it is the next
+	// function
+//    public List<Object> getByCity( 
+//    	    String city,
+//    	    String category) {
+//    	System.out.println("enter:"+Instant.now());
+//    	
+//    	
+//    		String query1 ="{$lookup: {from: 'bb_admin_panel_vendors_locations',localField: 'locationsId',foreignField: 'id',pipeline: [{$project: {'_id':0,'id': 1, 'address': 1,'time':1,'gps':'$circle.gps','circle':1} }], as: 'locations'}},";
+//    	    String query2 ="{$lookup: {from: 'bb_admin_panel_vendors_locations',localField: 'locationsId',foreignField: 'id',pipeline: [{$project: {'_id':0,'tags': 1 } }], as: 'vendorTags'}},";
+//    	    String query4 ="{$lookup: {from: 'bb_admin_panel_vendors_products',localField: 'id',foreignField: 'vendorId',pipeline: [{$project: {'_id': 0,'id':1,'descriptor':1,'tags':1,'quantity': 1,'price':1,'time':1,'category_id':1,'category_ids':1,'fulfillment_id':1,'location_id':1,'related':1,'recommended':1,'@ondc/org/returnable':1,'@ondc/org/cancellable':1,'@ondc/org/return_window':1 ,'@ondc/org/seller_pickup_return':1,'@ondc/org/time_to_ship':1,'@ondc/org/available_on_cod':1,'@ondc/org/contact_details_consumer_care\':1  } }], as: 'itemsMain'}},";
+//    	    String query3 ="{$lookup: {from: 'bb_admin_panel_vendors_fulfillments',localField: 'fulfillmentsId',foreignField: 'id',pipeline: [{$project: {'_id': 0,'id':1,'type':1,'contact':1} }], as: 'fulfillments'}},";
+//    	    String query8 ="{$lookup: {from: 'bb_admin_panel_vendors_categories',localField: 'itemsMain.parent_category_id',foreignField: 'id',pipeline: [{$project: {'_id': 0,'id':1,'parent_category_id':1,'descriptor':1,'tags':1} }],as: 'categoriesMain'}},";
+//    	    String query5 ="{$lookup: {from: 'bb_admin_panel_vendors_custom_groups',localField: 'itemsMain.id',foreignField: 'parentProductId',pipeline: [{$project: {'_id': 0,'id':1,'descriptor':1,'tags':1} }], as: 'customGroups'}},";
+//    	    String query6 ="{$lookup: {from: 'bb_admin_panel_vendors_items',localField: 'itemsMain.id',foreignField: 'parentItemId',pipeline: [{$project: {'_id': 0,'id':1,'descriptor':1,'tags':1,'quantity': 1,'price':1,'catgory_id':1,'related':1 } }], as: 'itemCollection'}},";
+//    	 
+//    	    Aggregation aggregation = Aggregation.newAggregation(
+// 	    		new CustomProjectAggregationOperation(query1),
+// 	    		new CustomProjectAggregationOperation(query2),
+// 	    		new CustomProjectAggregationOperation(query3),
+// 	    		new CustomProjectAggregationOperation(query4),
+// 	    		new CustomProjectAggregationOperation(query5),
+// 	    		new CustomProjectAggregationOperation(query6),
+// 	            new CustomProjectAggregationOperation(query8),
+// 	            Aggregation.unwind("vendorTags"),
+// 	            Aggregation.match(Criteria.where("locations.address.city").is(city)),
+// 	            Aggregation.project()
+//	                .andExclude("_id")
+//	                .andInclude("id","time", "fulfillments", "descriptor", "@ondc/org/fssai_license_no", "ttl", "offers", "locations","categories","items", "tags:$vendorTags.tags")
+//	                .and(ArrayOperators.ConcatArrays.arrayOf("categoriesMain").concat("customGroups")).as("categories")
+//	                .and(ArrayOperators.ConcatArrays.arrayOf("itemsMain").concat("itemCollection")).as("items")
+// 	    		);
+//    	
+//    	    AggregationResults<Object> results = 
+//        	        mongoTemplate.aggregate(aggregation, "bb_admin_panel_vendors", Object.class);
+//        	    List<Object> resultDtoString=results.getMappedResults();
+//        	    System.out.println("exit:"+Instant.now());
+//        	    return resultDtoString;            
+//    	}
+	// New function for CITY to include category and ftype filtering
+	public List<Object> getByCity(String city, String category, String fulfillmentType) {
+		System.out.println("enter:" + Instant.now());
 
-         
-    	} 
+		String matchCategory = "";
+		if (category != null && !category.isEmpty()) {
+			matchCategory = String.format("{$match: {category_id: '%s'}},", category);
+		}
+
+		String query1 = "{$lookup: {from: 'bb_admin_panel_vendors_locations',localField: 'locationsId',foreignField: 'id',pipeline: [{$project: {'_id':0,'id': 1, 'address': 1,'time':1,'gps':'$circle.gps','circle':1} }], as: 'locations'}},";
+		String query2 = "{$lookup: {from: 'bb_admin_panel_vendors_locations',localField: 'locationsId',foreignField: 'id',pipeline: [{$project: {'_id':0,'tags': 1 } }], as: 'vendorTags'}},";
+		String query4 = String.format("{$lookup: {from: 'bb_admin_panel_vendors_products'," + "localField: 'id',"
+				+ "foreignField: 'vendorId',"
+				+ "pipeline: [%s{$project: {'_id': 0,'id':1,'descriptor':1,'tags':1,'quantity':1,'price':1,'time':1,'category_id':1,'category_ids':1,'fulfillment_id':1,'location_id':1,'related':1,'recommended':1,'@ondc/org/returnable':1,'@ondc/org/cancellable':1,'@ondc/org/return_window':1,'@ondc/org/seller_pickup_return':1,'@ondc/org/time_to_ship':1,'@ondc/org/available_on_cod':1,'@ondc/org/contact_details_consumer_care':1}}],"
+				+ "as: 'itemsMain'}}", matchCategory);
+		String query3 = "{$lookup: {from: 'bb_admin_panel_vendors_fulfillments',localField: 'fulfillmentsId',foreignField: 'id',pipeline: [{$project: {'_id': 0,'id':1,'type':1,'contact':1} }], as: 'fulfillments'}},";
+		String query8 = "{$lookup: {from: 'bb_admin_panel_vendors_categories',localField: 'itemsMain.parent_category_id',foreignField: 'id',pipeline: [{$project: {'_id': 0,'id':1,'parent_category_id':1,'descriptor':1,'tags':1} }],as: 'categoriesMain'}},";
+		String query5 = "{$lookup: {from: 'bb_admin_panel_vendors_custom_groups',localField: 'itemsMain.id',foreignField: 'parentProductId',pipeline: [{$project: {'_id': 0,'id':1,'descriptor':1,'tags':1} }], as: 'customGroups'}},";
+		String query6 = "{$lookup: {from: 'bb_admin_panel_vendors_items',localField: 'itemsMain.id',foreignField: 'parentItemId',pipeline: [{$project: {'_id': 0,'id':1,'descriptor':1,'tags':1,'quantity': 1,'price':1,'catgory_id':1,'related':1 } }], as: 'itemCollection'}},";
+
+		List<AggregationOperation> ops = new ArrayList<>();
+		ops.add(new CustomProjectAggregationOperation(query1));
+		ops.add(new CustomProjectAggregationOperation(query2));
+		ops.add(new CustomProjectAggregationOperation(query3));
+		ops.add(new CustomProjectAggregationOperation(query4));
+		ops.add(new CustomProjectAggregationOperation(query5));
+		ops.add(new CustomProjectAggregationOperation(query6));
+		ops.add(new CustomProjectAggregationOperation(query8));
+		ops.add(Aggregation.unwind("vendorTags"));
+		ops.add(Aggregation.match(Criteria.where("locations.address.city").is(city)));
+
+		if (fulfillmentType != null && !fulfillmentType.isEmpty()) {
+			ops.add(Aggregation.match(Criteria.where("fulfillments.type").is(fulfillmentType)));
+		}
+
+		ops.add(Aggregation.project().andExclude("_id")
+				.andInclude("id", "time", "fulfillments", "descriptor", "@ondc/org/fssai_license_no", "ttl", "offers",
+						"locations", "categories", "items", "tags:$vendorTags.tags")
+				.and(ArrayOperators.ConcatArrays.arrayOf("categoriesMain").concat("customGroups")).as("categories")
+				.and(ArrayOperators.ConcatArrays.arrayOf("itemsMain").concat("itemCollection")).as("items"));
+
+		Aggregation aggregation = Aggregation.newAggregation(ops);
+		AggregationResults<Object> results = mongoTemplate.aggregate(aggregation, "bb_admin_panel_vendors",
+				Object.class);
+		List<Object> resultDtoString = results.getMappedResults();
+		System.out.println("exit:" + Instant.now());
+		return resultDtoString;
+
+	}
+
+	public static List<Object> getByItem(String item, String city, String latitude, String longitude,
+			String maxDistance, String fulfillmentType, String areaCode) {
+
+		System.out.println("enter:" + Instant.now());
+		List<Object> resultDtoString = null;
+
+		try {
+			String geoNearQuery = "{$geoNear: {near: { type: 'Point', coordinates: [" + latitude + "," + longitude
+					+ "] }, " + "distanceField: 'dist.calculated', maxDistance:" + maxDistance + ", spherical: true }}";
+
+			String query1 = "{$lookup: {from: 'bb_admin_panel_vendors_locations', let: { locationId: '$locationsId' }, pipeline: ["
+					+ geoNearQuery + ", {$match: {$expr: {$eq: ['$id', '$$locationId']}}},"
+					+ "{$project: {_id: 0, id: 1, address: 1, time: 1, gps:'$circle.gps', circle:1}}], as: 'locations'}}";
+
+			String query2 = "{$lookup: {from: 'bb_admin_panel_vendors_locations', localField: 'locationsId', foreignField: 'id',"
+					+ " pipeline: [{$project: {_id: 0, tags: 1}}], as: 'vendorTags'}}";
+
+			String query3 = "{$lookup: {from: 'bb_admin_panel_vendors_fulfillments', localField: 'fulfillmentsId', foreignField: 'id',"
+					+ " pipeline: [{$project: {_id:0, id:'$defaultId', type:1, contact:1}}], as: 'fulfillments'}}";
+
+			String query4 = "{$lookup: {from: 'bb_admin_panel_vendors_products', localField: 'locations.id', foreignField: 'location_id',"
+					+ " pipeline: [{$match: {'descriptor.name': {$regex: '.*" + item + ".*', $options: 'i'}}},"
+					+ "{$project: {_id:0, id:1, descriptor:1, tags:1, quantity:1, price:1, time:1, category_id:1, category_ids:1, parent_category_id:1,"
+					+ " fulfillment_id:1, location_id:1, related:1, recommended:1,"
+					+ " '@ondc/org/returnable':1,'@ondc/org/cancellable':1,'@ondc/org/return_window':1,"
+					+ " '@ondc/org/seller_pickup_return':1,'@ondc/org/time_to_ship':1,'@ondc/org/available_on_cod':1,"
+					+ " '@ondc/org/contact_details_consumer_care':1}}], as: 'itemsMain'}}";
+
+			String query5 = "{$lookup: {from: 'bb_admin_panel_vendors_custom_groups', localField: 'itemsMain.id', foreignField: 'parentProductId',"
+					+ " pipeline: [{$project: {_id:0, id:1, descriptor:1, tags:1}}], as: 'customGroups'}}";
+
+			String query6 = "{$lookup: {from: 'bb_admin_panel_vendors_items', localField: 'itemsMain.id', foreignField: 'parentItemId',"
+					+ " pipeline: [{$project: {_id:0, id:1, descriptor:1, tags:1, quantity:1, price:1, category_id:1, related:1}}], as: 'itemCollection'}}";
+
+			String query8 = "{$lookup: {from: 'bb_admin_panel_vendors_categories', localField: 'itemsMain.parent_category_id', foreignField: 'id',"
+					+ " pipeline: [{$project: {_id:0, id:1, parent_category_id:1, descriptor:1, tags:1}}], as: 'categoriesMain'}}";
+
+			String unsetParentCategoryId = "{$unset: ['items.parent_category_id']}";
+
+			// --- build pipeline ---
+			List<AggregationOperation> ops = new ArrayList<>();
+			ops.add(new CustomProjectAggregationOperation(query1));
+			ops.add(new CustomProjectAggregationOperation(query2));
+			ops.add(new CustomProjectAggregationOperation(query3));
+			ops.add(new CustomProjectAggregationOperation(query4));
+			ops.add(Aggregation.match(Criteria.where("itemsMain.descriptor.name").is(item)));
+			ops.add(new CustomProjectAggregationOperation(query5));
+			ops.add(new CustomProjectAggregationOperation(query6));
+			ops.add(new CustomProjectAggregationOperation(query8));
+			ops.add(Aggregation.unwind("vendorTags"));
+
+			ops.add(Aggregation.match(Criteria.where("locations.address.city").is(city)));
+
+			if (areaCode != null && !areaCode.isEmpty()) {
+				ops.add(Aggregation.match(Criteria.where("locations.address.area_code").is(areaCode)));
+			}
+
+			if (fulfillmentType != null && !fulfillmentType.isEmpty()) {
+				ops.add(Aggregation.match(Criteria.where("fulfillments.type").is(fulfillmentType)));
+			}
+
+			// projection
+			ops.add(Aggregation.project().andExclude("_id")
+					.andInclude("id", "time", "fulfillments", "descriptor", "@ondc/org/fssai_license_no", "ttl",
+							"offers", "locations", "categories", "items", "tags")
+					.and("vendorTags.tags").as("tags")
+					.and(ArrayOperators.ConcatArrays.arrayOf("categoriesMain").concat("customGroups")).as("categories")
+					.and(ArrayOperators.ConcatArrays.arrayOf("itemsMain").concat("itemCollection")).as("items"));
+			ops.add(new CustomProjectAggregationOperation(unsetParentCategoryId));
+
+			Aggregation aggregation = Aggregation.newAggregation(ops);
+
+			AggregationResults<Object> results = mongoTemplate.aggregate(aggregation, "bb_admin_panel_vendors",
+					Object.class);
+
+			resultDtoString = results.getMappedResults();
+			System.out.println("exit:" + Instant.now());
+			return resultDtoString;
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return resultDtoString;
+	}
+
+	// COMMENTED, for adding category type, areacode etc.
+//	public static List<Object> getByItem(String item, String city) {
+//
+//		System.out.println("enter:" + Instant.now());
+//		List<Object> resultDtoString = null;
+//		try {
+//
+//			String query1 = "{$lookup: {from: 'bb_admin_panel_vendors_locations', localField: 'locationsId', foreignField: 'id', pipeline: [{$project: {_id: 0, id: 1, address: 1, time: 1, 'gps': '$circle.gps', circle: 1}}], as: 'locations'}}";
+//			String query2 = "{$lookup: {from: 'bb_admin_panel_vendors_locations', localField: 'locationsId', foreignField: 'id', pipeline: [{$project: {_id: 0, tags: 1}}], as: 'vendorTags'}}";
+//			String query3 = "{$lookup: {from: 'bb_admin_panel_vendors_fulfillments', localField: 'fulfillmentsId', foreignField: 'id', pipeline: [{$project: {_id: 0, id: '$defaultId', type: 1, contact: 1}}], as: 'fulfillments'}}";
+//			String query4 = "{$lookup: {from: 'bb_admin_panel_vendors_products', localField: 'id', foreignField: 'vendorId', pipeline: [{$match: {'descriptor.name': {$regex: '.*"
+//					+ item
+//					+ ".*', $options: 'i'}}}, {$project: {'_id': 0, 'id': 1, 'descriptor': 1, 'tags': 1, 'quantity': 1, 'price': 1, 'time': 1, 'category_id': 1, 'category_ids': 1, 'parent_category_id':1,'fulfillment_id': 1, 'location_id': 1, 'related': 1, 'recommended': 1, '@ondc/org/returnable': 1, '@ondc/org/cancellable': 1, '@ondc/org/return_window': 1, '@ondc/org/seller_pickup_return': 1, '@ondc/org/time_to_ship': 1, '@ondc/org/available_on_cod': 1, '@ondc/org/contact_details_consumer_care': 1}}], as: 'itemsMain'}}";
+//			String query5 = "{$lookup: {from: 'bb_admin_panel_vendors_custom_groups', localField: 'itemsMain.id', foreignField: 'parentProductId', pipeline: [{$project: {_id: 0, id: 1, descriptor: 1, tags: 1}}], as: 'customGroups'}}";
+//			String query6 = "{$lookup: {from: 'bb_admin_panel_vendors_items', localField: 'itemsMain.id', foreignField: 'parentItemId', pipeline: [{$project: {_id: 0, id: 1, descriptor: 1, tags: 1, quantity: 1, price: 1, category_id: 1, related: 1}}], as: 'itemCollection'}}";
+//			String query8 = "{$lookup: {from: 'bb_admin_panel_vendors_categories', localField: 'itemsMain.parent_category_id', foreignField: 'id', pipeline: [{$project: {_id: 0, id: 1, parent_category_id: 1, descriptor: 1, tags: 1}}], as: 'categoriesMain'}}";
+//			String unsetParentCategoryId = "{$unset: ['items.parent_category_id']}";
+//
+//			Aggregation aggregation = Aggregation.newAggregation(new CustomProjectAggregationOperation(query1),
+//					new CustomProjectAggregationOperation(query2), new CustomProjectAggregationOperation(query3),
+//					new CustomProjectAggregationOperation(query4),
+//					Aggregation.match(Criteria.where("itemsMain.descriptor.name").is(item)),
+//					new CustomProjectAggregationOperation(query5), new CustomProjectAggregationOperation(query6),
+//					new CustomProjectAggregationOperation(query8), Aggregation.unwind("vendorTags"),
+//					Aggregation.match(Criteria.where("locations.address.city").is(city)),
+//					Aggregation.project().andExclude("_id")
+//							.andInclude("id", "time", "fulfillments", "descriptor", "@ondc/org/fssai_license_no", "ttl",
+//									"offers", "locations", "categories", "items", "tags")
+//							.and("vendorTags.tags").as("tags")
+//							.and(ArrayOperators.ConcatArrays.arrayOf("categoriesMain").concat("customGroups"))
+//							.as("categories")
+//							.and(ArrayOperators.ConcatArrays.arrayOf("itemsMain").concat("itemCollection")).as("items"),
+//					new CustomProjectAggregationOperation(unsetParentCategoryId)
+//
+//			);
+//
+//			AggregationResults<Object> results = mongoTemplate.aggregate(aggregation, "bb_admin_panel_vendors",
+//					Object.class);
+//			resultDtoString = results.getMappedResults();
+//
+//			System.out.println("exit:" + Instant.now());
+//			return resultDtoString;
+//
+//		} catch (Exception e) {
+////	        	SearchRestaurantSeller.log.info(" Exception while fetching the records for method getByItem for search API");
+//			e.printStackTrace();
+//		}
+////		 SearchRestaurantSeller.log.info(" Exiting the getByItem metod of SearchRestaurantSeller class");
+//		return resultDtoString;
+//
+//	}
+
+	public List<Object> getFulfillmentChannelsByGeoLocation(String Latitude, String Longitude, String maxDistance) {
+		String fulfillmentType="Delivery";
+		String areaCode="851118";
+		String geoNearQuery = "{$geoNear: {near: { type: 'Point', coordinates: [" + Latitude + "," + Longitude
+				+ "] }, distanceField: 'dist.calculated', maxDistance:" + maxDistance + ", spherical: true }}";
+		// location lookup + area code filter (optional)
+		String areaCodeMatch = "";
+		if (areaCode != null && !areaCode.isEmpty()) {
+			areaCodeMatch = ", { $match: { 'address.area_code': '" + areaCode + "' } }";
+		}
+
+//		String query1 = "{$lookup: {from: 'bb_admin_panel_vendors_locations', let: { locationId: '$locationsId' }, pipeline: ["
+//				+ geoNearQuery
+//				+ ",{$match: {$expr: {$eq: ['$id', '$$locationId']}}},{$project: {'_id':0,'id': 1, 'address': 1,'time':1,'gps':'$circle.gps','circle':1} }], as: 'locations'}}";
+		String query1 = "{$lookup: {" + "from: 'bb_admin_panel_vendors_locations',"
+				+ "let: { locationId: '$locationsId' }," + "pipeline: [" + geoNearQuery + ","
+				+ "{$match: {$expr: {$eq: ['$id', '$$locationId']}}}" + areaCodeMatch + ","
+				+ "{$project: {_id:0,id:1,address:1,time:1,gps:'$circle.gps',circle:1}}" + "]," + "as: 'locations'"
+				+ "}}";
+
+		String query2 = "{$lookup: {from: 'bb_admin_panel_vendors_locations',localField: 'locationsId',foreignField: 'id',pipeline: [{$project: {'_id':0,'tags': 1 } }], as: 'vendorTags'}}";
+		// fulfillments lookup + optional filter by type
+		String fulfillmentMatch = "";
+		if (fulfillmentType != null && !fulfillmentType.isEmpty()) {
+			fulfillmentMatch = ", { $match: { type: '" + fulfillmentType + "' } }";
+		}
+		String query3 = "{$lookup: {" + "from: 'bb_admin_panel_vendors_fulfillments'," + "localField: 'fulfillmentsId',"
+				+ "foreignField: 'id'," + "pipeline: [" + "{$project: {_id:0,id:1,type:1,contact:1}}" + fulfillmentMatch
+				+ // ✅ optional fulfillment type filter
+				"]," + "as: 'fulfillments'" + "}}";
+//		String query3 = "{$lookup: {from: 'bb_admin_panel_vendors_fulfillments',localField: 'fulfillmentsId',foreignField: 'id',pipeline: [{$project: {'_id': 0,'id':1,'type':1,'contact':1} }], as: 'fulfillments'}}";
+		String query4 = "{$lookup: {from: 'bb_admin_panel_vendors_products',localField: 'id',foreignField: 'vendorId',pipeline: [{$project: {'_id': 0,'id':1,'descriptor':1,'tags':1,'quantity': 1,'price':1,'time':1,'category_id':1,'category_ids':1,'fulfillment_id':1,'location_id':1,'related':1,'recommended':1,'@ondc/org/returnable':1,'@ondc/org/cancellable':1,'@ondc/org/return_window':1 ,'@ondc/org/seller_pickup_return':1,'@ondc/org/time_to_ship':1,'@ondc/org/available_on_cod':1,'@ondc/org/contact_details_consumer_care\':1  } }], as: 'itemsMain'}}";
+		String query8 = "{$lookup: {from: 'bb_admin_panel_vendors_categories',localField: 'id',foreignField: 'parent_category_id',pipeline: [{$project: {'_id': 0,'id':1,'parent_category_id':1,'descriptor':1,'tags':1} }],as: 'categoriesMain'}}";
+		String query5 = "{$lookup: {from: 'bb_admin_panel_vendors_custom_groups',localField: 'itemsMain.id',foreignField: 'parentProductId',pipeline: [{$project: {'_id': 0,'id':1,'descriptor':1,'tags':1} }], as: 'customGroups'}}";
+		String query6 = "{$lookup: {from: 'bb_admin_panel_vendors_items',localField: 'itemsMain.id',foreignField: 'parentItemId',pipeline: [{$project: {'_id': 0,'id':1,'descriptor':1,'tags':1,'quantity': 1,'price':1,'catgory_id':1,'related':1 } }], as: 'itemCollection'}}";
+		String query7 = "{$lookup: {from: 'bb_admin_panel_vendors_offers',localField: 'id',foreignField: 'vendorId',pipeline: [{$project: {'_id': 0,'id':1,'descriptor':1,'tags':1,'name' : 1 } }], as: 'offers'}}";
+
+		Aggregation aggregation = Aggregation.newAggregation(new CustomProjectAggregationOperation(query1),
+				new CustomProjectAggregationOperation(query2), new CustomProjectAggregationOperation(query3),
+				new CustomProjectAggregationOperation(query4), new CustomProjectAggregationOperation(query5),
+				new CustomProjectAggregationOperation(query6), new CustomProjectAggregationOperation(query7),
+				new CustomProjectAggregationOperation(query8), Aggregation.unwind("vendorTags"),
+				Aggregation.match(Criteria.where("locations").exists(true).not().size(0)),
+
+				Aggregation.project().andExclude("_id")
+						.andInclude("id", "time", "fulfillments", "descriptor", "@ondc/org/fssai_license_no", "ttl",
+								"offers", "locations", "categories", "items", "tags:$vendorTags.tags")
+						.and(ArrayOperators.ConcatArrays.arrayOf("categoriesMain").concat("customGroups"))
+						.as("categories").and(ArrayOperators.ConcatArrays.arrayOf("itemsMain").concat("itemCollection"))
+						.as("items"));
+
+		AggregationResults<Object> results = mongoTemplate.aggregate(aggregation, "bb_admin_panel_vendors",
+				Object.class);
+		List<Object> resultDtoString = results.getMappedResults();
+		System.out.println("exit:" + Instant.now());
+		return resultDtoString;
+
+	}
 
 //    working, commented due to testing with implemetation of ondc
 //    public static List<Object> getByItemAndCity(String item, String city) {
@@ -212,93 +422,60 @@ public class bbdataService {
 //		}
 //		
 //    }   
-    
-    // code of actual implementation
-    public static List<Object> getByItemAndCity( String item,String city) {
- 	   
+
+	// code of actual implementation
+	public static List<Object> getByItemAndCity(String item, String city) {
+
 //	    SearchRestaurantSeller.log.info(" Inside the getByItem metod of SearchRestaurantSeller class");
-		System.out.println("enter:"+Instant.now());
-		List<Object> resultDtoString=null;
-		 try {
-//			String query1 ="{$lookup: {from: 'bb_admin_panel_vendors_locations',localField: 'locationsId',foreignField: 'id',pipeline: [{$project: {'_id':0,'id': 1, 'address': 1,'time':1,'gps':'$circle.gps','circle':1} }], as: 'locations'}},";
-//		    String query2 ="{$lookup: {from: 'bb_admin_panel_vendors_locations',localField: 'locationsId',foreignField: 'id',pipeline: [{$project: {'_id':0,'tags': 1 } }], as: 'vendorTags'}},";
-//		    String query4 = "{$lookup: {from: 'bb_admin_panel_vendors_products', localField: 'id', foreignField: 'vendorId', pipeline: [{$match: {'descriptor.name': {$regex: '.*"+item+".*', $options: 'i'}}}, {$project: {'_id': 0, 'id': 1, 'descriptor': 1, 'tags': 1, 'quantity': 1, 'price': 1, 'time': 1, 'category_id': 1, 'category_ids': 1, 'parent_category_id':1,'fulfillment_id': 1, 'location_id': 1, 'related': 1, 'recommended': 1, '@ondc/org/returnable': 1, '@ondc/org/cancellable': 1, '@ondc/org/return_window': 1, '@ondc/org/seller_pickup_return': 1, '@ondc/org/time_to_ship': 1, '@ondc/org/available_on_cod': 1, '@ondc/org/contact_details_consumer_care': 1}}], as: 'itemsMain'}}";
-//		    String query3 ="{$lookup: {from: 'bb_admin_panel_vendors_fulfillments',localField: 'fulfillmentsId',foreignField: 'id',pipeline: [{$project: {'_id': 0,'id':'$defaultId','type':1,'contact':1} }], as: 'fulfillments'}},";
-//		    String query8 ="{$lookup: {from: 'bb_admin_panel_vendors_categories',localField: 'itemsMain.parent_category_id',foreignField: 'id',pipeline: [{$project: {'_id': 0,'id':1,'parent_category_id':1,'descriptor':1,'tags':1} }],as: 'categoriesMain'}},";
-//		    String query5 ="{$lookup: {from: 'bb_admin_panel_vendors_custom_groups',localField: 'itemsMain.id',foreignField: 'parentProductId',pipeline: [{$project: {'_id': 0,'id':1,'descriptor':1,'tags':1} }], as: 'customGroups'}},";
-//		    String query6 ="{$lookup: {from: 'bb_admin_panel_vendors_items',localField: 'itemsMain.id',foreignField: 'parentItemId',pipeline: [{$project: {'_id': 0,'id':1,'descriptor':1,'tags':1,'quantity': 1,'price':1,'category_id':1,'related':1 } }], as: 'itemCollection'}},";
-//		 
-//		    Aggregation aggregation = Aggregation.newAggregation(
-//		    		new CustomProjectAggregationOperation(query1),
-//		    		new CustomProjectAggregationOperation(query2),
-//		    		new CustomProjectAggregationOperation(query3),
-//		    		new CustomProjectAggregationOperation(query4),
-//		    	    Aggregation.match(Criteria.where("itemsMain.descriptor.name").is(item)),
-//		    		new CustomProjectAggregationOperation(query5),
-//		    		new CustomProjectAggregationOperation(query6),
-//		            new CustomProjectAggregationOperation(query8),
-//		            Aggregation.unwind("vendorTags"),
-//		            Aggregation.match(Criteria.where("locations.address.city").is(city)),
-//		            Aggregation.project()
-//	               .andExclude("_id")
-//	               .andInclude("id","time", "fulfillments", "descriptor", "@ondc/org/fssai_license_no", "ttl", "offers", "locations","categories","items", "tags:$vendorTags.tags")
-//	               .and(ArrayOperators.ConcatArrays.arrayOf("categoriesMain").concat("customGroups")).as("categories")
-//	               .and(ArrayOperators.ConcatArrays.arrayOf("itemsMain").concat("itemCollection")).as("items")
-//		    		);
-//		
-//		    AggregationResults<Object> results = 
-//	   	        mongoTemplate.aggregate(aggregation, "bb_admin_panel_vendors", Object.class);
-//	   	    resultDtoString=results.getMappedResults();
-			 
-			 String query1 = "{$lookup: {from: 'bb_admin_panel_vendors_locations', localField: 'locationsId', foreignField: 'id', pipeline: [{$project: {_id: 0, id: 1, address: 1, time: 1, 'gps': '$circle.gps', circle: 1}}], as: 'locations'}}";
-			 String query2 = "{$lookup: {from: 'bb_admin_panel_vendors_locations', localField: 'locationsId', foreignField: 'id', pipeline: [{$project: {_id: 0, tags: 1}}], as: 'vendorTags'}}";
-			 String query3 = "{$lookup: {from: 'bb_admin_panel_vendors_fulfillments', localField: 'fulfillmentsId', foreignField: 'id', pipeline: [{$project: {_id: 0, id: '$defaultId', type: 1, contact: 1}}], as: 'fulfillments'}}";
-			    String query4 = "{$lookup: {from: 'bb_admin_panel_vendors_products', localField: 'id', foreignField: 'vendorId', pipeline: [{$match: {'descriptor.name': {$regex: '.*"+item+".*', $options: 'i'}}}, {$project: {'_id': 0, 'id': 1, 'descriptor': 1, 'tags': 1, 'quantity': 1, 'price': 1, 'time': 1, 'category_id': 1, 'category_ids': 1, 'parent_category_id':1,'fulfillment_id': 1, 'location_id': 1, 'related': 1, 'recommended': 1, '@ondc/org/returnable': 1, '@ondc/org/cancellable': 1, '@ondc/org/return_window': 1, '@ondc/org/seller_pickup_return': 1, '@ondc/org/time_to_ship': 1, '@ondc/org/available_on_cod': 1, '@ondc/org/contact_details_consumer_care': 1}}], as: 'itemsMain'}}";
-			 String query5 = "{$lookup: {from: 'bb_admin_panel_vendors_custom_groups', localField: 'itemsMain.id', foreignField: 'parentProductId', pipeline: [{$project: {_id: 0, id: 1, descriptor: 1, tags: 1}}], as: 'customGroups'}}";
-			 String query6 = "{$lookup: {from: 'bb_admin_panel_vendors_items', localField: 'itemsMain.id', foreignField: 'parentItemId', pipeline: [{$project: {_id: 0, id: 1, descriptor: 1, tags: 1, quantity: 1, price: 1, category_id: 1, related: 1}}], as: 'itemCollection'}}";
-			 String query8 = "{$lookup: {from: 'bb_admin_panel_vendors_categories', localField: 'itemsMain.parent_category_id', foreignField: 'id', pipeline: [{$project: {_id: 0, id: 1, parent_category_id: 1, descriptor: 1, tags: 1}}], as: 'categoriesMain'}}";
-			 String unsetParentCategoryId = "{$unset: ['items.parent_category_id']}";
+		System.out.println("enter:" + Instant.now());
+		List<Object> resultDtoString = null;
+		try {
+//			
 
+			String query1 = "{$lookup: {from: 'bb_admin_panel_vendors_locations', localField: 'locationsId', foreignField: 'id', pipeline: [{$project: {_id: 0, id: 1, address: 1, time: 1, 'gps': '$circle.gps', circle: 1}}], as: 'locations'}}";
+			String query2 = "{$lookup: {from: 'bb_admin_panel_vendors_locations', localField: 'locationsId', foreignField: 'id', pipeline: [{$project: {_id: 0, tags: 1}}], as: 'vendorTags'}}";
+			String query3 = "{$lookup: {from: 'bb_admin_panel_vendors_fulfillments', localField: 'fulfillmentsId', foreignField: 'id', pipeline: [{$project: {_id: 0, id: '$defaultId', type: 1, contact: 1}}], as: 'fulfillments'}}";
+			String query4 = "{$lookup: {from: 'bb_admin_panel_vendors_products', localField: 'id', foreignField: 'vendorId', pipeline: [{$match: {'descriptor.name': {$regex: '.*"
+					+ item
+					+ ".*', $options: 'i'}}}, {$project: {'_id': 0, 'id': 1, 'descriptor': 1, 'tags': 1, 'quantity': 1, 'price': 1, 'time': 1, 'category_id': 1, 'category_ids': 1, 'parent_category_id':1,'fulfillment_id': 1, 'location_id': 1, 'related': 1, 'recommended': 1, '@ondc/org/returnable': 1, '@ondc/org/cancellable': 1, '@ondc/org/return_window': 1, '@ondc/org/seller_pickup_return': 1, '@ondc/org/time_to_ship': 1, '@ondc/org/available_on_cod': 1, '@ondc/org/contact_details_consumer_care': 1}}], as: 'itemsMain'}}";
+			String query5 = "{$lookup: {from: 'bb_admin_panel_vendors_custom_groups', localField: 'itemsMain.id', foreignField: 'parentProductId', pipeline: [{$project: {_id: 0, id: 1, descriptor: 1, tags: 1}}], as: 'customGroups'}}";
+			String query6 = "{$lookup: {from: 'bb_admin_panel_vendors_items', localField: 'itemsMain.id', foreignField: 'parentItemId', pipeline: [{$project: {_id: 0, id: 1, descriptor: 1, tags: 1, quantity: 1, price: 1, category_id: 1, related: 1}}], as: 'itemCollection'}}";
+			String query8 = "{$lookup: {from: 'bb_admin_panel_vendors_categories', localField: 'itemsMain.parent_category_id', foreignField: 'id', pipeline: [{$project: {_id: 0, id: 1, parent_category_id: 1, descriptor: 1, tags: 1}}], as: 'categoriesMain'}}";
+			String unsetParentCategoryId = "{$unset: ['items.parent_category_id']}";
 
-			 Aggregation aggregation = Aggregation.newAggregation(
-					    new CustomProjectAggregationOperation(query1),
-					    new CustomProjectAggregationOperation(query2),
-					    new CustomProjectAggregationOperation(query3),
-					    new CustomProjectAggregationOperation(query4),
-					    Aggregation.match(Criteria.where("itemsMain.descriptor.name").is(item)),
-					    new CustomProjectAggregationOperation(query5),
-					    new CustomProjectAggregationOperation(query6),
-					    new CustomProjectAggregationOperation(query8),
-					    Aggregation.unwind("vendorTags"),
-					    Aggregation.match(Criteria.where("locations.address.city").is(city)),
-					    Aggregation.project()
-					        .andExclude("_id")
-					        .andInclude("id", "time", "fulfillments", "descriptor", "@ondc/org/fssai_license_no", "ttl", "offers", "locations", "categories", "items", "tags")
-					        .and("vendorTags.tags").as("tags")
-					        .and(ArrayOperators.ConcatArrays.arrayOf("categoriesMain").concat("customGroups")).as("categories")
-					        .and(ArrayOperators.ConcatArrays.arrayOf("itemsMain").concat("itemCollection")).as("items"),
-					    new CustomProjectAggregationOperation(unsetParentCategoryId)
+			Aggregation aggregation = Aggregation.newAggregation(new CustomProjectAggregationOperation(query1),
+					new CustomProjectAggregationOperation(query2), new CustomProjectAggregationOperation(query3),
+					new CustomProjectAggregationOperation(query4),
+					Aggregation.match(Criteria.where("itemsMain.descriptor.name").is(item)),
+					new CustomProjectAggregationOperation(query5), new CustomProjectAggregationOperation(query6),
+					new CustomProjectAggregationOperation(query8), Aggregation.unwind("vendorTags"),
+					Aggregation.match(Criteria.where("locations.address.city").is(city)),
+					Aggregation.project().andExclude("_id")
+							.andInclude("id", "time", "fulfillments", "descriptor", "@ondc/org/fssai_license_no", "ttl",
+									"offers", "locations", "categories", "items", "tags")
+							.and("vendorTags.tags").as("tags")
+							.and(ArrayOperators.ConcatArrays.arrayOf("categoriesMain").concat("customGroups"))
+							.as("categories")
+							.and(ArrayOperators.ConcatArrays.arrayOf("itemsMain").concat("itemCollection")).as("items"),
+					new CustomProjectAggregationOperation(unsetParentCategoryId)
 
-					        
-					);
+			);
 
-				 AggregationResults<Object> results = mongoTemplate.aggregate(aggregation, "bb_admin_panel_vendors", Object.class);
-				 resultDtoString = results.getMappedResults();
+			AggregationResults<Object> results = mongoTemplate.aggregate(aggregation, "bb_admin_panel_vendors",
+					Object.class);
+			resultDtoString = results.getMappedResults();
 
+			System.out.println("exit:" + Instant.now());
+			return resultDtoString;
 
-	   	    
-	   	    System.out.println("exit:"+Instant.now());
-	   	    return resultDtoString;
-   	    
-		 }catch (Exception e) {
+		} catch (Exception e) {
 //	        	SearchRestaurantSeller.log.info(" Exception while fetching the records for method getByItem for search API");
-	        	e.printStackTrace();
-	     }
+			e.printStackTrace();
+		}
 //		 SearchRestaurantSeller.log.info(" Exiting the getByItem metod of SearchRestaurantSeller class");
-   	    return resultDtoString;
-       	             
-   	}
+		return resultDtoString;
 
+	}
 
 //	String query1 = "{$lookup: {from: 'bb_admin_panel_vendors_products', let: { locationId: '$locationsId' }, pipeline: [{$match: {$expr: {$eq: ['$id', '$$locationId']}}},{$project: {'_id':0,'id': 1} }], as: 'locations'}}";
 //	String query3 = "{$lookup: {from: 'bb_admin_panel_vendors_fulfillments',localField: 'fulfillmentsId',foreignField: 'id',pipeline: [{$project: {'_id': 0,'id':1,'type':1} }], as: 'fulfillments'}}";
@@ -326,33 +503,25 @@ public class bbdataService {
 //	);
 //
 //	AggregationResults<Object> results = mongoTemplate.aggregate(aggregation, "bb_admin_panel_vendors", Object.class);
-    	public List<Object> onSelectQuery() {
-	List<String> itemidsToFind = new ArrayList<>();
+	public List<Object> onSelectQuery() {
+		List<String> itemidsToFind = new ArrayList<>();
 //    itemidsToFind.add("I85");
 //    itemidsToFind.add("I83");	
-	
-	
-	String query6 ="{$lookup: {from: 'bb_admin_panel_vendors_items',localField: 'id',foreignField: 'parentItemId',pipeline: [{$project: {'_id': 0,'id':1,'descriptor':1,'tags':1,'quantity': 1,'price':1,'category_id':1,'related':1 } }], as: 'item'}},";
-	String query7 ="{$lookup: {from: 'bb_admin_panel_vendors_custom_groups',localField: 'id',foreignField: 'parentProductId',pipeline: [{$project: {'_id': 0,'id':1,'descriptor':1,'tags':1,'quantity': 1,'price':1,'category_id':1,'related':1 } }], as: 'customGroup'}},";
 
-	Aggregation aggregation = Aggregation.newAggregation(
+		String query6 = "{$lookup: {from: 'bb_admin_panel_vendors_items',localField: 'id',foreignField: 'parentItemId',pipeline: [{$project: {'_id': 0,'id':1,'descriptor':1,'tags':1,'quantity': 1,'price':1,'category_id':1,'related':1 } }], as: 'item'}},";
+		String query7 = "{$lookup: {from: 'bb_admin_panel_vendors_custom_groups',localField: 'id',foreignField: 'parentProductId',pipeline: [{$project: {'_id': 0,'id':1,'descriptor':1,'tags':1,'quantity': 1,'price':1,'category_id':1,'related':1 } }], as: 'customGroup'}},";
+
+		Aggregation aggregation = Aggregation.newAggregation(
 //			   Aggregation.match(Criteria.where("id").in(itemidsToFind)),
 
-		   new CustomProjectAggregationOperation(query6),
-		   new CustomProjectAggregationOperation(query7),
-		   Aggregation.project()
-		   .andExclude("_id")
-		   .andInclude("id","dimension","weight","item","customGroup"));
-		   
-AggregationResults<Object> results = 
-	        mongoTemplate.aggregate(aggregation, "bb_admin_panel_vendors_products", Object.class);
-	List<Object> resultDtoString = results.getMappedResults();
-	System.out.println("exit:"+Instant.now());
-	return resultDtoString;
+				new CustomProjectAggregationOperation(query6), new CustomProjectAggregationOperation(query7),
+				Aggregation.project().andExclude("_id").andInclude("id", "dimension", "weight", "item", "customGroup"));
 
-     
-	} }
+		AggregationResults<Object> results = mongoTemplate.aggregate(aggregation, "bb_admin_panel_vendors_products",
+				Object.class);
+		List<Object> resultDtoString = results.getMappedResults();
+		System.out.println("exit:" + Instant.now());
+		return resultDtoString;
 
-
-
-
+	}
+}
