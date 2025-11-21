@@ -442,6 +442,7 @@ public class Controller {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(model);
 		}
 	}
+    // adding the creds add methods
     @CrossOrigin(origins = "http://localhost:4200", allowedHeaders = { "Authorization", "Content-Type" })
     @PostMapping(path = "/kiranaCreds")
     public ResponseEntity<Object> addkiranaCreds(@RequestBody KiranaCredDto kiranaCredDto ) {
