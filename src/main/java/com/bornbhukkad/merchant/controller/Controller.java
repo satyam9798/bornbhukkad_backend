@@ -442,6 +442,24 @@ public class Controller {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(model);
 		}
 	}
+    @CrossOrigin(origins = "http://localhost:4200", allowedHeaders = { "Authorization", "Content-Type" })
+    @PostMapping(path = "/kiranaCreds")
+    public ResponseEntity<Object> addkiranaCreds(@RequestBody KiranaCredDto kiranaCredDto ) {
+        try {
+            
+            if (kiranaCredDto == null) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No data provided");
+            }
+            kiranaService.addKiranaCred(kiranaCredDto);
+
+            // Return the created request DTO
+            return ResponseEntity.status(HttpStatus.CREATED).body(kiranaCredDto);
+
+        } catch (Exception e) {
+            // Handle exceptions and return an error response
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error occurred");
+        }
+    }
 
 	@CrossOrigin(origins = "http://localhost:4200", allowedHeaders = { "Authorization", "Content-Type" })
 	@PostMapping(path = "/kiranaProduct")
