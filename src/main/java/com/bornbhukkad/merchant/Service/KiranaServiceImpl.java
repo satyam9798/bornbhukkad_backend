@@ -98,7 +98,7 @@ public class KiranaServiceImpl implements KiranaService {
 	@Autowired
 	public KiranaServiceImpl(MongoTemplate mongoTemplate, @Value("${app.service.vendorTTL}") String vendorTtl) {
 		this.vendorTtl = vendorTtl;
-//		this.mongoTemplate = mongoTemplate;
+		this.mongoTemplate = mongoTemplate;
 	}
 
 	@Override

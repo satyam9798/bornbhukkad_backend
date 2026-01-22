@@ -1,30 +1,23 @@
 package com.bornbhukkad.merchant.controller;
-import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static org.springframework.http.ResponseEntity.ok;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.function.Supplier;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -113,7 +106,7 @@ public class AuthController {
             
             if ("kirana".equals(merchantType) && kiranaUsers.findByEmail(email) != null) {
                 authenticateUser(email, data.getPassword());
-                String token = jwtTokenProvider.createToken(email, kiranaUsers.findByEmail(email).getRoles());
+                      String token = jwtTokenProvider.createToken(email, kiranaUsers.findByEmail(email).getRoles());
                 String merchantId = kiranaUsers.findByEmail(email).getMerchantId();
                 model.put("email", email);
                 model.put("merchantId", merchantId);
@@ -147,7 +140,7 @@ public class AuthController {
     }
 
     @PostMapping("/registerKirana")
-    public ResponseEntity<Map<String, String>> registerKirana(@RequestBody KiranaUser user) {
+    public ResponseEntity<Map<String, String>> registerKirana (@RequestBody KiranaUser user) {
     	try {
         return registerUser(
             () -> userService.findKiranaUserByEmail(user.getEmail()),
