@@ -48,7 +48,6 @@ import com.bornbhukkad.merchant.dto.SearchBody;
 
 
 
-@CrossOrigin(origins = "http://localhost:4200", allowedHeaders = {"Authorization", "Content-Type"})
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -73,7 +72,6 @@ public class AuthController {
     private bbdataService bbService;
     
     //test
-    @CrossOrigin(origins = "http://localhost:4200", allowedHeaders = {"Authorization", "Content-Type"})
     @SuppressWarnings("rawtypes")
     @GetMapping(path="/getByLocation")
     public ResponseEntity<Object> greetings(@RequestBody SearchBody data) {
@@ -106,7 +104,6 @@ public class AuthController {
     	return bbService.getByCity(data.getCity(), data.getCategory(), data.getType());
     }
     
-    @CrossOrigin(origins = "http://localhost:4200", allowedHeaders = {"Authorization", "Content-Type"})
     @PostMapping("/login")
     public ResponseEntity<Map<String, String>> login(@RequestBody AuthBody data) {
         try {
@@ -149,7 +146,6 @@ public class AuthController {
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, password));
     }
 
-    @CrossOrigin(origins = "http://localhost:4200", allowedHeaders = {"Authorization", "Content-Type"})
     @PostMapping("/registerKirana")
     public ResponseEntity<Map<String, String>> registerKirana(@RequestBody KiranaUser user) {
     	try {
@@ -170,7 +166,6 @@ public class AuthController {
         }
     }
 
-    @CrossOrigin(origins = "http://localhost:4200", allowedHeaders = {"Authorization", "Content-Type"})
     @PostMapping("/registerRestaurant")
     public ResponseEntity<Map<String, String>> registerRestaurant(@RequestBody RestaurantUser user) {
     	try {

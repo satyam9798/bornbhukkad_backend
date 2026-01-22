@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -21,12 +20,14 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.bornbhukkad.merchant.Service.KiranaServiceImpl;
+import com.bornbhukkad.merchant.Service.RestaurantPublicLinkService;
 import com.bornbhukkad.merchant.Service.RestaurantServiceImpl;
 import com.bornbhukkad.merchant.dto.KiranaCategoriesDto;
 import com.bornbhukkad.merchant.dto.KiranaCredDto;
@@ -56,21 +57,21 @@ import com.bornbhukkad.merchant.dto.SearchBody;
 
 @RestController
 @RequestMapping("/merchants")
-@CrossOrigin(origins = "http://localhost:4200", allowedHeaders = { "Authorization", "Content-Type" })
 public class Controller {
 
 	private static final Logger logger = LoggerFactory.getLogger(Controller.class);
 
 	private final RestaurantServiceImpl restaurantService;
 	private final KiranaServiceImpl kiranaService;
+	private final RestaurantPublicLinkService restaurantPublicLinkService;
 
 	@Autowired
-	public Controller(RestaurantServiceImpl restaurantService, KiranaServiceImpl kiranaService) {
+	public Controller(RestaurantServiceImpl restaurantService, KiranaServiceImpl kiranaService, RestaurantPublicLinkService restaurantPublicLinkService) {
 		this.restaurantService = restaurantService;
 		this.kiranaService = kiranaService;
+		this.restaurantPublicLinkService=restaurantPublicLinkService;
 	}
 
-	@CrossOrigin(origins = "http://localhost:4200", allowedHeaders = { "Authorization", "Content-Type" })
 	@PostMapping(path = "/restFulfillment")
 	public ResponseEntity<Object> addRestFulfillment(@RequestBody List<RestaurantFulfillmentDto> fulfillment) {
 		List<RestaurantFulfillmentDto> restFulfillmentDto = fulfillment;
@@ -83,7 +84,6 @@ public class Controller {
 		return ResponseEntity.status(HttpStatus.CREATED).body(fulfillment);
 	}
 
-	@CrossOrigin(origins = "http://localhost:4200", allowedHeaders = { "Authorization", "Content-Type" })
 	@PostMapping(path = "/restaurant")
 	public ResponseEntity<Object> addRestaurant(@RequestBody RestaurantDto merchant) {
 		try {
@@ -101,7 +101,6 @@ public class Controller {
 		}
 	}
 
-	@CrossOrigin(origins = "http://localhost:4200", allowedHeaders = { "Authorization", "Content-Type" })
 	@PostMapping(path = "/restaurantLocation")
 	public ResponseEntity<Object> addRestaurantLocation(@RequestBody RestaurantLocationDto location) {
 		try {
@@ -115,7 +114,6 @@ public class Controller {
 		}
 	}
 
-	@CrossOrigin(origins = "http://localhost:4200", allowedHeaders = { "Authorization", "Content-Type" })
 	@PostMapping(path = "/restaurantMinOrder")
 	public ResponseEntity<Object> updateRestMinOrder(@RequestParam("locationId") String locationId,
 			@RequestBody SearchBody data) {
@@ -129,7 +127,6 @@ public class Controller {
 		}
 	}
 
-	@CrossOrigin(origins = "http://localhost:4200", allowedHeaders = { "Authorization", "Content-Type" })
 	@PostMapping(path = "/restaurantOffer")
 	public ResponseEntity<Object> addRestaurantOffer(@RequestBody List<RestaurantOfferDto> offers) {
 		try {
@@ -142,32 +139,27 @@ public class Controller {
 		}
 	}
 
-	@CrossOrigin(origins = "http://localhost:4200", allowedHeaders = { "Authorization", "Content-Type" })
 	@GetMapping("/restaurantOffer")
 	public List<RestaurantOfferDto> getOfferByVendorId(@RequestParam("vendorId") String vendorId) {
 		return restaurantService.getOffersByVendorId(vendorId);
 	}
 
-	@CrossOrigin(origins = "http://localhost:4200", allowedHeaders = { "Authorization", "Content-Type" })
 	@GetMapping("/offer")
 	public Optional<RestaurantOfferDto> getOfferByOfferId(@RequestParam("id") String id) {
 		return restaurantService.getOfferById(id);
 	}
 
-	@CrossOrigin(origins = "http://localhost:4200", allowedHeaders = { "Authorization", "Content-Type" })
 	@PatchMapping("/offer")
 	public RestaurantOfferDto updateOfferByOfferId(@RequestParam("offerId") String id,
 			@RequestBody RestaurantOfferDto offer) {
 		return restaurantService.updateOffer(id, offer);
 	}
 
-	@CrossOrigin(origins = "http://localhost:4200", allowedHeaders = { "Authorization", "Content-Type" })
 	@DeleteMapping("/offer")
 	public void deleteOfferByOfferId(@RequestParam("offerId") String id) {
 		restaurantService.deleteOffer(id);
 	}
 
-	@CrossOrigin(origins = "http://localhost:4200", allowedHeaders = { "Authorization", "Content-Type" })
 	@PostMapping(path = "/restaurantAudience")
 	public ResponseEntity<Object> addRestaurantAudienceSegment(@RequestBody RestaurantAudienceDto audience) {
 		try {
@@ -180,20 +172,17 @@ public class Controller {
 		}
 	}
 
-	@CrossOrigin(origins = "http://localhost:4200", allowedHeaders = { "Authorization", "Content-Type" })
 	@GetMapping("/get-audience")
 	public Optional<RestaurantAudienceDto> getRestAudienceSegmentById(@RequestParam("id") String id) {
 		return restaurantService.getAudienceSegmentById(id);
 	}
 
-	@CrossOrigin(origins = "http://localhost:4200", allowedHeaders = { "Authorization", "Content-Type" })
 	@GetMapping("/get-restaurant-audience")
 	public List<RestaurantAudienceDto> getAudienceSegmentByVendorId(@RequestParam("vendorId") String vendorId) {
 //    	logger.info("search product in controller  by vendorId:"+vendorId);
 		return restaurantService.getAudienceSegmentByVendorId(vendorId);
 	}
 
-	@CrossOrigin(origins = "http://localhost:4200", allowedHeaders = { "Authorization", "Content-Type" })
 	@PostMapping(path = "/restaurantRadius")
 	public ResponseEntity<Object> updateRestRadius(@RequestParam("locationId") String locationId,
 			@RequestBody SearchBody data) {
@@ -207,7 +196,6 @@ public class Controller {
 		}
 	}
 
-	@CrossOrigin(origins = "http://localhost:4200", allowedHeaders = { "Authorization", "Content-Type" })
 	@PostMapping(path = "/restaurantCategories")
 	public ResponseEntity<Object> addRestaurantCategory(@RequestBody List<RestaurantCategoriesDto> categories) {
 		try {
@@ -228,14 +216,12 @@ public class Controller {
 		}
 	}
 
-	@CrossOrigin(origins = "http://localhost:4200", allowedHeaders = { "Authorization", "Content-Type" })
 	@GetMapping("/categories")
 	public List<RestaurantCategoriesDto> getCategoriesByVendorId(@RequestParam("vendorId") String vendorId) {
 		logger.info("search product in controller  by vendorId:" + vendorId);
 		return restaurantService.getCategoriesByVendorId(vendorId);
 	}
 
-	@CrossOrigin(origins = "http://localhost:4200", allowedHeaders = { "Authorization", "Content-Type" })
 	@PostMapping(path = "/restaurantProduct")
 	public ResponseEntity<Object> addRestaurantProduct(@RequestBody RestauranItemRequestDto restauranItemRequestDto) {
 		try {
@@ -273,35 +259,30 @@ public class Controller {
 		}
 	}
 
-	@CrossOrigin(origins = "http://localhost:4200", allowedHeaders = { "Authorization", "Content-Type" })
 	@GetMapping("/products")
 	public List<Object> getProductByVendorId(@RequestParam("vendorId") String vendorId) {
 //    	logger.info("search product in controller  by vendorId:"+vendorId);
 		return restaurantService.getProductsByVendorId(vendorId);
 	}
 
-	@CrossOrigin(origins = "http://localhost:4200", allowedHeaders = { "Authorization", "Content-Type" })
 	@GetMapping("/raw-products")
 	public List<RestaurantProductDto> getRawProductByVendorId(@RequestParam("vendorId") String vendorId) {
 //    	logger.info("search product in controller  by vendorId:"+vendorId);
 		return restaurantService.getRawProductsByVendorId(vendorId);
 	}
 
-	@CrossOrigin(origins = "http://localhost:4200", allowedHeaders = { "Authorization", "Content-Type" })
 	@GetMapping("/location")
 	public List<RestaurantLocationDto> getLocationByVendorId(@RequestParam("vendorId") String vendorId) {
 //    	logger.info("search product in controller  by vendorId:"+vendorId);
 		return restaurantService.getLocationByVendorId(vendorId);
 	}
 
-	@CrossOrigin(origins = "http://localhost:4200", allowedHeaders = { "Authorization", "Content-Type" })
 	@GetMapping("/vendor")
 	public RestaurantDto getVendorByVendorId(@RequestParam("vendorId") String vendorId) {
 //    	logger.info("search product in controller  by vendorId:"+vendorId);
 		return restaurantService.getVendorById(vendorId);
 	}
 
-	@CrossOrigin(origins = "http://localhost:4200", allowedHeaders = { "Authorization", "Content-Type" })
 	@PutMapping(path = "/restaurantProduct")
 	public ResponseEntity<Object> updateRestaurantProduct(
 			@RequestBody RestauranItemRequestDto RestauranItemRequestDto) {
@@ -352,7 +333,6 @@ public class Controller {
 		restaurantService.deleteItem(id);
 	}
 
-	@CrossOrigin(origins = "http://localhost:4200", allowedHeaders = { "Authorization", "Content-Type" })
 	@GetMapping(path = "/restDefaultCategories")
 	public List<RestaurantDefaultCategoriesDto> restDefaultCategories() {
 		try {
@@ -364,7 +344,6 @@ public class Controller {
 		}
 	}
 
-	@CrossOrigin(origins = "http://localhost:4200", allowedHeaders = { "Authorization", "Content-Type" })
 	@GetMapping(path = "/restFulfillments")
 	public List<RestaurantFulfillmentDto> restFulfillments(@RequestParam("id") String id) {
 		try {
@@ -376,7 +355,6 @@ public class Controller {
 		}
 	}
 
-	@CrossOrigin(origins = "http://localhost:4200", allowedHeaders = { "Authorization", "Content-Type" })
 	@PostMapping(path = "/restOrder")
 	public ResponseEntity<RestaurantOrderDto> createOrder(@RequestBody RestaurantOrderDto order) {
 		return ResponseEntity.ok(restaurantService.createOrder(order));
@@ -412,9 +390,23 @@ public class Controller {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error occurred");
 		}
 	}
+	
+	@GetMapping("/restaurant/public-link")
+    public ResponseEntity<?> getOrCreate(
+    		@RequestParam("vendorId") String vendorId) {
+		System.out.println("vendorId = " + vendorId);
+
+        return ResponseEntity.ok(restaurantPublicLinkService.getOrCreateLink(vendorId));
+    }
+
+    @PostMapping("/restaurant/regenerate")
+    public ResponseEntity<?> regenerate(
+    		@RequestParam("vendorId") String vendorId) {
+
+        return ResponseEntity.ok(restaurantPublicLinkService.regenerateLink(vendorId));
+    }
 	// kirana apis
 
-	@CrossOrigin(origins = "http://localhost:4200", allowedHeaders = { "Authorization", "Content-Type" })
 	@PostMapping(path = "/kirana")
 	public ResponseEntity<Object> addKirana(@RequestBody KiranaDto merchant) {
 		try {
@@ -430,7 +422,6 @@ public class Controller {
 		}
 	}
 
-	@CrossOrigin(origins = "http://localhost:4200", allowedHeaders = { "Authorization", "Content-Type" })
 	@PostMapping(path = "/kiranaLocation")
 	public ResponseEntity<Object> addKiranaLocation(@RequestBody KiranaLocationDto location) {
 		try {
@@ -443,7 +434,6 @@ public class Controller {
 		}
 	}
 
-	@CrossOrigin(origins = "http://localhost:4200", allowedHeaders = { "Authorization", "Content-Type" })
 	@PostMapping(path = "/kiranaProduct")
 	public ResponseEntity<Object> addKiranaProduct(@RequestBody KiranaItemRequestDto kiranaItemRequestDto) {
 		try {
@@ -476,25 +466,21 @@ public class Controller {
 		}
 	}
 
-	@CrossOrigin(origins = "http://localhost:4200", allowedHeaders = { "Authorization", "Content-Type" })
 	@GetMapping(path = "/kirana")
 	public KiranaDto getKiranaById(@RequestParam("id") String id) {
 		return kiranaService.getKiranaById(id);
 	}
 
-	@CrossOrigin(origins = "http://localhost:4200", allowedHeaders = { "Authorization", "Content-Type" })
 	@GetMapping(path = "/kiranaLocation")
 	public List<KiranaLocationDto> getLocationByKiranaId(@RequestParam("kiranaId") String kiranaId) {
 		return kiranaService.getLocationByKiranaId(kiranaId);
 	}
 
-	@CrossOrigin(origins = "http://localhost:4200", allowedHeaders = { "Authorization", "Content-Type" })
 	@GetMapping(path = "/kiranaProduct")
 	public List<Object> getProductsByKiranaId(@RequestParam("kiranaId") String kiranaId) {
 		return kiranaService.getProductsByKiranaId(kiranaId);
 	}
 
-	@CrossOrigin(origins = "http://localhost:4200", allowedHeaders = { "Authorization", "Content-Type" })
 	@PutMapping(path = "/kiranaProduct")
 	public ResponseEntity<Object> updateKiranaProduct(@RequestBody KiranaProductDto kiranaProductDto) {
 		try {
@@ -517,7 +503,6 @@ public class Controller {
 		}
 	}
 
-	@CrossOrigin(origins = "http://localhost:4200", allowedHeaders = { "Authorization", "Content-Type" })
 	@PostMapping(path = "/kiranaMinOrder")
 	public ResponseEntity<Object> updateKiranaMinOrder(@RequestParam("locationId") String locationId,
 			@RequestBody SearchBody data) {
@@ -531,7 +516,6 @@ public class Controller {
 		}
 	}
 
-	@CrossOrigin(origins = "http://localhost:4200", allowedHeaders = { "Authorization", "Content-Type" })
 	@PostMapping(path = "/kiranaRadius")
 	public ResponseEntity<Object> updateKiranaRadius(@RequestParam("locationId") String locationId,
 			@RequestBody SearchBody data) {
@@ -545,7 +529,6 @@ public class Controller {
 		}
 	}
 
-	@CrossOrigin(origins = "http://localhost:4200", allowedHeaders = { "Authorization", "Content-Type" })
 	@PostMapping(path = "/kiranaCategories")
 	public ResponseEntity<Object> addKiranaCategory(@RequestBody List<KiranaCategoriesDto> categories) {
 		try {
@@ -562,7 +545,6 @@ public class Controller {
 		}
 	}
 
-	@CrossOrigin(origins = "http://localhost:4200", allowedHeaders = { "Authorization", "Content-Type" })
 	@PostMapping(path = "/kiranaFulfillment")
 	public ResponseEntity<Object> addKiranaFulfillment(@RequestBody List<KiranaFulfillmentDto> fulfillment) {
 		try {
@@ -581,7 +563,6 @@ public class Controller {
 		}
 	}
 
-	@CrossOrigin(origins = "http://localhost:4200", allowedHeaders = { "Authorization", "Content-Type" })
 	@GetMapping(path = "/kiranaDefaultCategories")
 	public List<KiranaDefaultCategoriesDto> getKiranaDefaultCategories() {
 		try {
@@ -591,7 +572,6 @@ public class Controller {
 		}
 	}
 
-	@CrossOrigin(origins = "http://localhost:4200", allowedHeaders = { "Authorization", "Content-Type" })
 	@GetMapping(path = "/kiranaFulfillments")
 	public List<KiranaFulfillmentDto> kiranaFulfillments(@RequestParam("id") String id) {
 		try {
@@ -603,7 +583,6 @@ public class Controller {
 		}
 	}
 
-	@CrossOrigin(origins = "http://localhost:4200", allowedHeaders = { "Authorization", "Content-Type" })
 	@GetMapping("/kiranaCategories")
 	public List<KiranaCategoriesDto> getCategoriesByKiranaId(@RequestParam("kiranaId") String kiranaId) {
 		logger.info("search product in controller  by vendorId:" + kiranaId);
@@ -625,7 +604,6 @@ public class Controller {
 		kiranaService.deleteItem(id);
 	}
 
-	@CrossOrigin(origins = "http://localhost:4200", allowedHeaders = { "Authorization", "Content-Type" })
 	@PostMapping(path = "/KiranaOffer")
 	public ResponseEntity<Object> addKiranaOffer(@RequestBody List<KiranaOfferDto> offers) {
 		try {
@@ -638,26 +616,22 @@ public class Controller {
 		}
 	}
 
-	@CrossOrigin(origins = "http://localhost:4200", allowedHeaders = { "Authorization", "Content-Type" })
 	@GetMapping("/kiranaVendorOffer")
 	public List<KiranaOfferDto> getKiranaOfferByKiranaId(@RequestParam("kiranaId") String kiranaId) {
 		return kiranaService.getOffersByKiranaId(kiranaId);
 	}
 
-	@CrossOrigin(origins = "http://localhost:4200", allowedHeaders = { "Authorization", "Content-Type" })
 	@GetMapping("/kiranaOffer")
 	public Optional<KiranaOfferDto> getKiranaOfferByOfferId(@RequestParam("id") String id) {
 		return kiranaService.getOfferById(id);
 	}
 
-	@CrossOrigin(origins = "http://localhost:4200", allowedHeaders = { "Authorization", "Content-Type" })
 	@PatchMapping("/kiranaOffer")
 	public KiranaOfferDto updateKiranaOfferByOfferId(@RequestParam("offerId") String id,
 			@RequestBody KiranaOfferDto offer) {
 		return kiranaService.updateOffer(id, offer);
 	}
 
-	@CrossOrigin(origins = "http://localhost:4200", allowedHeaders = { "Authorization", "Content-Type" })
 	@DeleteMapping("/kiranaOffer")
 	public void deleteKiranaOfferByOfferId(@RequestParam("offerId") String id) {
 		kiranaService.deleteOffer(id);
