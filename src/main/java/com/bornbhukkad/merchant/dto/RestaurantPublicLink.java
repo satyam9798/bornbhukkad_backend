@@ -16,7 +16,7 @@ public class RestaurantPublicLink {
 
     private String restaurantId;
     private String publicLinkId;
-    private Boolean isActive;
+    private boolean isActive;
 
     @CreatedDate
     private Instant createdAt;
@@ -45,11 +45,11 @@ public class RestaurantPublicLink {
 		this.publicLinkId = publicLinkId;
 	}
 
-	public Boolean getIsActive() {
+	public boolean getIsActive() {
 		return isActive;
 	}
 
-	public void setIsActive(Boolean isActive) {
+	public void setIsActive(boolean isActive) {
 		this.isActive = isActive;
 	}
 
