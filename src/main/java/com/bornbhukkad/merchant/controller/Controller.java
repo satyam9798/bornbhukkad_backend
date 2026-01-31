@@ -104,7 +104,7 @@ public class Controller {
 	@PostMapping(path = "/restaurantLocation")
 	public ResponseEntity<Object> addRestaurantLocation(@RequestBody RestaurantLocationDto location) {
 		try {
-			// TODO: if condition for empty data
+			// TODO: if condition for empty data 
 			restaurantService.addRestaurantLocation(location);
 			return ResponseEntity.status(HttpStatus.CREATED).body(location);
 
@@ -433,7 +433,6 @@ public class Controller {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(model);
 		}
 	}
-    @CrossOrigin(origins = "http://localhost:4200", allowedHeaders = { "Authorization", "Content-Type" })
     @PostMapping(path = "/kiranaCreds")
     public ResponseEntity<Object> addkiranaCreds(@RequestBody KiranaCredDto kiranaCredDto ) {
         try {
