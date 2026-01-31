@@ -19,6 +19,7 @@ import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import java.util.ArrayList;
 //import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 //import java.util.Optional;
 import java.util.stream.Collectors;
@@ -30,6 +31,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.bornbhukkad.merchant.Configuration.NotificationHandler;
 import com.bornbhukkad.merchant.Repository.IRestaurantAudienceSegmentRepository;
 import com.bornbhukkad.merchant.Repository.IRestaurantCategoriesRepository;
 import com.bornbhukkad.merchant.Repository.IRestaurantCustomGroupRepository;
@@ -88,6 +90,9 @@ public class RestaurantServiceImpl implements RestaurantService {
 	}
 
 	private static final Logger logger = LoggerFactory.getLogger(RestaurantServiceImpl.class);
+    private NotificationHandler notificationHandler = new NotificationHandler();
+
+    
 	@Autowired
 	IRestaurantRepository restaurantRepo;
 	@Autowired
@@ -594,12 +599,41 @@ public class RestaurantServiceImpl implements RestaurantService {
 	}
 
 	public RestaurantOrderDto createOrder(RestaurantOrderDto order) {
-		order.setId("O" + sequenceGeneratorService.getSequenceNumber(restOrder_sequence));
-		order.setStatus(RestaurantOrderStatus.NEW);
-		order.setTimestamp(LocalDateTime.now());
-		order.setAcceptanceDeadline(LocalDateTime.now().plusSeconds(30));
-		return restaurantOrderRepository.save(order);
+
+	    // 1. Generate ID only if external system didn’t send it
+	    if (order.getId() == null) {
+	        order.setId("O" + sequenceGeneratorService.getSequenceNumber(
+	            RestaurantOrderDto.restOrder_sequence
+	        ));
+	    }
+
+	    // 2. Set initial state
+	    order.setStatus(RestaurantOrderStatus.NEW);
+	    order.setTimestamp(LocalDateTime.now());
+	    order.setAcceptanceDeadline(LocalDateTime.now().plusSeconds(30));
+
+	    // 3. Save first (IMPORTANT)
+	    RestaurantOrderDto savedOrder =
+	        restaurantOrderRepository.save(order);
+
+	    // 4. Send WebSocket notification (NON-BLOCKING)
+	    try {
+	        notificationHandler.sendNotificationToMerchant(
+	            savedOrder.getVendorId(),
+	            Map.of(
+	                "event", "NEW_ORDER",
+	                "order", savedOrder
+	            )
+	        );
+	    } catch (Exception e) {
+	        // ❗ Never fail order creation due to websocket
+	        LoggerFactory.getLogger(RestaurantServiceImpl.class)
+	            .error("Failed to send WS notification for order {}", savedOrder.getId(), e);
+	    }
+
+	    return savedOrder;
 	}
+
 
 	public Optional<RestaurantOrderDto> updateOrderStatus(String orderId, RestaurantOrderStatus status) {
 		Query query = new Query(Criteria.where("id").is(orderId));
