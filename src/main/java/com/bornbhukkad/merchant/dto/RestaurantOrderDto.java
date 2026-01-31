@@ -1,6 +1,7 @@
 package com.bornbhukkad.merchant.dto;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
@@ -16,6 +17,28 @@ public class RestaurantOrderDto {
 	@Field("id")
     private String id;
     private String vendorId;
+    private List<RestaurantOrderItemDto> items;
+    public List<RestaurantOrderItemDto> getItems() {
+		return items;
+	}
+	public void setItems(List<RestaurantOrderItemDto> items) {
+		this.items = items;
+	}
+	public Double getTotalAmount() {
+		return totalAmount;
+	}
+	public void setTotalAmount(Double totalAmount) {
+		this.totalAmount = totalAmount;
+	}
+	public String getPaymentMode() {
+		return paymentMode;
+	}
+	public void setPaymentMode(String paymentMode) {
+		this.paymentMode = paymentMode;
+	}
+	private Double totalAmount;
+    private String paymentMode;
+
     public String getId() {
 		return id;
 	}
@@ -49,4 +72,29 @@ public class RestaurantOrderDto {
 	private RestaurantOrderStatus status;
     private LocalDateTime timestamp;
     private LocalDateTime acceptanceDeadline;
+    
+    public static class RestaurantOrderItemDto {
+        private String itemId;
+        private String name;
+        public String getItemId() {
+			return itemId;
+		}
+		public void setItemId(String itemId) {
+			this.itemId = itemId;
+		}
+		public String getName() {
+			return name;
+		}
+		public void setName(String name) {
+			this.name = name;
+		}
+		public int getQuantity() {
+			return quantity;
+		}
+		public void setQuantity(int quantity) {
+			this.quantity = quantity;
+		}
+		private int quantity;
+    }
+
 }
