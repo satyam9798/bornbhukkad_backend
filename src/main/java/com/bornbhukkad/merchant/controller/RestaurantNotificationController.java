@@ -16,8 +16,9 @@ import com.bornbhukkad.merchant.dto.NotificationRequest;
 public class RestaurantNotificationController {
 
     
-    private NotificationHandler notificationHandler = new NotificationHandler();
-
+	@Autowired
+    private NotificationHandler notificationHandler;
+	
     @Autowired
     public void NotificationController(NotificationHandler notificationHandler) {
         this.notificationHandler = notificationHandler;

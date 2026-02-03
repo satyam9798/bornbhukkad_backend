@@ -90,8 +90,8 @@ public class RestaurantServiceImpl implements RestaurantService {
 	}
 
 	private static final Logger logger = LoggerFactory.getLogger(RestaurantServiceImpl.class);
-    private NotificationHandler notificationHandler = new NotificationHandler();
-
+	@Autowired
+    private NotificationHandler notificationHandler;
     
 	@Autowired
 	IRestaurantRepository restaurantRepo;
@@ -597,6 +597,24 @@ public class RestaurantServiceImpl implements RestaurantService {
 //				+ orderDetails;
 //		messagingTemplate.convertAndSend("/topic/restaurant/" + merchantId, notificationMessage);
 	}
+	
+	@Override
+	public List<RestaurantOrderDto> getOrdersByVendorId(String vendorId) {
+		logger.info("Get Orders in service by vendorId:" + vendorId);
+		return restaurantOrderRepository.findByVendorId(vendorId);
+	}
+
+	@Override
+	public RestaurantOrderDto getOrderById(String id) {
+	    logger.info("Get Order in service by orderId: {}", id);
+
+	    Query query = new Query(Criteria.where("id").is(id));
+	    RestaurantOrderDto order =
+	            mongoTemplate.findOne(query, RestaurantOrderDto.class);
+
+	    return order; // may be null, controller will handle
+	}
+
 
 	public RestaurantOrderDto createOrder(RestaurantOrderDto order) {
 
