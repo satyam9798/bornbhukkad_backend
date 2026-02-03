@@ -18,8 +18,18 @@ public class RestaurantItemDto {
 
     private String parentCategoryId;
     private String parentItemId;
+    // id which is linked to its custom group default id
+    private String customizationGroupId;
 
-    public String getParentItemId() {
+    public String getCustomizationGroupId() {
+		return customizationGroupId;
+	}
+
+	public void setCustomizationGroupId(String customizationGroupId) {
+		this.customizationGroupId = customizationGroupId;
+	}
+
+	public String getParentItemId() {
 		return parentItemId;
 	}
 

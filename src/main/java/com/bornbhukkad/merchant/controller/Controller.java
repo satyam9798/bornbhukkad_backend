@@ -233,13 +233,19 @@ public class Controller {
 			// Add product
 			RestaurantProductDto savedProduct = restaurantService.addRestaurantProduct(restaurantProductDto);
 
+			// defaultId (front end) -> actual DB id
+			Map<String, String> customGroupIdMap = new HashMap<>();
 			// Add custom groups and update product tags
 			if (restaurantCustomGroupDto != null && !restaurantCustomGroupDto.isEmpty()) {
 				List<String> customGroupIds = new ArrayList<>();
 				for (RestaurantCustomGroupDto dto : restaurantCustomGroupDto) {
+					String defaultId = dto.getDefaultId();
+
 					dto.setParentProductId(savedProduct.getId());
 					RestaurantCustomGroupDto savedCustomGroup = restaurantService.addRestaurantCustomGroup(dto);
 					customGroupIds.add(savedCustomGroup.getId());
+					// Build mapping
+			        customGroupIdMap.put(defaultId, savedCustomGroup.getId());
 				}
 				restaurantService.updateProductCustomGroupTags(savedProduct.getId(), customGroupIds);
 			}
@@ -247,6 +253,19 @@ public class Controller {
 			// Add items and update their tags
 			if (restaurantItemDto != null && !restaurantItemDto.isEmpty()) {
 				for (RestaurantItemDto dto : restaurantItemDto) {
+					// front end temp ID
+			        String frontendCgId = dto.getCustomizationGroupId();
+
+			        // resolve real DB ID
+			        String actualCgId = customGroupIdMap.get(frontendCgId);
+			        if (actualCgId == null) {
+			            throw new IllegalStateException(
+			                "No Custom Group found for customizationGroupId: " + frontendCgId
+			            );
+			        }
+
+			        // set resolved parent
+			        dto.setParentCategoryId(actualCgId);
 					dto.setParentItemId(savedProduct.getId());
 					restaurantService.addRestaurantItem(dto);
 				}
