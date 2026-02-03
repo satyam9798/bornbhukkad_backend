@@ -354,6 +354,28 @@ public class Controller {
 			throw new BadCredentialsException("Invalid token");
 		}
 	}
+	
+	@GetMapping("/restOrder")
+	public List<RestaurantOrderDto> getOrders(
+	        @RequestParam String vendorId) {
+		return restaurantService.getOrdersByVendorId(vendorId);
+
+	}
+	
+	@GetMapping("/restOrder/{orderId}")
+	public ResponseEntity<RestaurantOrderDto> getOrderById(
+	        @PathVariable String orderId) {
+
+	    RestaurantOrderDto order = restaurantService.getOrderById(orderId);
+
+	    if (order == null) {
+	        return ResponseEntity.notFound().build();
+	    }
+
+	    return ResponseEntity.ok(order);
+	}
+
+
 
 	@PostMapping(path = "/restOrder")
 	public ResponseEntity<RestaurantOrderDto> createOrder(@RequestBody RestaurantOrderDto order) {
@@ -363,9 +385,6 @@ public class Controller {
 	@PutMapping("/restOrder/{orderId}/status")
 	public ResponseEntity<Object> updateOrderStatus(@PathVariable String orderId,
 			@RequestParam RestaurantOrderStatus status) {
-//        restaurantService.updateOrderStatus(orderId, status)
-//            .map(ResponseEntity::ok)
-//            .orElse(ResponseEntity.notFound().build());
 		try {
 			restaurantService.updateOrderStatus(orderId, status);
 			return ResponseEntity.status(HttpStatus.CREATED).body("Success");
