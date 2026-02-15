@@ -26,18 +26,19 @@ public class KiranaOfferDto {
 		private Descriptor descriptor;
 		
 		private String audienceId;
-		private Boolean active;
+		private boolean active;
 
-		public Boolean getActive() {
-			return active;
-		}
-
-		public void setActive(Boolean active) {
-			this.active = active;
-		}
 
 		public String getAudienceId() {
 			return audienceId;
+		}
+
+		public boolean getActive() {
+			return active;
+		}
+
+		public void setActive(boolean active) {
+			this.active = active;
 		}
 
 		public void setAudienceId(String audienceId) {

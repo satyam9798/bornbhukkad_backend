@@ -9,9 +9,13 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 import com.bornbhukkad.merchant.dto.KiranaProductDto.DimensionDTO.Measurement;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Document (collection = "bb_admin_panel_vendors_products")
+@JsonIgnoreProperties(ignoreUnknown = true)          // ignore fields not present in this context
+@JsonInclude(JsonInclude.Include.NON_NULL) 
 public class RestaurantProductDto {
 	@Transient
     public static final String restProduct_sequence = "restProduct_sequence";

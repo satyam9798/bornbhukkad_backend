@@ -7,6 +7,8 @@ import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 @Document(collection = "bb_admin_panel_kirana_products")
 public class KiranaProductDto {
 	@Transient
@@ -24,7 +26,15 @@ public class KiranaProductDto {
 //    private String vendorId;
     private List<String> customizationItems;
     private String parent_category_id;
-    private String fulfillment_id;
+    private String parent_item_id;
+    public String getParent_item_id() {
+		return parent_item_id;
+	}
+	public void setParent_item_id(String parent_item_id) {
+		this.parent_item_id = parent_item_id;
+	}
+
+	private String fulfillment_id;
     private String location_id;
     private boolean related;
     private boolean recommended;
@@ -281,14 +291,6 @@ public class KiranaProductDto {
 		this.category_ids = category_ids;
 	}
 
-//	public String getVendorId() {
-//		return vendorId;
-//	}
-//
-//	public void setVendorId(String vendorId) {
-//		this.vendorId = vendorId;
-//	}
-
 	public List<String> getCustomizationItems() {
 		return customizationItems;
 	}
@@ -415,8 +417,9 @@ public class KiranaProductDto {
 	@Field("@ondc/org/available_on_cod")
     private boolean ondc_org_available_on_cod;
 	
-	@Field("@ondc/org/contact_details_consumer_care\"")
-    private String ondc_org_contact_details_consumer_care;
+	@Field("@ondc_org_contact_details_consumer_care")
+    @JsonProperty("ondc_org_contact_details_consumer_care")
+    private String ondc_org_contact_details_consumer_care;    
     private List<Tag> tags;
     private String kiranaId;
 

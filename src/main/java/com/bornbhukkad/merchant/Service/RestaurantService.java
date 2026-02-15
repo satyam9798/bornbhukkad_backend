@@ -14,6 +14,7 @@ import com.bornbhukkad.merchant.dto.RestaurantFulfillmentDto;
 import com.bornbhukkad.merchant.dto.RestaurantItemDto;
 import com.bornbhukkad.merchant.dto.RestaurantLocationDto;
 import com.bornbhukkad.merchant.dto.RestaurantOfferDto;
+import com.bornbhukkad.merchant.dto.RestaurantOrderDto;
 import com.bornbhukkad.merchant.dto.RestaurantProductDto;
 
 public interface RestaurantService {
@@ -41,5 +42,7 @@ public interface RestaurantService {
 	Optional<RestaurantAudienceDto> getAudienceSegmentById(String id);
 	List<RestaurantAudienceDto> getAudienceSegmentByVendorId(String vendorId);
 	List<RestaurantProductDto> getRawProductsByVendorId(String vendorId);
+	RestaurantOrderDto getOrderById(String id);
+	List<RestaurantOrderDto> getOrdersByVendorId(String vendorId);
 
 }

@@ -15,11 +15,10 @@ import com.bornbhukkad.merchant.dto.NotificationRequest;
 @CrossOrigin(origins = "http://127.0.0.1:5500", allowedHeaders = {"Authorization", "Content-Type"})
 public class RestaurantNotificationController {
 
-    @Autowired
-    private RestaurantService restaurantNotificationService;
     
-    private NotificationHandler notificationHandler = new NotificationHandler();
-
+	@Autowired
+    private NotificationHandler notificationHandler;
+	
     @Autowired
     public void NotificationController(NotificationHandler notificationHandler) {
         this.notificationHandler = notificationHandler;
