@@ -17,7 +17,7 @@ public class RestaurantUser {
     private String id;
     @Indexed(unique = true, direction = IndexDirection.DESCENDING, dropDups = true)
     private String email;
-    private Integer phone;
+    private long phone;
     private String password;
     private String merchantId;
     public String getMerchantId() {
@@ -51,10 +51,10 @@ public class RestaurantUser {
     public void setEmail(String email) {
         this.email = email;
     }
-    public Integer getPhone() {
+    public long getPhone() {
         return phone;
     }
-    public void setPhone(Integer phone) {
+    public void setPhone(long phone) {
         this.phone = phone;
     }
     public String getPassword() {
