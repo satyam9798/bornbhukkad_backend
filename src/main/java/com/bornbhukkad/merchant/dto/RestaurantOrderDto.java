@@ -76,7 +76,14 @@ public class RestaurantOrderDto {
     public static class RestaurantOrderItemDto {
         private String itemId;
         private String name;
-        public String getItemId() {
+        private List<RestaurantCustomizationDto> customization;
+        public List<RestaurantCustomizationDto> getCustomization() {
+			return customization;
+		}
+		public void setCustomization(List<RestaurantCustomizationDto> customization) {
+			this.customization = customization;
+		}
+		public String getItemId() {
 			return itemId;
 		}
 		public void setItemId(String itemId) {
@@ -95,6 +102,44 @@ public class RestaurantOrderDto {
 			this.quantity = quantity;
 		}
 		private int quantity;
+		
+		public static class RestaurantCustomizationDto{
+			public String getItemId() {
+				return itemId;
+			}
+			public void setItemId(String itemId) {
+				this.itemId = itemId;
+			}
+			public String getName() {
+				return name;
+			}
+			public void setName(String name) {
+				this.name = name;
+			}
+			public String getCustomGroupName() {
+				return customGroupName;
+			}
+			public void setCustomGroupName(String customGroupName) {
+				this.customGroupName = customGroupName;
+			}
+			public String getCustomGroupId() {
+				return customGroupId;
+			}
+			public void setCustomGroupId(String customGroupId) {
+				this.customGroupId = customGroupId;
+			}
+			public String getQuantity() {
+				return quantity;
+			}
+			public void setQuantity(String quantity) {
+				this.quantity = quantity;
+			}
+			private String itemId;
+			private String name;
+			private String customGroupName;
+			private String customGroupId;
+			private String quantity;
+		}
     }
 
 }

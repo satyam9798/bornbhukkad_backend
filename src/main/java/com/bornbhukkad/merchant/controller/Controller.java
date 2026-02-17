@@ -40,6 +40,7 @@ import com.bornbhukkad.merchant.dto.KiranaItemRequestDto;
 import com.bornbhukkad.merchant.dto.KiranaLocationDto;
 import com.bornbhukkad.merchant.dto.KiranaOfferDto;
 import com.bornbhukkad.merchant.dto.KiranaProductDto;
+import com.bornbhukkad.merchant.dto.OrderStatusUpdateRequest;
 import com.bornbhukkad.merchant.dto.RestauranItemRequestDto;
 import com.bornbhukkad.merchant.dto.RestaurantAudienceDto;
 import com.bornbhukkad.merchant.dto.RestaurantCategoriesDto;
@@ -413,21 +414,83 @@ public class Controller {
 	}
 
 	@PutMapping("/restOrder/{orderId}/accept")
-	public ResponseEntity<String> acceptOrder(@PathVariable String orderId) {
-		return restaurantService.updateOrderStatus(orderId, RestaurantOrderStatus.CONFIRMED)
-				.map(order -> ResponseEntity.ok("Order status updated successfully"))
-				.orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).body("Order not found"));
+	public ResponseEntity<ApiResponse<RestaurantOrderDto>> acceptOrder(
+	        @PathVariable String orderId) {
+
+	    return restaurantService
+	            .updateOrderStatus(orderId, RestaurantOrderStatus.CONFIRMED)
+	            .map(order ->
+	                    ResponseEntity.ok(
+	                            new ApiResponse<>(
+	                                    true,
+	                                    "Order accepted successfully",
+	                                    order
+	                            )
+	                    )
+	            )
+	            .orElse(
+	                    ResponseEntity.status(HttpStatus.NOT_FOUND)
+	                            .body(new ApiResponse<>(
+	                                    false,
+	                                    "Order not found",
+	                                    null
+	                            ))
+	            );
 	}
 
+
 	@PutMapping("/restOrder/{orderId}/decline")
-	public ResponseEntity<Object> declineOrder(@PathVariable String orderId) {
-		try {
-			restaurantService.updateOrderStatus(orderId, RestaurantOrderStatus.REJECTED);
-			return ResponseEntity.status(HttpStatus.CREATED).body("Success");
-		} catch (Exception e) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error occurred");
-		}
+	public ResponseEntity<ApiResponse<RestaurantOrderDto>> declineOrder(
+	        @PathVariable String orderId) {
+
+	    return restaurantService
+	            .updateOrderStatus(orderId, RestaurantOrderStatus.REJECTED)
+	            .map(order ->
+	                    ResponseEntity.ok(
+	                            new ApiResponse<>(
+	                                    true,
+	                                    "Order rejected successfully",
+	                                    order
+	                            )
+	                    )
+	            )
+	            .orElse(
+	                    ResponseEntity.status(HttpStatus.NOT_FOUND)
+	                            .body(new ApiResponse<>(
+	                                    false,
+	                                    "Order not found",
+	                                    null
+	                            ))
+	            );
 	}
+	
+	@PutMapping("/restOrder/{orderId}/update")
+	public ResponseEntity<ApiResponse<RestaurantOrderDto>> updateOrder(
+	        @PathVariable String orderId,
+	        @RequestBody OrderStatusUpdateRequest request) {
+
+	    return restaurantService
+	            .updateOrderStatus(orderId, request.getStatus())
+	            .map(order ->
+	                    ResponseEntity.ok(
+	                            new ApiResponse<>(
+	                                    true,
+	                                    "Order status updated successfully",
+	                                    order
+	                            )
+	                    )
+	            )
+	            .orElse(
+	                    ResponseEntity.status(HttpStatus.NOT_FOUND)
+	                            .body(new ApiResponse<>(
+	                                    false,
+	                                    "Order not found",
+	                                    null
+	                            ))
+	            );
+	}
+
+
 	
 	@GetMapping("/restaurant/public-link")
     public ResponseEntity<?> getOrCreate(
@@ -691,5 +754,23 @@ public class Controller {
 	public void deleteKiranaOfferByOfferId(@RequestParam("offerId") String id) {
 		kiranaService.deleteOffer(id);
 	}
+	
+	public class ApiResponse<T> {
+
+	    private boolean success;
+	    private String message;
+	    private T data;
+
+	    public ApiResponse(boolean success, String message, T data) {
+	        this.success = success;
+	        this.message = message;
+	        this.data = data;
+	    }
+
+	    public boolean isSuccess() { return success; }
+	    public String getMessage() { return message; }
+	    public T getData() { return data; }
+	}
+
 
 }

@@ -6,7 +6,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.bornbhukkad.merchant.Configuration.NotificationHandler;
-import com.bornbhukkad.merchant.Service.KiranaService;
 import com.bornbhukkad.merchant.dto.NotificationRequest;
 
 @RestController
@@ -14,8 +13,6 @@ import com.bornbhukkad.merchant.dto.NotificationRequest;
 @CrossOrigin(origins = "http://127.0.0.1:5500", allowedHeaders = {"Authorization", "Content-Type"})
 public class KiranaNotificationController {
 
-    @Autowired
-    private KiranaService kiranaNotificationService;
 
     private NotificationHandler notificationHandler = new NotificationHandler();
 

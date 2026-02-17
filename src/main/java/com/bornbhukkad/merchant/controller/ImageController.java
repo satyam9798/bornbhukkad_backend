@@ -16,7 +16,6 @@ import com.bornbhukkad.merchant.Service.ImageService;
 
 @RestController
 @RequestMapping("/api")
-@CrossOrigin(origins = "http://127.0.0.1:5500", allowedHeaders = {"Authorization", "Content-Type"})
 public class ImageController {
 
     private final ImageService imageService;
@@ -25,7 +24,6 @@ public class ImageController {
         this.imageService = imageService;
     }
 
-    @CrossOrigin(origins = "http://127.0.0.1:5500", allowedHeaders = {"Authorization", "Content-Type"})
     @PostMapping("/upload")
     public ResponseEntity<Map<String, String>> uploadImage(@RequestParam("image") MultipartFile file) {
         String imagePath = imageService.saveImage(file);
@@ -33,7 +31,6 @@ public class ImageController {
         response.put("path", imagePath);
         return ResponseEntity.ok(response);
     }
-    @CrossOrigin(origins = "http://127.0.0.1:5500", allowedHeaders = {"Authorization", "Content-Type"})
     @GetMapping(value = "/images/**", produces = MediaType.IMAGE_JPEG_VALUE)
     public ResponseEntity<byte[]> getImage(@RequestParam("path") String path) {
         byte[] imageData = imageService.getImageData(path);
