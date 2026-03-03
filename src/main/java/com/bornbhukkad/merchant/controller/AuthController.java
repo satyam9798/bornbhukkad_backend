@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -99,6 +100,50 @@ public class AuthController {
     
     @PostMapping("/login")
     public ResponseEntity<Map<String, String>> login(@RequestBody AuthBody data) {
+        Map<String, String> model = new HashMap<>();
+        try {
+            String email = data.getEmail();
+            String merchantType = data.getMerchantType();
+            String password = data.getPassword();
+
+            KiranaUser kiranaUser = null;
+            RestaurantUser resUserData = null;
+
+            if ("kirana".equalsIgnoreCase(merchantType)) {
+                kiranaUser = kiranaUsers.findByEmail(email);
+            } else if ("restaurant".equalsIgnoreCase(merchantType)) {
+                resUserData = restaurantUsers.findByEmail(email);
+            }
+
+            if (resUserData != null || kiranaUser != null) {
+                authenticateUser(email, password);
+                String token = jwtTokenProvider.createToken(email, (resUserData == null) ? kiranaUser.getRoles() : resUserData.getRoles());
+
+                model.put("email", email);
+                model.put("token", token);
+                if (resUserData != null) {
+                    model.put("merchantId", resUserData.getMerchantId());
+                    model.put("phone", String.valueOf(resUserData.getPhone()));
+                    model.put("userName", resUserData.getUsername());
+                }else{
+                    model.put("merchantId", kiranaUser.getMerchantId());
+                    model.put("phone", String.valueOf(kiranaUser.getPhone()));
+                    model.put("userName", kiranaUser.getUsername());
+                }
+                model.put("merchantType", merchantType);
+                return ResponseEntity.ok(model);
+            }
+
+            model.put("error", "Invalid Credentials");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(model);
+
+        } catch (AuthenticationException e) {
+            model.put("error", "Invalid Credentials");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(model);
+        }
+    }
+
+/*    public ResponseEntity<Map<String, String>> login(@RequestBody AuthBody data) {
         try {
             String email = data.getEmail();
             String merchantType = data.getMerchantType();
@@ -107,20 +152,22 @@ public class AuthController {
             if ("kirana".equals(merchantType) && kiranaUsers.findByEmail(email) != null) {
                 authenticateUser(email, data.getPassword());
                       String token = jwtTokenProvider.createToken(email, kiranaUsers.findByEmail(email).getRoles());
-                String merchantId = kiranaUsers.findByEmail(email).getMerchantId();
+                RestaurantUser resUserData = restaurantUsers.findByEmail(email);
                 model.put("email", email);
-                model.put("merchantId", merchantId);
                 model.put("token", token);
-                model.put("merchantType", "kirana");
+                model.put("merchantId", resUserData.getMerchantId());
+                model.put("phone", String.valueOf(resUserData.getPhone()));
+                model.put("merchantType", "restaurant");
                 return ResponseEntity.ok(model);
 
             } else if ("restaurant".equals(merchantType) && restaurantUsers.findByEmail(email) != null) {
                 authenticateUser(email, data.getPassword());
                 String token = jwtTokenProvider.createToken(email, restaurantUsers.findByEmail(email).getRoles());
-                String merchantId = restaurantUsers.findByEmail(email).getMerchantId();
+                RestaurantUser resUserData = restaurantUsers.findByEmail(email);
                 model.put("email", email);
                 model.put("token", token);
-                model.put("merchantId", merchantId);
+                model.put("merchantId", resUserData.getMerchantId());
+                model.put("phone", String.valueOf(resUserData.getPhone()));
                 model.put("merchantType", "restaurant");
                 return ResponseEntity.ok(model);
 
@@ -133,7 +180,7 @@ public class AuthController {
             model.put("error", "Invalid Credentials");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(model);
         }
-    }
+    }*/
 
     private void authenticateUser(String email, String password) {
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, password));
