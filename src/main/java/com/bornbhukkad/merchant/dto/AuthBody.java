@@ -2,6 +2,7 @@ package com.bornbhukkad.merchant.dto;
 
 public class AuthBody {
     private String email;
+    private String emailOrPhone;
     private String password;
     private String merchantType;
 
@@ -16,6 +17,12 @@ public class AuthBody {
     }
     public void setEmail(String email) {
         this.email = email;
+    }
+    public String getEmailOrPhone() {
+        return emailOrPhone;
+    }
+    public void setEmailOrPhone(String emailOrPhone) {
+        this.emailOrPhone = emailOrPhone;
     }
     public String getPassword() {
         return password;

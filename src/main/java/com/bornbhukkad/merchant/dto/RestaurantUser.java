@@ -17,6 +17,7 @@ public class RestaurantUser {
     private String id;
     @Indexed(unique = true, direction = IndexDirection.DESCENDING, dropDups = true)
     private String email;
+    @Indexed(unique = true, direction = IndexDirection.DESCENDING, dropDups = true)
     private long phone;
     private String password;
     private String merchantId;

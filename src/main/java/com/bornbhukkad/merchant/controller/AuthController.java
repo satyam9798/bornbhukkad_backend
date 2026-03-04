@@ -102,24 +102,38 @@ public class AuthController {
     public ResponseEntity<Map<String, String>> login(@RequestBody AuthBody data) {
         Map<String, String> model = new HashMap<>();
         try {
-            String email = data.getEmail();
+            String emailOrPhone = data.getEmailOrPhone(); // unified field
             String merchantType = data.getMerchantType();
             String password = data.getPassword();
-
             KiranaUser kiranaUser = null;
             RestaurantUser resUserData = null;
 
+            // Check merchant type and search by email OR phone
             if ("kirana".equalsIgnoreCase(merchantType)) {
-                kiranaUser = kiranaUsers.findByEmail(email);
+                // Try combined query
+                if (emailOrPhone.matches("\\d+")) {
+                    // numeric → treat as phone
+                    kiranaUser = kiranaUsers.findByEmailOrPhone(null, Long.parseLong(emailOrPhone));
+                } else {
+                    kiranaUser = kiranaUsers.findByEmailOrPhone(emailOrPhone, null);
+                }
             } else if ("restaurant".equalsIgnoreCase(merchantType)) {
-                resUserData = restaurantUsers.findByEmail(email);
+                // Try combined query
+                if (emailOrPhone.matches("\\d+")) {
+                    // numeric → treat as phone
+                    resUserData = restaurantUsers.findByEmailOrPhone(null, Long.parseLong(emailOrPhone));
+                } else {
+                    resUserData = restaurantUsers.findByEmailOrPhone(emailOrPhone, null);
+                }
             }
 
             if (resUserData != null || kiranaUser != null) {
-                authenticateUser(email, password);
-                String token = jwtTokenProvider.createToken(email, (resUserData == null) ? kiranaUser.getRoles() : resUserData.getRoles());
+                String actualEmail = (resUserData != null) ? resUserData.getEmail() : kiranaUser.getEmail();
+                // Authenticate using email + password
+                authenticateUser(actualEmail, password);
+                String token = jwtTokenProvider.createToken(actualEmail, (resUserData == null) ? kiranaUser.getRoles() : resUserData.getRoles());
 
-                model.put("email", email);
+                model.put("email", actualEmail);
                 model.put("token", token);
                 if (resUserData != null) {
                     model.put("merchantId", resUserData.getMerchantId());
