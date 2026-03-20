@@ -412,6 +412,18 @@ public class Controller {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error occurred");
 		}
 	}
+	
+	@PutMapping("/restStatus/{merchantId}")
+	public ResponseEntity<Object> updateRestaurantActiveStatus(
+	        @PathVariable String merchantId,
+	        @RequestBody RestaurantDto request) {
+	    try {
+	        restaurantService.updateRestaurantActiveStatus(merchantId, request.isActive());
+	        return ResponseEntity.ok("Success");
+	    } catch (Exception e) {
+	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error occurred");
+	    }
+	}
 
 	@PutMapping("/restOrder/{orderId}/accept")
 	public ResponseEntity<ApiResponse<RestaurantOrderDto>> acceptOrder(
@@ -753,6 +765,18 @@ public class Controller {
 	@DeleteMapping("/kiranaOffer")
 	public void deleteKiranaOfferByOfferId(@RequestParam("offerId") String id) {
 		kiranaService.deleteOffer(id);
+	}
+	
+	@PutMapping("/kiranaStatus/{merchantId}")
+	public ResponseEntity<Object> updateKiranaActiveStatus(
+	        @PathVariable String merchantId,
+	        @RequestBody KiranaDto request) {
+	    try {
+	        kiranaService.updateKiranaActiveStatus(merchantId, request.isActive());
+	        return ResponseEntity.ok("Success");
+	    } catch (Exception e) {
+	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error occurred");
+	    }
 	}
 	
 	public class ApiResponse<T> {

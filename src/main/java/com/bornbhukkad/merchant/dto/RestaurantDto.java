@@ -31,9 +31,17 @@ public class RestaurantDto{
 	private String _id;
 //    @JsonIgnore
     private String userEmail;
+    
+    private boolean isActive;
 	
 
-    public String getUserEmail() {
+    public boolean isActive() {
+		return isActive;
+	}
+	public void setIsActive(boolean isActive) {
+		this.isActive = isActive;
+	}
+	public String getUserEmail() {
 		return userEmail;
 	}
 	public void setUserEmailString(String userEmail) {

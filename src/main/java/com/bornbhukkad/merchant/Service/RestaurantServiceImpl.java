@@ -134,6 +134,7 @@ public class RestaurantServiceImpl implements RestaurantService {
 
 			merchant.setTime(time);
 			merchant.setTtl(vendorTtl);
+			merchant.setIsActive(true);
 
 			merchant.setId("P" + sequenceGeneratorService.getSequenceNumber(restaurant_sequence));
 			restaurantRepo.save(merchant);
@@ -660,6 +661,17 @@ public class RestaurantServiceImpl implements RestaurantService {
 
 			order.setStatus(status);
 			return Optional.of(restaurantOrderRepository.save(order));
+		}
+		return Optional.empty();
+	}
+	
+	public Optional<RestaurantDto> updateRestaurantActiveStatus(String vendorId, boolean isActive) {
+		Query query = new Query(Criteria.where("id").is(vendorId));
+		RestaurantDto merchant = mongoTemplate.findOne(query, RestaurantDto.class);
+		if (merchant != null) {
+
+			merchant.setIsActive(isActive);
+			return Optional.of(restaurantRepo.save(merchant));
 		}
 		return Optional.empty();
 	}

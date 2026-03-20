@@ -32,6 +32,16 @@ public class KiranaDto{
 	private String _id;
 //    @JsonIgnore
     private String userEmail;
+    private boolean isActive;
+	
+
+    public boolean isActive() {
+		return isActive;
+	}
+	public void setIsActive(boolean isActive) {
+		this.isActive = isActive;
+	}
+    
     public String getUserEmail() {
 		return userEmail;
 	}

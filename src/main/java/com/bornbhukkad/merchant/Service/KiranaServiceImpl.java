@@ -43,6 +43,7 @@ import com.bornbhukkad.merchant.dto.KiranaOfferDto;
 import com.bornbhukkad.merchant.dto.KiranaProductDto;
 import com.bornbhukkad.merchant.dto.KiranaProductDto.ProductTime;
 import com.bornbhukkad.merchant.dto.KiranaUser;
+import com.bornbhukkad.merchant.dto.RestaurantDto;
 import com.mongodb.client.result.UpdateResult;
 import com.bornbhukkad.merchant.dto.KiranaDto.Time;
 import com.bornbhukkad.merchant.dto.KiranaFulfillmentDto;
@@ -112,6 +113,7 @@ public class KiranaServiceImpl implements KiranaService {
 
 			merchant.setTime(time);
 			merchant.setTtl(vendorTtl);
+			merchant.setIsActive(true);
 			merchant.setId("P" + sequenceGeneratorService.getSequenceNumber(kirana_sequence));
 			kiranaRepo.save(merchant);
 			Query query = new Query(Criteria.where("email").is(merchant.getUserEmail()));
@@ -440,6 +442,16 @@ public class KiranaServiceImpl implements KiranaService {
 		mongoTemplate.remove(query, "bb_admin_panel_kirana_offers");
 	}
 
+	public Optional<KiranaDto> updateKiranaActiveStatus(String vendorId, boolean isActive) {
+		Query query = new Query(Criteria.where("id").is(vendorId));
+		KiranaDto merchant = mongoTemplate.findOne(query, KiranaDto.class);
+		if (merchant != null) {
+
+			merchant.setIsActive(isActive);
+			return Optional.of(kiranaRepo.save(merchant));
+		}
+		return Optional.empty();
+	}
 	// Send a WebSocket notification to a specific Kirana merchant
 	public void sendKiranaNotification(String orderId, String merchantId, String orderDetails) {
 //		String notificationMessage = "New Kirana order received! Order ID: " + orderId + " | Details: " + orderDetails;
