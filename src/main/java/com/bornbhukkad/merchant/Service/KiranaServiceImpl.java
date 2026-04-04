@@ -121,6 +121,15 @@ public class KiranaServiceImpl implements KiranaService {
 			UpdateResult(query, update, KiranaUser.class);
 		}
 	}
+	
+	@Override
+	public KiranaDto getVendorById(String vendorId) {
+		logger.info("In Get Kirana service by vendorId:" + vendorId);
+		Query query = new Query();
+		query.addCriteria(Criteria.where("id").is(vendorId));
+		KiranaDto vendor = mongoTemplate.findOne(query, KiranaDto.class);
+		return vendor;
+	}
 
 	private UpdateResult UpdateResult(Query query, Update update, Class<?> class1) {
 		return mongoTemplate.updateFirst(query, update, class1);
@@ -449,6 +458,16 @@ public class KiranaServiceImpl implements KiranaService {
 
 			merchant.setIsActive(isActive);
 			return Optional.of(kiranaRepo.save(merchant));
+		}
+		return Optional.empty();
+	}
+	public Optional<KiranaProductDto> updateKiranaProductStatus(String vendorId, boolean isActive) {
+		Query query = new Query(Criteria.where("id").is(vendorId));
+		KiranaProductDto merchant = mongoTemplate.findOne(query, KiranaProductDto.class);
+		if (merchant != null) {
+
+			merchant.setActive(isActive);
+			return Optional.of(kiranaProductRepo.save(merchant));
 		}
 		return Optional.empty();
 	}

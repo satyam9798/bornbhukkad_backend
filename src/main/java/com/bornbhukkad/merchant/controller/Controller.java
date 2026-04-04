@@ -424,6 +424,24 @@ public class Controller {
 	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error occurred");
 	    }
 	}
+	
+	@PutMapping("/restProductStatus/{merchantId}/product/{productId}")
+	public ResponseEntity<Object> updateRestaurantProductActiveStatus(
+	        @PathVariable String merchantId,
+	        @PathVariable String productId,
+	        @RequestBody RestaurantDto request) {
+	    try {
+	    	RestaurantDto merchant = restaurantService.getVendorById(merchantId);
+	    	if( merchant == null) {
+	    		return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Merchant Not Found");
+	    	}
+	    	
+	        restaurantService.updateRestaurantProductStatus(productId, request.isActive());
+	        return ResponseEntity.ok("Success");
+	    } catch (Exception e) {
+	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error occurred");
+	    }
+	}
 
 	@PutMapping("/restOrder/{orderId}/accept")
 	public ResponseEntity<ApiResponse<RestaurantOrderDto>> acceptOrder(
@@ -773,6 +791,22 @@ public class Controller {
 	        @RequestBody KiranaDto request) {
 	    try {
 	        kiranaService.updateKiranaActiveStatus(merchantId, request.isActive());
+	        return ResponseEntity.ok("Success");
+	    } catch (Exception e) {
+	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error occurred");
+	    }
+	}
+	
+	@PutMapping("/kiranaStatus/{merchantId}/product/{productId}")
+	public ResponseEntity<Object> updateKiranaItemStatus(
+	        @PathVariable String merchantId,
+	        @PathVariable String productId,
+	        @RequestBody KiranaProductDto request) {
+	    try {
+	    	if(kiranaService.getVendorById(merchantId) == null) {
+	    		return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Merchant Not Found");
+	    	}
+	        kiranaService.updateKiranaProductStatus(merchantId, request.isActive());
 	        return ResponseEntity.ok("Success");
 	    } catch (Exception e) {
 	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error occurred");

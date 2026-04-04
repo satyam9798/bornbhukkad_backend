@@ -26,7 +26,15 @@ public class KiranaProductDto {
 //    private String vendorId;
     private List<String> customizationItems;
     private String parent_category_id;
-    private String parent_item_id;
+    private boolean isActive;
+    public boolean isActive() {
+		return isActive;
+	}
+	public void setActive(boolean isActive) {
+		this.isActive = isActive;
+	}
+
+	private String parent_item_id;
     public String getParent_item_id() {
 		return parent_item_id;
 	}

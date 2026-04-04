@@ -72,4 +72,6 @@ public interface KiranaService {
 
 	List<KiranaOfferDto> getOffersByKiranaId(String kiranaId);
 
+	KiranaDto getVendorById(String vendorId);
+
 }

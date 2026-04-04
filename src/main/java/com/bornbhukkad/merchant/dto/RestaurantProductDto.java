@@ -35,7 +35,16 @@ public class RestaurantProductDto {
     private String fulfillment_id;
     private String location_id;
     private boolean related;
-    private boolean recommended;
+    private boolean isActive;
+    public boolean isActive() {
+		return isActive;
+	}
+
+	public void setActive(boolean isActive) {
+		this.isActive = isActive;
+	}
+
+	private boolean recommended;
     @Field("@ondc/org/returnable")
     @JsonProperty("ondc_org_returnable")
     private boolean ondc_org_returnable;

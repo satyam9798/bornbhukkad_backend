@@ -675,6 +675,18 @@ public class RestaurantServiceImpl implements RestaurantService {
 		}
 		return Optional.empty();
 	}
+	
+	public Optional<RestaurantProductDto> updateRestaurantProductStatus(String productId, boolean isActive) {
+		Query query = new Query(Criteria.where("id").is(productId));
+		
+		RestaurantProductDto merchant = mongoTemplate.findOne(query, RestaurantProductDto.class);
+		if (merchant != null) {
+
+			merchant.setActive(isActive);
+			return Optional.of(restaurantProductRepo.save(merchant));
+		}
+		return Optional.empty();
+	}
 
 	// Automatically reject orders not accepted within 30 seconds
 	@Scheduled(fixedRate = 10000) // Runs every 10 seconds
