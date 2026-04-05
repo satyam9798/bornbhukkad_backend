@@ -425,7 +425,7 @@ public class Controller {
 	    }
 	}
 	
-	@PutMapping("/restProductStatus/{merchantId}/product/{productId}")
+	@PutMapping("/restStatus/{merchantId}/product/{productId}")
 	public ResponseEntity<Object> updateRestaurantProductActiveStatus(
 	        @PathVariable String merchantId,
 	        @PathVariable String productId,
