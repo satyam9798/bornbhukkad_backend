@@ -256,7 +256,7 @@ public class KiranaServiceImpl implements KiranaService {
 		logger.info("Search product in service by kiranaId:" + kiranaId);
 		System.out.println("enter:" + Instant.now());
 
-		String query4 = "{$lookup: {from: 'bb_admin_panel_kirana_products', localField: 'id', foreignField: 'kiranaId', pipeline: [{$project: {'_id': 0,'id':1,'descriptor':1,'tags':1,'price':1,'category_id':1,'category_ids':1,'dimension':1,'packagingPrice':1,'timing':1,'weight':1}}], as: 'product'}},";
+		String query4 = "{$lookup: {from: 'bb_admin_panel_kirana_products', localField: 'id', foreignField: 'kiranaId', pipeline: [{$project: {'_id': 0,'id':1,'descriptor':1,'tags':1,'price':1,'category_id':1,'category_ids':1,'dimension':1,'packagingPrice':1,'isActive':1,'timing':1,'weight':1}}], as: 'product'}},";
 		String query5 = "{$lookup: {from: 'bb_admin_panel_kirana_custom_groups', localField: 'product.id', foreignField: 'parentProductId', pipeline: [{$project: {'_id': 0,'id':1,'descriptor':1,'tags':1}}], as: 'customGroups'}},";
 		String query6 = "{$lookup: {from: 'bb_admin_panel_kirana_items', localField: 'product.id', foreignField: 'parentItemId', pipeline: [{$project: {'_id': 0,'id':1,'parentItemId':1,'parentCategoryId':1,'descriptor':1,'tags':1,'quantity':1,'price':1,'category_id':1,'related':1}}], as: 'items'}},";
 
