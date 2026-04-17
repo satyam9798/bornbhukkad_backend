@@ -435,7 +435,6 @@ public class RestaurantServiceImpl implements RestaurantService {
 	
 	@Override
 	public List<RestaurantProductDto> getRawProductsByVendorId(String vendorId) {
-
 		// return after lookup
 		return restaurantProductRepo.findByVendorId(vendorId);
 
