@@ -70,7 +70,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 				.antMatchers("/merchants/kiranaProduct").permitAll().antMatchers("/merchants/kiranaCreds").permitAll().antMatchers("/merchants/kiranaCategories")
 				.permitAll().antMatchers("/merchants/kiranaFulfillments")
 //				.permitAll().antMatchers("/api/upload")
-				.permitAll().antMatchers("/api/images").permitAll().antMatchers("/merchants/vendor").permitAll()
+				.permitAll().antMatchers("/api/images").permitAll().antMatchers("/api/images/**").permitAll().antMatchers("/merchants/vendor").permitAll()
 				.antMatchers("/merchants/location").permitAll().antMatchers("/merchants/kirana").permitAll()
 				.antMatchers("/merchants/kiranaLocation").permitAll().antMatchers("/merchants/**").hasAuthority("ADMIN")
 				.anyRequest().authenticated().and().csrf().disable().exceptionHandling()
